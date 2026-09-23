@@ -1065,12 +1065,17 @@ window.toggleFullscreen = toggleFullscreen;
 // ==========================================
 window.liveMetrics = null;
 let autosyncSecondsLeft = 300;
+window.isSyncPaused = false;
 
 function initSaveAndMetricsSync() {
   fetchMetrics();
   loadMapData();
 
   setInterval(() => {
+    if (window.isSyncPaused) {
+      updateSyncCountdownUI();
+      return;
+    }
     autosyncSecondsLeft--;
     if (autosyncSecondsLeft <= 0) {
       autosyncSecondsLeft = 300;
@@ -1080,19 +1085,59 @@ function initSaveAndMetricsSync() {
     }
   }, 1000);
 
-  // Poll metrics every 20 seconds to keep live rates fresh
-  setInterval(fetchMetrics, 20000);
+  // Poll metrics every 20 seconds to keep live rates fresh (if not paused)
+  setInterval(() => {
+    if (!window.isSyncPaused) {
+      fetchMetrics();
+    }
+  }, 20000);
 }
 
 function updateSyncCountdownUI() {
   const badge = document.getElementById('save-status-text');
   if (!badge) return;
+  const saveName = window.liveMetrics?.active_save_file || window.liveMetrics?.session?.sessionName || 'Satisfactory';
+  if (window.isSyncPaused) {
+    badge.innerHTML = `<span style="color:var(--ficsit-orange)">⏸</span> <strong>${saveName}</strong> &bull; Autosync: <strong style="color:var(--ficsit-orange)">PAUSADO</strong>`;
+    return;
+  }
   const m = Math.floor(autosyncSecondsLeft / 60);
   const s = autosyncSecondsLeft % 60;
   const timeStr = `${m}:${s < 10 ? '0' : ''}${s}`;
-  const saveName = window.liveMetrics?.active_save_file || window.liveMetrics?.session?.sessionName || 'Satisfactory';
   badge.innerHTML = `🟢 <strong>${saveName}</strong> &bull; Autosync: <strong>${timeStr}</strong>`;
 }
+
+function togglePauseSync(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  window.isSyncPaused = !window.isSyncPaused;
+  const icon = document.getElementById('icon-pause');
+  const btn = document.getElementById('btn-pause-sync');
+  if (window.isSyncPaused) {
+    if (icon) {
+      icon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3" fill="currentColor"></polygon>';
+    }
+    if (btn) {
+      btn.title = 'Reanudar Sincronización Automática';
+      btn.style.background = 'var(--ficsit-orange)';
+      btn.style.color = '#fff';
+    }
+  } else {
+    if (icon) {
+      icon.innerHTML = '<rect x="6" y="4" width="4" height="16" fill="currentColor"></rect><rect x="14" y="4" width="4" height="16" fill="currentColor"></rect>';
+    }
+    if (btn) {
+      btn.title = 'Pausar Sincronización Automática';
+      btn.style.background = '#333';
+      btn.style.color = '';
+    }
+    fetchMetrics();
+  }
+  updateSyncCountdownUI();
+}
+window.togglePauseSync = togglePauseSync;
 
 function updateKPITicker(saveData, metricsData) {
   const mCount = document.getElementById('kpi-machines-count');
@@ -1201,24 +1246,25 @@ async function forceReloadLatestSave(event) {
   }
   const spinIcon = document.getElementById('reload-icon-spin');
   const badge = document.getElementById('save-status-text');
-  const btn = document.getElementById('btn-force-reload');
+  const btn = document.getElementById('btn-force-sync') || document.getElementById('btn-force-reload');
   
   if (spinIcon) spinIcon.classList.add('spinning');
   if (btn) btn.disabled = true;
-  if (badge) badge.innerHTML = '⏳ Leyendo save más reciente en /srv/saved/server...';
+  if (badge) badge.innerHTML = '⏳ Sincronizando save más reciente en /srv/saved/server...';
 
   try {
-    // 1. Intentar activar la sincronización forzada en el daemon local o remoto
     const triggerHosts = [
+      `http://${window.location.hostname || 'localhost'}:8086`,
       'http://localhost:8086',
-      `http://${window.location.hostname}:8086`,
       'http://192.168.1.230:8086',
-      'http://100.109.149.10:8086'
+      'http://100.109.149.10:8086',
+      ''
     ];
     let triggered = false;
     for (const host of triggerHosts) {
       try {
-        const tr = await fetch(`${host}/api/sync/force`, {
+        const url = host ? `${host}/api/sync/force` : `/api/sync/force`;
+        const tr = await fetch(url, {
           method: 'POST',
           signal: AbortSignal.timeout(4000)
         });
@@ -1230,16 +1276,13 @@ async function forceReloadLatestSave(event) {
       } catch (e) {}
     }
 
-    // Esperar brevemente para asegurar que los archivos se escribieron
     if (triggered) {
       await new Promise(r => setTimeout(r, 600));
     }
 
-    // 2. Recargar datos con timestamp anti-caché
     await loadMapData();
     await fetchMetrics();
 
-    // 3. Reiniciar contador de autosync a 300s (5 minutos)
     autosyncSecondsLeft = 300;
   } catch (err) {
     console.error('[Sync] Error forzando recarga:', err);
@@ -1250,7 +1293,204 @@ async function forceReloadLatestSave(event) {
   }
 }
 window.forceReloadLatestSave = forceReloadLatestSave;
+window.forceSyncNow = forceReloadLatestSave;
 window.reloadSaveData = forceReloadLatestSave;
+
+async function toggleSaveDropdown(event) {
+  if (event) {
+    event.stopPropagation();
+  }
+  const dd = document.getElementById('save-dropdown');
+  if (!dd) return;
+
+  if (dd.style.display === 'block') {
+    dd.style.display = 'none';
+    return;
+  }
+
+  dd.style.display = 'block';
+  dd.innerHTML = `
+    <div style="padding: 10px 14px; font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+      <span class="reload-icon spinning" style="font-size: 13px; color: var(--ficsit-orange);">⚙</span>
+      <span>Consultando partidas disponibles en el servidor...</span>
+    </div>
+  `;
+
+  let saves = null;
+  const hosts = [
+    `http://${window.location.hostname || 'localhost'}:8086`,
+    'http://localhost:8086',
+    'http://192.168.1.230:8086',
+    'http://100.109.149.10:8086',
+    ''
+  ];
+
+  // 1. Intentar obtener del daemon API
+  for (const host of hosts) {
+    try {
+      const url = host ? `${host}/api/saves?t=${Date.now()}` : `/api/saves?t=${Date.now()}`;
+      const res = await fetch(url, { signal: AbortSignal.timeout(2500) });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          saves = data;
+          break;
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 2. Si no respondió el daemon, intentar FileBrowser directamente
+  if (!saves || saves.length === 0) {
+    try {
+      const fbRes = await fetch(`/api/resources?source=srv&path=/saved/server&t=${Date.now()}`, { signal: AbortSignal.timeout(2500) });
+      if (fbRes.ok) {
+        const fbData = await fbRes.json();
+        if (fbData && fbData.files) {
+          saves = fbData.files
+            .filter(f => f.name && f.name.endsWith('.sav'))
+            .sort((a, b) => new Date(b.modified) - new Date(a.modified))
+            .map(f => ({ name: f.name, modified: f.modified, size: f.size }));
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 3. Si aún no hay saves, intentar de window.liveMetrics.recentSaves
+  if (!saves || saves.length === 0) {
+    if (window.liveMetrics?.recentSaves && window.liveMetrics.recentSaves.length > 0) {
+      saves = window.liveMetrics.recentSaves;
+    }
+  }
+
+  // 4. Último fallback: partida activa actual
+  if (!saves || saves.length === 0) {
+    if (window.liveMetrics?.active_save_file) {
+      saves = [{ name: window.liveMetrics.active_save_file, modified: window.liveMetrics.save_modified || '' }];
+    }
+  }
+
+  if (!saves || saves.length === 0) {
+    dd.innerHTML = `
+      <div style="padding: 12px; font-size: 11px; color: #888; text-align: center;">
+        No se pudieron detectar partidas en el servidor.
+      </div>
+    `;
+    return;
+  }
+
+  const activeSaveName = window.liveMetrics?.active_save_file || '';
+  let html = `
+    <div style="padding: 6px 12px; background: #181818; border-bottom: 1px solid #333; font-size: 10px; font-weight: 900; color: var(--ficsit-orange); letter-spacing: 0.5px; text-transform: uppercase; display:flex; justify-content:space-between; align-items:center;">
+      <span>PARTIDAS EN SERVIDOR (${saves.length})</span>
+      <span style="font-size: 9px; color: #777;">Haz clic para cargar</span>
+    </div>
+    <div style="max-height: 230px; overflow-y: auto;">
+  `;
+
+  for (const s of saves) {
+    const name = s.name || s;
+    const isActive = (name === activeSaveName);
+    let timeStr = '';
+    if (s.modified) {
+      try {
+        const d = new Date(s.modified);
+        timeStr = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+      } catch (e) {}
+    }
+    let sizeStr = '';
+    if (s.size) {
+      sizeStr = ` • ${(s.size / 1024).toFixed(0)} KB`;
+    }
+
+    html += `
+      <div class="save-item-row" onclick="selectSaveFile('${name}'); event.stopPropagation();"
+           style="padding: 7px 12px; border-bottom: 1px solid #282828; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.15s; ${isActive ? 'background: rgba(250, 149, 73, 0.18); border-left: 3px solid var(--ficsit-orange);' : 'background: #202020;'}"
+           onmouseover="if (!${isActive}) this.style.background='#2c2c2c'" 
+           onmouseout="if (!${isActive}) this.style.background='#202020'">
+        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; padding-right: 8px;">
+          <div style="font-size: 11.5px; font-weight: 700; color: ${isActive ? 'var(--ficsit-orange)' : '#eee'}; display: flex; align-items: center; gap: 6px;">
+            <span>${isActive ? '🟢' : '💾'}</span>
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</span>
+          </div>
+          <div style="font-size: 9.5px; color: #888; margin-top: 1px; padding-left: 20px;">${timeStr}${sizeStr}</div>
+        </div>
+        <span style="font-size: 10px; font-weight: 800; color: ${isActive ? 'var(--neon-green)' : 'var(--ficsit-orange)'}; white-space: nowrap;">
+          ${isActive ? 'ACTIVA' : 'CARGAR &rarr;'}
+        </span>
+      </div>
+    `;
+  }
+
+  html += `</div>`;
+  dd.innerHTML = html;
+}
+window.toggleSaveDropdown = toggleSaveDropdown;
+
+async function selectSaveFile(saveName) {
+  const dd = document.getElementById('save-dropdown');
+  if (dd) dd.style.display = 'none';
+
+  const spinIcon = document.getElementById('reload-icon-spin');
+  const badge = document.getElementById('save-status-text');
+  const btn = document.getElementById('btn-force-sync');
+
+  if (spinIcon) spinIcon.classList.add('spinning');
+  if (btn) btn.disabled = true;
+  if (badge) badge.innerHTML = `⏳ Cargando partida <strong>${saveName}</strong>...`;
+
+  try {
+    const hosts = [
+      `http://${window.location.hostname || 'localhost'}:8086`,
+      'http://localhost:8086',
+      'http://192.168.1.230:8086',
+      'http://100.109.149.10:8086',
+      ''
+    ];
+    let triggered = false;
+    for (const host of hosts) {
+      try {
+        const url = host ? `${host}/api/saves/select` : `/api/saves/select`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: saveName }),
+          signal: AbortSignal.timeout(12000)
+        });
+        if (res.ok) {
+          triggered = true;
+          console.log('[Sync] Partida seleccionada vía daemon:', saveName);
+          break;
+        }
+      } catch (e) {}
+    }
+
+    if (triggered) {
+      await new Promise(r => setTimeout(r, 600));
+    }
+
+    await loadMapData();
+    await fetchMetrics();
+    autosyncSecondsLeft = 300;
+  } catch (err) {
+    console.error('[Sync] Error cambiando de partida:', err);
+  } finally {
+    if (spinIcon) spinIcon.classList.remove('spinning');
+    if (btn) btn.disabled = false;
+    updateSyncCountdownUI();
+  }
+}
+window.selectSaveFile = selectSaveFile;
+
+// Cerrar dropdown al hacer clic fuera
+document.addEventListener('click', (e) => {
+  const dd = document.getElementById('save-dropdown');
+  if (dd && dd.style.display === 'block') {
+    if (!e.target.closest('#save-status-badge') && !e.target.closest('#save-dropdown')) {
+      dd.style.display = 'none';
+    }
+  }
+});
 
 // ==========================================
 // 9. MODALES Y DIÁLOGOS

@@ -40,7 +40,7 @@ async function getAuthHeaders() {
   return { 'Cookie': `filebrowser_quantum_jwt=${authToken}` };
 }
 
-async function performSync(force = false) {
+async function performSync(force = false, targetSaveName = null) {
   if (isSyncing) {
     console.log('[Sync Daemon] Ya hay una sincronización en curso. Esperando...');
     return { status: 'busy' };
@@ -66,15 +66,23 @@ async function performSync(force = false) {
       return { status: 'no_saves_found' };
     }
 
+    global.recentSaves = savFiles.map(f => ({ name: f.name, modified: f.modified, size: f.size }));
+
     console.log('[Sync Daemon] Archivos más recientes encontrados:');
     savFiles.slice(0, 3).forEach((f, i) => {
       console.log(`  ${i+1}. ${f.name} (Modificado: ${new Date(f.modified).toLocaleString()})`);
     });
 
-    const newest = savFiles[0];
+    const targetSave = targetSaveName ? savFiles.find(f => f.name === targetSaveName) : null;
+    if (targetSaveName && !targetSave) {
+      console.warn(`[Sync Daemon] Save solicitado "${targetSaveName}" no encontrado.`);
+      return { status: 'not_found', error: `Save "${targetSaveName}" no encontrado` };
+    }
 
-    // Comprobar si ya fue procesado y no es forzado
-    if (!force && lastProcessedSave === newest.name && lastProcessedTime === newest.modified) {
+    const newest = targetSave || savFiles[0];
+
+    // Comprobar si ya fue procesado y no es forzado ni dirigido
+    if (!force && !targetSaveName && lastProcessedSave === newest.name && lastProcessedTime === newest.modified) {
       // Sin cambios
       return { status: 'unchanged', save: newest.name };
     }
@@ -110,11 +118,13 @@ async function performSync(force = false) {
     metrics.active_save_file = newest.name;
     metrics.save_modified = newest.modified;
     metrics.last_sync = syncDate;
+    metrics.recentSaves = savFiles.slice(0, 20).map(f => ({ name: f.name, modified: f.modified, size: f.size }));
 
     const buildingsData = {
       active_save_file: newest.name,
       save_modified: newest.modified,
       last_sync: syncDate,
+      recentSaves: savFiles.slice(0, 20).map(f => ({ name: f.name, modified: f.modified, size: f.size })),
       buildings: parsedSave.buildings || [],
       storages: parsedSave.storages || [],
       miners: parsedSave.miners || [],
@@ -219,6 +229,26 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(global.recentSaves || [{name: lastProcessedSave}]));
     }
+    return;
+  }
+
+  if (url.pathname === '/api/saves/select' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', async () => {
+      try {
+        const data = JSON.parse(body || '{}');
+        const saveName = data.name;
+        console.log(`[HTTP API] Recibida solicitud para cargar save específico: ${saveName}`);
+        const result = await performSync(true, saveName);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(result));
+      } catch (err) {
+        console.error('[HTTP API] Error seleccionando save:', err.message);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'error', error: err.message }));
+      }
+    });
     return;
   }
 

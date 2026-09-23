@@ -1,13 +1,13 @@
 {
-  "last_sync": "2026-09-23T10:01:54.951Z",
+  "last_sync": "2026-09-23T21:49:16.262Z",
   "session": {
     "sessionName": "test",
     "saveVersion": 60,
     "buildVersion": 502094,
-    "playTimeFormatted": "93h 5m",
-    "playDurationSeconds": 335117,
-    "saveDateTime": "2026-09-23T10:01:54.596Z",
-    "fileSizeBytes": 1395070
+    "playTimeFormatted": "104h 50m",
+    "playDurationSeconds": 377412,
+    "saveDateTime": "2026-09-23T21:49:15.916Z",
+    "fileSizeBytes": 1567344
   },
   "global": {
     "Iron_Ingot": {
@@ -169,7 +169,7 @@
     },
     "Smart_Plating": {
       "name": "Smart Plating",
-      "production_nominal": 5,
+      "production_nominal": 2,
       "machines_count": 1,
       "zones_breakdown": {}
     },
@@ -181,20 +181,20 @@
     },
     "Plastic": {
       "name": "Plastic",
-      "production_nominal": 100,
-      "machines_count": 5,
+      "production_nominal": 200,
+      "machines_count": 10,
       "zones_breakdown": {}
     },
     "Heavy_Oil_Residue": {
       "name": "Heavy Oil Residue",
-      "production_nominal": 150,
-      "machines_count": 10,
+      "production_nominal": 300,
+      "machines_count": 20,
       "zones_breakdown": {}
     },
     "Rubber": {
       "name": "Rubber",
-      "production_nominal": 100,
-      "machines_count": 5,
+      "production_nominal": 200,
+      "machines_count": 10,
       "zones_breakdown": {}
     },
     "Packaged_Fuel": {
@@ -211,8 +211,14 @@
     },
     "Fuel": {
       "name": "Fuel",
-      "production_nominal": 100,
-      "machines_count": 3,
+      "production_nominal": 500,
+      "machines_count": 13,
+      "zones_breakdown": {}
+    },
+    "Polymer_Resin": {
+      "name": "Polymer Resin",
+      "production_nominal": 300,
+      "machines_count": 10,
       "zones_breakdown": {}
     }
   },
@@ -280,7 +286,7 @@
       "zoneName": "Complejo Placas y Logística",
       "assignedItem": "iron_plate",
       "color": "#61afef",
-      "totalMachines": 4,
+      "totalMachines": 6,
       "totalStorages": 18,
       "production": {
         "Iron_Plate": {
@@ -329,7 +335,7 @@
       "assignedItem": "reinforced_iron_plate",
       "color": "#98c379",
       "totalMachines": 3,
-      "totalStorages": 4,
+      "totalStorages": 5,
       "production": {
         "Screw": {
           "name": "Screw",
@@ -358,6 +364,78 @@
       }
     }
   },
-  "active_save_file": "test_autosave_2.sav",
-  "save_modified": "2026-09-23T12:00:07.919727392+02:00"
+  "active_save_file": "test_autosave_0.sav",
+  "save_modified": "2026-09-23T23:47:26.351364989+02:00",
+  "recentSaves": [
+    {
+      "name": "test_autosave_0.sav",
+      "modified": "2026-09-23T23:47:26.351364989+02:00",
+      "size": 1568768
+    },
+    {
+      "name": "test_autosave_4.sav",
+      "modified": "2026-09-23T23:42:26.33292651+02:00",
+      "size": 1568768
+    },
+    {
+      "name": "test_autosave_3.sav",
+      "modified": "2026-09-23T23:37:26.318821144+02:00",
+      "size": 1568768
+    },
+    {
+      "name": "test_autosave_2.sav",
+      "modified": "2026-09-23T23:32:26.288869563+02:00",
+      "size": 1568768
+    },
+    {
+      "name": "test_autosave_1.sav",
+      "modified": "2026-09-23T23:27:26.285903686+02:00",
+      "size": 1568768
+    },
+    {
+      "name": "test_autosave_2_continue.sav",
+      "modified": "2026-09-23T09:00:00.245798837+02:00",
+      "size": 1396736
+    },
+    {
+      "name": "test_220926-192552.sav",
+      "modified": "2026-09-22T19:26:11.476970778+02:00",
+      "size": 1347584
+    },
+    {
+      "name": "test_220926-185427.sav",
+      "modified": "2026-09-22T18:54:46.343883243+02:00",
+      "size": 1339392
+    },
+    {
+      "name": "test_210926-232031.sav",
+      "modified": "2026-09-21T23:20:47.033256894+02:00",
+      "size": 1097728
+    },
+    {
+      "name": "test_210926-232009.sav",
+      "modified": "2026-09-21T23:20:25.727319574+02:00",
+      "size": 1097728
+    },
+    {
+      "name": "test_autosave_1_continue.sav",
+      "modified": "2026-09-21T09:00:00.148725488+02:00",
+      "size": 954368
+    },
+    {
+      "name": "test_200926-154843.sav",
+      "modified": "2026-09-20T15:48:57.555436417+02:00",
+      "size": 925696
+    },
+    {
+      "name": "test_200926-012528_continue.sav",
+      "modified": "2026-09-20T02:00:00.120358874+02:00",
+      "size": 540672
+    },
+    {
+      "name": "test_200926-012528.sav",
+      "modified": "2026-09-20T01:25:39.513386852+02:00",
+      "size": 540672
+    }
+  ]
 }

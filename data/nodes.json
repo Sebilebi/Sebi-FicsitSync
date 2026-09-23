@@ -5012,11 +5012,11 @@
     "isExploited": true,
     "miner": {
       "type": "OilPump",
-      "potential": 1.25,
+      "potential": 2.5,
       "x": 44496,
       "y": -228950
     },
-    "currentRate": 300
+    "currentRate": 600
   },
   {
     "id": "BP_ResourceNode27_100",
@@ -5032,9 +5032,14 @@
     "x": 12163,
     "y": -225348,
     "z": -1744,
-    "isExploited": false,
-    "miner": null,
-    "currentRate": 0
+    "isExploited": true,
+    "miner": {
+      "type": "OilPump",
+      "potential": 2.5,
+      "x": 12163,
+      "y": -225348
+    },
+    "currentRate": 600
   },
   {
     "id": "BP_ResourceNode28_101",
@@ -5842,9 +5847,14 @@
     "x": -37614,
     "y": -142250,
     "z": 7972,
-    "isExploited": false,
-    "miner": null,
-    "currentRate": 0
+    "isExploited": true,
+    "miner": {
+      "type": "MinerMk2",
+      "potential": 2,
+      "x": -37614,
+      "y": -142250
+    },
+    "currentRate": 480
   },
   {
     "id": "BP_ResourceNode462_UAID_40B076DF2F7902E201_1630060169",

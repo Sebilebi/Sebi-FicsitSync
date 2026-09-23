@@ -30,17 +30,17 @@
         </div>
 
         <div class="save-status-wrapper" style="position:relative; display:flex; align-items:stretch; gap:0; height: 32px;">
-          <div id="save-status-badge" class="save-sync-pill ficsit-panel" title="Haz clic para seleccionar otra partida" onclick="toggleSaveDropdown()" style="cursor:pointer; clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%); border-radius:0; padding-right:20px; z-index:3; position:relative;">
+          <div id="save-status-badge" class="save-sync-pill ficsit-panel" title="Haz clic para seleccionar otra partida" onclick="toggleSaveDropdown(event)" style="cursor:pointer; clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%); border-radius:0; padding-right:20px; z-index:3; position:relative;">
             <span class="sync-pulse"></span>
             <span id="save-status-text" style="display:inline-block; min-width:260px; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; vertical-align:middle;">Conectando...</span>
-            </div>
-          <div id="save-dropdown" style="display:none; position:absolute; top:calc(100% + 2px); left:0; background:#222; border:1px solid var(--ficsit-orange); width:320px; max-height:200px; overflow-y:auto; z-index:9999;"></div>
+          </div>
+          <div id="save-dropdown" style="display:none; position:absolute; top:calc(100% + 4px); left:0; background:#1c1c1c; border:1px solid var(--ficsit-orange); width:380px; max-height:280px; overflow-y:auto; z-index:9999; box-shadow: 0 8px 24px rgba(0,0,0,0.85);"></div>
           
-          <button id="btn-pause-sync" class="sync-reload-btn" onclick="togglePauseSync()" title="Pausar Sincronización Automática" style="clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); border-radius:0; padding: 0 15px; margin-left:-10px; z-index:2; background:#333; border-left:1px solid #444;">
+          <button id="btn-pause-sync" class="sync-reload-btn" onclick="togglePauseSync(event)" title="Pausar Sincronización Automática" style="clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); border-radius:0; padding: 0 15px; margin-left:-10px; z-index:2; background:#333; border-left:1px solid #444;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" id="icon-pause"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
           </button>
 
-          <button id="btn-force-sync" class="sync-reload-btn" onclick="forceSyncNow()" title="Forzar Recarga Manual" style="clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%); border-radius:0; padding: 0 15px; margin-left:-10px; z-index:1; background:var(--ficsit-orange); color:#fff;">
+          <button id="btn-force-sync" class="sync-reload-btn" onclick="forceSyncNow(event)" title="Forzar Recarga Manual" style="clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%); border-radius:0; padding: 0 15px; margin-left:-10px; z-index:1; background:var(--ficsit-orange); color:#fff;">
             <span class="reload-icon" id="reload-icon-spin">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-8.31l5.67-5.67"/>
