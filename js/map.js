@@ -368,13 +368,19 @@ class TacticalMap {
     const tools = document.getElementById("zone-edit-tools");
     if (tools) tools.style.display = (mode === "transform_zone") ? "flex" : "none";
 
-
-    if (mode === 'pan') {
+    if (mode === 'transform_zone') {
+      this.initialZonesState = JSON.stringify(this.zones);
+      this.history = [];
+      this.redoStack = [];
+      this.updateUndoRedoUI();
+      const btnSave = document.getElementById("btn-save-zone-edits");
+      if (btnSave) { btnSave.disabled = true; btnSave.style.opacity = "0.5"; }
+      const btnRevert = document.getElementById("btn-revert-zone-edits");
+      if (btnRevert) { btnRevert.disabled = true; btnRevert.style.opacity = "0.5"; }
+    } else {
       this.selectedZone = null;
       this.transformAction = null;
       this.canvas.style.cursor = 'grab';
-    } else {
-      this.canvas.style.cursor = 'default';
     }
     this.render();
   }
@@ -472,7 +478,7 @@ class TacticalMap {
       if (this.selectedZone) {
         const handle = this.getZoneHandleAtPos(this.selectedZone, mouseX, mouseY);
         if (handle) {
-          this.pushHistory(); // Save state BEFORE mutation
+          this.transformPreZonesSnapshot = JSON.stringify(this.zones);
           this.transformAction = handle;
           this.transformMouseStart = { x: mouseX, y: mouseY };
           this.transformZoneStartBounds = Object.assign({}, this.selectedZone.bounds);
@@ -495,6 +501,7 @@ class TacticalMap {
 
       if (clickedZone) {
         this.selectedZone = clickedZone;
+        this.transformPreZonesSnapshot = JSON.stringify(this.zones);
         this.transformAction = 'move';
         this.transformMouseStart = { x: mouseX, y: mouseY };
         this.transformZoneStartBounds = Object.assign({}, clickedZone.bounds);
@@ -503,6 +510,7 @@ class TacticalMap {
       } else {
         this.selectedZone = null;
         this.transformAction = null;
+        this.transformPreZonesSnapshot = null;
       }
     }
 
@@ -594,12 +602,30 @@ class TacticalMap {
       this.drawCurrent = null;
       this.render();
     } else if (this.interactionMode === 'transform_zone' && this.transformAction && this.selectedZone) {
+      const b = this.transformZoneStartBounds;
+      const cur = this.selectedZone.bounds;
+      const hasChanged = b && cur && (b.minX !== cur.minX || b.maxX !== cur.maxX || b.minY !== cur.minY || b.maxY !== cur.maxY);
       
-      // Enable save button
-      const btn = document.getElementById("btn-save-zone-edits");
-      if(btn) { btn.disabled = false; btn.style.opacity = "1"; }
+      if (hasChanged && this.transformPreZonesSnapshot) {
+        if (!this.history) this.history = [];
+        this.history.push(this.transformPreZonesSnapshot);
+        if (this.history.length > 50) this.history.shift();
+        this.redoStack = [];
+        this.updateUndoRedoUI();
+
+        // Enable save button and revert button
+        const btnSave = document.getElementById("btn-save-zone-edits");
+        if (btnSave) { btnSave.disabled = false; btnSave.style.opacity = "1"; }
+        const btnRevert = document.getElementById("btn-revert-zone-edits");
+        if (btnRevert) { btnRevert.disabled = false; btnRevert.style.opacity = "1"; }
+
+        if (typeof window.updateQuickZonesBar === 'function') window.updateQuickZonesBar();
+        if (typeof window.recalculateMetricsForZones === 'function') window.recalculateMetricsForZones();
+      }
 
       this.transformAction = null;
+      this.transformPreZonesSnapshot = null;
+      this.transformZoneStartBounds = null;
       this.render();
     } else if (!this.hasDragged) {
       this.handleClick(mouseX, mouseY);
@@ -2897,17 +2923,38 @@ window.TacticalMap = TacticalMap;
 
 // Added function to commit zone changes
 TacticalMap.prototype.commitZoneChanges = function() {
-  if (this.selectedZone) {
-    this.saveZoneChanges(this.selectedZone);
-  } else {
-    this.persistZones();
-    this.updateZoneListUI();
-    if (typeof window.updateQuickZonesBar === "function") window.updateQuickZonesBar();
-  }
-  this.pushHistory();
-      const btn = document.getElementById("btn-save-zone-edits");
-  if(btn) { btn.disabled = true; btn.style.opacity = "0.5"; }
+  this.persistZones();
+  this.updateZoneListUI();
+  if (typeof window.updateQuickZonesBar === "function") window.updateQuickZonesBar();
+  if (typeof window.recalculateMetricsForZones === "function") window.recalculateMetricsForZones();
+  this.initialZonesState = JSON.stringify(this.zones);
+  this.history = [];
+  this.redoStack = [];
+  this.updateUndoRedoUI();
+  const btnSave = document.getElementById("btn-save-zone-edits");
+  if (btnSave) { btnSave.disabled = true; btnSave.style.opacity = "0.5"; }
+  const btnRevert = document.getElementById("btn-revert-zone-edits");
+  if (btnRevert) { btnRevert.disabled = true; btnRevert.style.opacity = "0.5"; }
   alert("Zonas guardadas correctamente.");
+};
+
+TacticalMap.prototype.revertZoneChanges = function() {
+  if (!this.initialZonesState) return;
+  if (!confirm("¿Deseas descartar todos los cambios y volver al estado inicial?")) return;
+  this.zones = JSON.parse(this.initialZonesState);
+  this.selectedZone = null;
+  this.transformAction = null;
+  this.history = [];
+  this.redoStack = [];
+  this.updateUndoRedoUI();
+  this.render();
+  this.updateZoneListUI();
+  if (typeof window.updateQuickZonesBar === "function") window.updateQuickZonesBar();
+  if (typeof window.recalculateMetricsForZones === "function") window.recalculateMetricsForZones();
+  const btnSave = document.getElementById("btn-save-zone-edits");
+  if (btnSave) { btnSave.disabled = true; btnSave.style.opacity = "0.5"; }
+  const btnRevert = document.getElementById("btn-revert-zone-edits");
+  if (btnRevert) { btnRevert.disabled = true; btnRevert.style.opacity = "0.5"; }
 };
 
 TacticalMap.prototype.pushHistory = function() {
@@ -2918,6 +2965,7 @@ TacticalMap.prototype.pushHistory = function() {
   this.redoStack = [];
   this.updateUndoRedoUI();
 };
+
 TacticalMap.prototype.undo = function() {
   if (!this.history || this.history.length === 0) return;
   if (!this.redoStack) this.redoStack = [];
@@ -2927,9 +2975,15 @@ TacticalMap.prototype.undo = function() {
   this.selectedZone = null;
   this.updateUndoRedoUI();
   this.render();
+  this.updateZoneListUI();
+  if (typeof window.updateQuickZonesBar === "function") window.updateQuickZonesBar();
+  if (typeof window.recalculateMetricsForZones === "function") window.recalculateMetricsForZones();
   const btnSave = document.getElementById("btn-save-zone-edits");
-  if(btnSave) { btnSave.disabled = false; btnSave.style.opacity = "1"; }
+  if (btnSave) { btnSave.disabled = false; btnSave.style.opacity = "1"; }
+  const btnRevert = document.getElementById("btn-revert-zone-edits");
+  if (btnRevert) { btnRevert.disabled = false; btnRevert.style.opacity = "1"; }
 };
+
 TacticalMap.prototype.redo = function() {
   if (!this.redoStack || this.redoStack.length === 0) return;
   if (!this.history) this.history = [];
@@ -2939,19 +2993,27 @@ TacticalMap.prototype.redo = function() {
   this.selectedZone = null;
   this.updateUndoRedoUI();
   this.render();
+  this.updateZoneListUI();
+  if (typeof window.updateQuickZonesBar === "function") window.updateQuickZonesBar();
+  if (typeof window.recalculateMetricsForZones === "function") window.recalculateMetricsForZones();
   const btnSave = document.getElementById("btn-save-zone-edits");
-  if(btnSave) { btnSave.disabled = false; btnSave.style.opacity = "1"; }
+  if (btnSave) { btnSave.disabled = false; btnSave.style.opacity = "1"; }
+  const btnRevert = document.getElementById("btn-revert-zone-edits");
+  if (btnRevert) { btnRevert.disabled = false; btnRevert.style.opacity = "1"; }
 };
+
 TacticalMap.prototype.updateUndoRedoUI = function() {
   const btnUndo = document.getElementById("btn-undo-zone");
   const btnRedo = document.getElementById("btn-redo-zone");
   if (btnUndo) {
     btnUndo.disabled = !this.history || this.history.length === 0;
     btnUndo.style.opacity = btnUndo.disabled ? "0.5" : "1";
+    btnUndo.style.cursor = btnUndo.disabled ? "not-allowed" : "pointer";
   }
   if (btnRedo) {
     btnRedo.disabled = !this.redoStack || this.redoStack.length === 0;
     btnRedo.style.opacity = btnRedo.disabled ? "0.5" : "1";
+    btnRedo.style.cursor = btnRedo.disabled ? "not-allowed" : "pointer";
   }
 };
 window.addEventListener("keydown", (e) => {
