@@ -1,8 +1,23 @@
 {
-  "active_save_file": "test_autosave_0.sav",
-  "save_modified": "2026-09-23T23:47:26.351364989+02:00",
-  "last_sync": "2026-09-23T21:49:16.262Z",
+  "active_save_file": "test_autosave_3.sav",
+  "save_modified": "2026-09-24T00:02:26.44105384+02:00",
+  "last_sync": "2026-09-23T22:02:10.107Z",
   "recentSaves": [
+    {
+      "name": "test_autosave_3.sav",
+      "modified": "2026-09-24T00:02:26.44105384+02:00",
+      "size": 1568768
+    },
+    {
+      "name": "test_autosave_2.sav",
+      "modified": "2026-09-23T23:57:26.410822788+02:00",
+      "size": 1568768
+    },
+    {
+      "name": "test_autosave_1.sav",
+      "modified": "2026-09-23T23:52:26.386650834+02:00",
+      "size": 1568768
+    },
     {
       "name": "test_autosave_0.sav",
       "modified": "2026-09-23T23:47:26.351364989+02:00",
@@ -11,21 +26,6 @@
     {
       "name": "test_autosave_4.sav",
       "modified": "2026-09-23T23:42:26.33292651+02:00",
-      "size": 1568768
-    },
-    {
-      "name": "test_autosave_3.sav",
-      "modified": "2026-09-23T23:37:26.318821144+02:00",
-      "size": 1568768
-    },
-    {
-      "name": "test_autosave_2.sav",
-      "modified": "2026-09-23T23:32:26.288869563+02:00",
-      "size": 1568768
-    },
-    {
-      "name": "test_autosave_1.sav",
-      "modified": "2026-09-23T23:27:26.285903686+02:00",
       "size": 1568768
     },
     {
@@ -394,8 +394,8 @@
       "duration": 2,
       "icon": "Wire.png",
       "potential": 1,
-      "isProducing": false,
-      "status": "idle",
+      "isProducing": true,
+      "status": "producing",
       "inputs": [
         {
           "item": "Copper_Ingot",
@@ -1340,8 +1340,8 @@
       "duration": 2,
       "icon": "Copper_Sheet.png",
       "potential": 1,
-      "isProducing": false,
-      "status": "idle",
+      "isProducing": true,
+      "status": "producing",
       "inputs": [
         {
           "item": "Copper_Ingot",
@@ -1820,8 +1820,8 @@
       "duration": 2,
       "icon": "Caterium_Ingot.png",
       "potential": 1,
-      "isProducing": true,
-      "status": "producing",
+      "isProducing": false,
+      "status": "idle",
       "inputs": [
         {
           "item": "Caterium_Ore",
@@ -1856,8 +1856,8 @@
       "duration": 2,
       "icon": "Caterium_Ingot.png",
       "potential": 1,
-      "isProducing": true,
-      "status": "producing",
+      "isProducing": false,
+      "status": "idle",
       "inputs": [
         {
           "item": "Caterium_Ore",
@@ -6187,8 +6187,8 @@
       "duration": 2,
       "icon": "Fuel.png",
       "potential": 1,
-      "isProducing": false,
-      "status": "idle",
+      "isProducing": true,
+      "status": "producing",
       "inputs": [
         {
           "item": "Crude_Oil",
@@ -7981,7 +7981,7 @@
       "itemNameEs": "Wire",
       "itemIcon": "Wire.png",
       "itemColor": "#ffbca3",
-      "itemCount": 60,
+      "itemCount": 61,
       "rate": 60,
       "points": [
         {
@@ -8012,7 +8012,7 @@
       "itemNameEs": "Wire",
       "itemIcon": "Wire.png",
       "itemColor": "#ffbca3",
-      "itemCount": 60,
+      "itemCount": 61,
       "rate": 60,
       "points": [
         {
@@ -8361,7 +8361,7 @@
       "itemNameEs": "Wire",
       "itemIcon": "Wire.png",
       "itemColor": "#ffbca3",
-      "itemCount": 60,
+      "itemCount": 61,
       "rate": 60,
       "points": [
         {
@@ -10227,7 +10227,7 @@
       "itemNameEs": "Iron Rod",
       "itemIcon": "Iron_Rod.png",
       "itemColor": "#ffbca3",
-      "itemCount": 13,
+      "itemCount": 12,
       "rate": 60,
       "points": [
         {
@@ -10344,7 +10344,7 @@
       "itemNameEs": "Screw",
       "itemIcon": "Screw.png",
       "itemColor": "#ffbca3",
-      "itemCount": 11,
+      "itemCount": 10,
       "rate": 60,
       "points": [
         {
@@ -10733,7 +10733,7 @@
       "itemNameEs": "Wire",
       "itemIcon": "Wire.png",
       "itemColor": "#ffbca3",
-      "itemCount": 60,
+      "itemCount": 61,
       "rate": 60,
       "points": [
         {
@@ -10791,7 +10791,7 @@
       "itemNameEs": "Wire",
       "itemIcon": "Wire.png",
       "itemColor": "#ffbca3",
-      "itemCount": 11,
+      "itemCount": 10,
       "rate": 60,
       "points": [
         {
@@ -10948,13 +10948,13 @@
       "className": "Build_ConveyorBeltMk1_C",
       "type": "ConveyorBeltMk1",
       "maxRate": 60,
-      "item": null,
-      "itemName": null,
-      "itemNameEs": null,
-      "itemIcon": null,
+      "item": "Desc_CopperIngot_C",
+      "itemName": "Copper Ingot",
+      "itemNameEs": "Copper Ingot",
+      "itemIcon": "Copper_Ingot.png",
       "itemColor": "#ffbca3",
-      "itemCount": 0,
-      "rate": 0,
+      "itemCount": 1,
+      "rate": 60,
       "points": [
         {
           "x": -29627,
@@ -12678,7 +12678,7 @@
       "itemNameEs": "Caterium Ore",
       "itemIcon": "Caterium_Ore.png",
       "itemColor": "#ffbca3",
-      "itemCount": 38,
+      "itemCount": 37,
       "rate": 120,
       "points": [
         {
@@ -12713,7 +12713,7 @@
       "itemNameEs": "Caterium Ore",
       "itemIcon": "Caterium_Ore.png",
       "itemColor": "#ffbca3",
-      "itemCount": 38,
+      "itemCount": 37,
       "rate": 120,
       "points": [
         {
@@ -12736,7 +12736,7 @@
       "itemNameEs": "Caterium Ore",
       "itemIcon": "Caterium_Ore.png",
       "itemColor": "#ffbca3",
-      "itemCount": 38,
+      "itemCount": 37,
       "rate": 120,
       "points": [
         {
@@ -12771,7 +12771,7 @@
       "itemNameEs": "Caterium Ore",
       "itemIcon": "Caterium_Ore.png",
       "itemColor": "#ffbca3",
-      "itemCount": 4,
+      "itemCount": 5,
       "rate": 120,
       "points": [
         {
@@ -12794,7 +12794,7 @@
       "itemNameEs": "Caterium Ore",
       "itemIcon": "Caterium_Ore.png",
       "itemColor": "#ffbca3",
-      "itemCount": 4,
+      "itemCount": 5,
       "rate": 60,
       "points": [
         {
@@ -12833,7 +12833,7 @@
       "itemNameEs": "Caterium Ore",
       "itemIcon": "Caterium_Ore.png",
       "itemColor": "#ffbca3",
-      "itemCount": 8,
+      "itemCount": 9,
       "rate": 60,
       "points": [
         {
@@ -12880,7 +12880,7 @@
       "itemNameEs": "Caterium Ore",
       "itemIcon": "Caterium_Ore.png",
       "itemColor": "#ffbca3",
-      "itemCount": 7,
+      "itemCount": 8,
       "rate": 60,
       "points": [
         {
@@ -12927,7 +12927,7 @@
       "itemNameEs": "Caterium Ore",
       "itemIcon": "Caterium_Ore.png",
       "itemColor": "#ffbca3",
-      "itemCount": 38,
+      "itemCount": 37,
       "rate": 120,
       "points": [
         {
@@ -26895,7 +26895,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 6,
+      "itemCount": 7,
       "rate": 270,
       "points": [
         {
@@ -27056,7 +27056,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 7,
+      "itemCount": 6,
       "rate": 270,
       "points": [
         {
@@ -27148,7 +27148,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 6,
+      "itemCount": 5,
       "rate": 120,
       "points": [
         {
@@ -28998,13 +28998,13 @@
       "className": "Build_ConveyorBeltMk4_C",
       "type": "ConveyorBeltMk4",
       "maxRate": 480,
-      "item": null,
-      "itemName": null,
-      "itemNameEs": null,
-      "itemIcon": null,
+      "item": "Desc_PolymerResin_C",
+      "itemName": "Polymer Resin",
+      "itemNameEs": "Polymer Resin",
+      "itemIcon": "Polymer_Resin.png",
       "itemColor": "#ffbca3",
-      "itemCount": 0,
-      "rate": 0,
+      "itemCount": 1,
+      "rate": 480,
       "points": [
         {
           "x": 22500,
@@ -29021,13 +29021,13 @@
       "className": "Build_ConveyorBeltMk4_C",
       "type": "ConveyorBeltMk4",
       "maxRate": 480,
-      "item": null,
-      "itemName": null,
-      "itemNameEs": null,
-      "itemIcon": null,
+      "item": "Desc_PolymerResin_C",
+      "itemName": "Polymer Resin",
+      "itemNameEs": "Polymer Resin",
+      "itemIcon": "Polymer_Resin.png",
       "itemColor": "#ffbca3",
-      "itemCount": 0,
-      "rate": 0,
+      "itemCount": 1,
+      "rate": 480,
       "points": [
         {
           "x": 21500,
@@ -29141,7 +29141,7 @@
       "itemNameEs": "Polymer Resin",
       "itemIcon": "Polymer_Resin.png",
       "itemColor": "#ffbca3",
-      "itemCount": 3,
+      "itemCount": 5,
       "rate": 480,
       "points": [
         {
@@ -29164,7 +29164,7 @@
       "itemNameEs": "Polymer Resin",
       "itemIcon": "Polymer_Resin.png",
       "itemColor": "#ffbca3",
-      "itemCount": 5,
+      "itemCount": 6,
       "rate": 480,
       "points": [
         {
@@ -29187,7 +29187,7 @@
       "itemNameEs": "Polymer Resin",
       "itemIcon": "Polymer_Resin.png",
       "itemColor": "#ffbca3",
-      "itemCount": 4,
+      "itemCount": 5,
       "rate": 480,
       "points": [
         {
@@ -29210,7 +29210,7 @@
       "itemNameEs": "Polymer Resin",
       "itemIcon": "Polymer_Resin.png",
       "itemColor": "#ffbca3",
-      "itemCount": 3,
+      "itemCount": 2,
       "rate": 480,
       "points": [
         {

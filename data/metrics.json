@@ -1,13 +1,13 @@
 {
-  "last_sync": "2026-09-23T21:49:16.262Z",
+  "last_sync": "2026-09-23T22:02:10.107Z",
   "session": {
     "sessionName": "test",
     "saveVersion": 60,
     "buildVersion": 502094,
-    "playTimeFormatted": "104h 50m",
-    "playDurationSeconds": 377412,
-    "saveDateTime": "2026-09-23T21:49:15.916Z",
-    "fileSizeBytes": 1567344
+    "playTimeFormatted": "105h 5m",
+    "playDurationSeconds": 378309,
+    "saveDateTime": "2026-09-23T22:02:09.718Z",
+    "fileSizeBytes": 1567612
   },
   "global": {
     "Iron_Ingot": {
@@ -364,9 +364,24 @@
       }
     }
   },
-  "active_save_file": "test_autosave_0.sav",
-  "save_modified": "2026-09-23T23:47:26.351364989+02:00",
+  "active_save_file": "test_autosave_3.sav",
+  "save_modified": "2026-09-24T00:02:26.44105384+02:00",
   "recentSaves": [
+    {
+      "name": "test_autosave_3.sav",
+      "modified": "2026-09-24T00:02:26.44105384+02:00",
+      "size": 1568768
+    },
+    {
+      "name": "test_autosave_2.sav",
+      "modified": "2026-09-23T23:57:26.410822788+02:00",
+      "size": 1568768
+    },
+    {
+      "name": "test_autosave_1.sav",
+      "modified": "2026-09-23T23:52:26.386650834+02:00",
+      "size": 1568768
+    },
     {
       "name": "test_autosave_0.sav",
       "modified": "2026-09-23T23:47:26.351364989+02:00",
@@ -375,21 +390,6 @@
     {
       "name": "test_autosave_4.sav",
       "modified": "2026-09-23T23:42:26.33292651+02:00",
-      "size": 1568768
-    },
-    {
-      "name": "test_autosave_3.sav",
-      "modified": "2026-09-23T23:37:26.318821144+02:00",
-      "size": 1568768
-    },
-    {
-      "name": "test_autosave_2.sav",
-      "modified": "2026-09-23T23:32:26.288869563+02:00",
-      "size": 1568768
-    },
-    {
-      "name": "test_autosave_1.sav",
-      "modified": "2026-09-23T23:27:26.285903686+02:00",
       "size": 1568768
     },
     {

@@ -1254,34 +1254,30 @@ async function forceReloadLatestSave(event) {
 
   try {
     const triggerHosts = [
-      `http://${window.location.hostname || 'localhost'}:8086`,
-      'http://localhost:8086',
-      'http://192.168.1.230:8086',
-      'http://100.109.149.10:8086',
-      ''
+      `http://${window.location.hostname}:8086/api/sync/force`,
+      'http://localhost:8086/api/sync/force'
     ];
     let triggered = false;
-    for (const host of triggerHosts) {
-      try {
-        const url = host ? `${host}/api/sync/force` : `/api/sync/force`;
-        const tr = await fetch(url, {
-          method: 'POST',
-          signal: AbortSignal.timeout(4000)
-        });
-        if (tr.ok) {
-          triggered = true;
-          console.log('[Sync] Disparada sincronización vía daemon en:', host);
-          break;
-        }
-      } catch (e) {}
-    }
+    try {
+      await Promise.any(
+        triggerHosts.map(url =>
+          fetch(url, { method: 'POST', signal: AbortSignal.timeout(1500) }).then(r => {
+            if (!r.ok) throw new Error();
+            return r;
+          })
+        )
+      );
+      triggered = true;
+    } catch (e) {}
 
     if (triggered) {
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(r, 500));
     }
 
-    await loadMapData();
-    await fetchMetrics();
+    await Promise.all([
+      loadMapData(),
+      fetchMetrics()
+    ]);
 
     autosyncSecondsLeft = 300;
   } catch (err) {
@@ -1296,81 +1292,11 @@ window.forceReloadLatestSave = forceReloadLatestSave;
 window.forceSyncNow = forceReloadLatestSave;
 window.reloadSaveData = forceReloadLatestSave;
 
-async function toggleSaveDropdown(event) {
-  if (event) {
-    event.stopPropagation();
-  }
+function renderSaveDropdownContent(saves) {
   const dd = document.getElementById('save-dropdown');
   if (!dd) return;
 
-  if (dd.style.display === 'block') {
-    dd.style.display = 'none';
-    return;
-  }
-
-  dd.style.display = 'block';
-  dd.innerHTML = `
-    <div style="padding: 10px 14px; font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
-      <span class="reload-icon spinning" style="font-size: 13px; color: var(--ficsit-orange);">⚙</span>
-      <span>Consultando partidas disponibles en el servidor...</span>
-    </div>
-  `;
-
-  let saves = null;
-  const hosts = [
-    `http://${window.location.hostname || 'localhost'}:8086`,
-    'http://localhost:8086',
-    'http://192.168.1.230:8086',
-    'http://100.109.149.10:8086',
-    ''
-  ];
-
-  // 1. Intentar obtener del daemon API
-  for (const host of hosts) {
-    try {
-      const url = host ? `${host}/api/saves?t=${Date.now()}` : `/api/saves?t=${Date.now()}`;
-      const res = await fetch(url, { signal: AbortSignal.timeout(2500) });
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          saves = data;
-          break;
-        }
-      }
-    } catch (e) {}
-  }
-
-  // 2. Si no respondió el daemon, intentar FileBrowser directamente
-  if (!saves || saves.length === 0) {
-    try {
-      const fbRes = await fetch(`/api/resources?source=srv&path=/saved/server&t=${Date.now()}`, { signal: AbortSignal.timeout(2500) });
-      if (fbRes.ok) {
-        const fbData = await fbRes.json();
-        if (fbData && fbData.files) {
-          saves = fbData.files
-            .filter(f => f.name && f.name.endsWith('.sav'))
-            .sort((a, b) => new Date(b.modified) - new Date(a.modified))
-            .map(f => ({ name: f.name, modified: f.modified, size: f.size }));
-        }
-      }
-    } catch (e) {}
-  }
-
-  // 3. Si aún no hay saves, intentar de window.liveMetrics.recentSaves
-  if (!saves || saves.length === 0) {
-    if (window.liveMetrics?.recentSaves && window.liveMetrics.recentSaves.length > 0) {
-      saves = window.liveMetrics.recentSaves;
-    }
-  }
-
-  // 4. Último fallback: partida activa actual
-  if (!saves || saves.length === 0) {
-    if (window.liveMetrics?.active_save_file) {
-      saves = [{ name: window.liveMetrics.active_save_file, modified: window.liveMetrics.save_modified || '' }];
-    }
-  }
-
-  if (!saves || saves.length === 0) {
+  if (!Array.isArray(saves) || saves.length === 0) {
     dd.innerHTML = `
       <div style="padding: 12px; font-size: 11px; color: #888; text-align: center;">
         No se pudieron detectar partidas en el servidor.
@@ -1425,6 +1351,69 @@ async function toggleSaveDropdown(event) {
   html += `</div>`;
   dd.innerHTML = html;
 }
+
+async function toggleSaveDropdown(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  const dd = document.getElementById('save-dropdown');
+  if (!dd) return;
+
+  if (dd.style.display === 'block') {
+    dd.style.display = 'none';
+    return;
+  }
+
+  dd.style.display = 'block';
+
+  // 1. Si ya tenemos partidas cargadas en liveMetrics, renderizar de INMEDIATO (0 ms de espera!)
+  if (window.liveMetrics?.recentSaves && window.liveMetrics.recentSaves.length > 0) {
+    renderSaveDropdownContent(window.liveMetrics.recentSaves);
+  } else {
+    // Si aún no están, mostrar spinner breve y cargar de data/metrics.json
+    dd.innerHTML = `
+      <div style="padding: 10px 14px; font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+        <span class="reload-icon spinning" style="font-size: 13px; color: var(--ficsit-orange);">⚙</span>
+        <span>Cargando partidas disponibles...</span>
+      </div>
+    `;
+    try {
+      const mRes = await fetch(`data/metrics.json?t=${Date.now()}`);
+      if (mRes.ok) {
+        const mData = await mRes.json();
+        if (mData.recentSaves && mData.recentSaves.length > 0) {
+          window.liveMetrics = window.liveMetrics || {};
+          window.liveMetrics.recentSaves = mData.recentSaves;
+          window.liveMetrics.active_save_file = mData.active_save_file;
+          renderSaveDropdownContent(mData.recentSaves);
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 2. En segundo plano (sin bloquear la UI), consultar si el daemon tiene partidas más frescas
+  const daemonUrls = [
+    `http://${window.location.hostname}:8086/api/saves`,
+    'http://localhost:8086/api/saves'
+  ];
+  Promise.any(
+    daemonUrls.map(url =>
+      fetch(url, { signal: AbortSignal.timeout(800) }).then(r => {
+        if (!r.ok) throw new Error();
+        return r.json();
+      })
+    )
+  ).then(freshSaves => {
+    if (Array.isArray(freshSaves) && freshSaves.length > 0) {
+      window.liveMetrics = window.liveMetrics || {};
+      window.liveMetrics.recentSaves = freshSaves;
+      if (dd.style.display === 'block') {
+        renderSaveDropdownContent(freshSaves);
+      }
+    }
+  }).catch(() => {});
+}
 window.toggleSaveDropdown = toggleSaveDropdown;
 
 async function selectSaveFile(saveName) {
@@ -1440,37 +1429,37 @@ async function selectSaveFile(saveName) {
   if (badge) badge.innerHTML = `⏳ Cargando partida <strong>${saveName}</strong>...`;
 
   try {
-    const hosts = [
-      `http://${window.location.hostname || 'localhost'}:8086`,
-      'http://localhost:8086',
-      'http://192.168.1.230:8086',
-      'http://100.109.149.10:8086',
-      ''
+    const triggerHosts = [
+      `http://${window.location.hostname}:8086/api/saves/select`,
+      'http://localhost:8086/api/saves/select'
     ];
+    const body = JSON.stringify({ name: saveName });
     let triggered = false;
-    for (const host of hosts) {
-      try {
-        const url = host ? `${host}/api/saves/select` : `/api/saves/select`;
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: saveName }),
-          signal: AbortSignal.timeout(12000)
-        });
-        if (res.ok) {
-          triggered = true;
-          console.log('[Sync] Partida seleccionada vía daemon:', saveName);
-          break;
-        }
-      } catch (e) {}
-    }
+    try {
+      await Promise.any(
+        triggerHosts.map(url =>
+          fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body,
+            signal: AbortSignal.timeout(4000)
+          }).then(r => {
+            if (!r.ok) throw new Error();
+            return r;
+          })
+        )
+      );
+      triggered = true;
+    } catch (e) {}
 
     if (triggered) {
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(r, 500));
     }
 
-    await loadMapData();
-    await fetchMetrics();
+    await Promise.all([
+      loadMapData(),
+      fetchMetrics()
+    ]);
     autosyncSecondsLeft = 300;
   } catch (err) {
     console.error('[Sync] Error cambiando de partida:', err);
