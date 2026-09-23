@@ -604,6 +604,10 @@ class TacticalMap {
       this.handleClick(mouseX, mouseY);
     }
 
+    if (this.isDragging && this.hasDragged) {
+      if (typeof saveAppState === 'function') saveAppState();
+    }
+
     this.isDragging = false;
   }
 
@@ -633,6 +637,11 @@ class TacticalMap {
     this.checkHover(mouseX, mouseY);
     this.render();
     this.updateZoomIndicator();
+    
+    if (this._wheelSaveTimeout) clearTimeout(this._wheelSaveTimeout);
+    this._wheelSaveTimeout = setTimeout(() => {
+      if (typeof saveAppState === 'function') saveAppState();
+    }, 500);
   }
 
   checkHover(mouseX, mouseY) {
@@ -1194,6 +1203,7 @@ class TacticalMap {
   // Set switchable map background layer
   setMapBackground(mode) {
     this.currentMapBg = mode;
+    if (typeof saveAppState === 'function') saveAppState();
 
     // Update toolbar active button
     const modes = ['realistic', 'topo', 'blueprint'];
@@ -2687,6 +2697,7 @@ class TacticalMap {
     } else {
       this.filters.resources.delete(resourceClass);
     }
+    if (typeof saveAppState === 'function') saveAppState();
     this.render();
     this.updateSCIMFilterSidebarUI();
   }
@@ -2699,17 +2710,20 @@ class TacticalMap {
     } else {
       this.filters.resources.clear();
     }
+    if (typeof saveAppState === 'function') saveAppState();
     this.render();
     this.updateSCIMFilterSidebarUI();
   }
 
   setPurityFilter(purity, enabled) {
     this.filters.purity[purity] = enabled;
+    if (typeof saveAppState === 'function') saveAppState();
     this.render();
   }
 
   setStatusFilter(status) {
     this.filters.status = status;
+    if (typeof saveAppState === 'function') saveAppState();
     document.querySelectorAll('.scim-status-toggle-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.status === status);
     });
@@ -2718,6 +2732,7 @@ class TacticalMap {
 
   setLayerVisible(layer, visible) {
     this.filters.layers[layer] = visible;
+    if (typeof saveAppState === 'function') saveAppState();
     this.render();
   }
 

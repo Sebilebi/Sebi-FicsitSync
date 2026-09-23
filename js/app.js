@@ -11,8 +11,65 @@ let activeOnlyFilter = false;
 let globalModeFilter = false;
 let globalSearchQuery = '';
 
+let currentScimTab = 'resources';
+const APP_STATE_KEY = 'ficsit_app_state_v3';
+
+function saveAppState() {
+  const state = {
+    globalModeFilter,
+    activeOnlyFilter,
+    currentBranchId,
+    currentMode,
+    currentScimTab,
+    isSvgViewActive,
+    map: null
+  };
+
+  if (window.tacticalMap) {
+    state.map = {
+      bg: window.tacticalMap.currentMapBg,
+      status: window.tacticalMap.filters.status,
+      purity: window.tacticalMap.filters.purity,
+      layers: window.tacticalMap.filters.layers,
+      resources: Array.from(window.tacticalMap.filters.resources),
+      cameraX: window.tacticalMap.cameraX,
+      cameraY: window.tacticalMap.cameraY,
+      scale: window.tacticalMap.scale
+    };
+  } else {
+    // If tacticalMap not initialized yet, preserve existing map state if any
+    try {
+      const saved = JSON.parse(localStorage.getItem(APP_STATE_KEY) || '{}');
+      if (saved.map) state.map = saved.map;
+    } catch(e) {}
+  }
+
+  localStorage.setItem(APP_STATE_KEY, JSON.stringify(state));
+}
+
+let pendingMapState = null;
+
+function loadAppState() {
+  try {
+    const saved = localStorage.getItem(APP_STATE_KEY);
+    if (saved) {
+      const state = JSON.parse(saved);
+      if (typeof state.globalModeFilter !== 'undefined') globalModeFilter = state.globalModeFilter;
+      if (typeof state.activeOnlyFilter !== 'undefined') activeOnlyFilter = state.activeOnlyFilter;
+      if (state.currentBranchId) currentBranchId = state.currentBranchId;
+      if (state.currentMode) currentMode = state.currentMode;
+      if (state.currentScimTab) currentScimTab = state.currentScimTab;
+      if (typeof state.isSvgViewActive !== 'undefined') isSvgViewActive = state.isSvgViewActive;
+      if (state.map) pendingMapState = state.map;
+    }
+  } catch (e) {
+    console.warn('Could not load app state', e);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
+  loadAppState();
   initCommandCenter();
   populateZoneItemSelect();
   initSaveAndMetricsSync();
@@ -26,9 +83,27 @@ function initCommandCenter() {
   renderSchematics(currentBranchId);
   renderMallSummary();
 
-  // Initialize Map directly as the hero landing view
+  // Initialize Map directly as the hero landing view or restore from hash/state
   setTimeout(() => {
-    switchMainMode('live_map');
+    let targetMode = currentMode || 'live_map';
+    const hash = window.location.hash.replace('#', '');
+    if (['live_map', 'schematics', 'mall_summary'].includes(hash)) {
+      targetMode = hash;
+    }
+    switchMainMode(targetMode);
+    
+    // Set UI checkboxes for schematics
+    const chkActive = document.getElementById('filter-active-only');
+    if (chkActive) chkActive.checked = activeOnlyFilter;
+    const chkGlobal = document.getElementById('filter-global-mode');
+    if (chkGlobal) chkGlobal.checked = globalModeFilter;
+    
+    const targetSvgState = isSvgViewActive;
+    isSvgViewActive = !targetSvgState; 
+    toggleSvgSchematicView();
+
+    switchScimSidebarTab(currentScimTab);
+    
   }, 50);
 
   // Global Keyboard Shortcuts
@@ -61,6 +136,13 @@ function initCommandCenter() {
       requestAnimationFrame(updateFlowGraphConnections);
     }
   });
+
+  window.addEventListener('hashchange', () => {
+    const hash = window.location.hash.replace('#', '');
+    if (['live_map', 'schematics', 'mall_summary'].includes(hash)) {
+      if (currentMode !== hash) switchMainMode(hash);
+    }
+  });
 }
 
 // ==========================================
@@ -68,6 +150,11 @@ function initCommandCenter() {
 // ==========================================
 function switchMainMode(modeId) {
   currentMode = modeId;
+  if (window.location.hash !== `#${modeId}`) {
+    window.history.replaceState(null, null, `#${modeId}`);
+  }
+  
+  if (typeof saveAppState === 'function') saveAppState();
 
   // Views
   const views = [
@@ -94,6 +181,35 @@ function switchMainMode(modeId) {
   if (modeId === 'live_map') {
     if (!window.tacticalMap) {
       window.tacticalMap = new TacticalMap('tactical-map-canvas');
+      
+      if (pendingMapState) {
+        window.tacticalMap.currentMapBg = pendingMapState.bg || 'realistic';
+        if (pendingMapState.status) window.tacticalMap.filters.status = pendingMapState.status;
+        if (pendingMapState.purity) window.tacticalMap.filters.purity = pendingMapState.purity;
+        if (pendingMapState.layers) window.tacticalMap.filters.layers = pendingMapState.layers;
+        if (pendingMapState.resources) window.tacticalMap.filters.resources = new Set(pendingMapState.resources);
+        if (pendingMapState.cameraX !== undefined) window.tacticalMap.cameraX = pendingMapState.cameraX;
+        if (pendingMapState.cameraY !== undefined) window.tacticalMap.cameraY = pendingMapState.cameraY;
+        if (pendingMapState.scale !== undefined) window.tacticalMap.scale = pendingMapState.scale;
+        
+        // Sync DOM Background Pills
+        ['realistic', 'topo', 'blueprint'].forEach(bg => {
+          const btn = document.getElementById('btn-bg-' + bg);
+          if (btn) btn.classList.toggle('active', bg === window.tacticalMap.currentMapBg);
+        });
+        
+        // Sync Status toggles
+        document.querySelectorAll('.scim-status-toggle-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.status === window.tacticalMap.filters.status);
+        });
+        
+        // Sync Layer checkboxes
+        ['terrain', 'belts', 'pipes', 'power', 'machines'].forEach(layer => {
+          const cb = document.querySelector(`.layer-toggle-row input[onchange*="${layer}"]`);
+          if (cb) cb.checked = window.tacticalMap.filters.layers[layer];
+        });
+      }
+
       if (window.cachedBuildingsData) {
         applyMapData(window.cachedBuildingsData, window.cachedZonesData, window.cachedNodesData);
       }
@@ -148,6 +264,7 @@ function renderBranchNavRail() {
 
 function selectBranch(branchId) {
   currentBranchId = branchId;
+  saveAppState();
   renderBranchNavRail();
   renderSchematics(branchId);
 }
@@ -729,18 +846,21 @@ window.jumpToCreateZoneForItem = jumpToCreateZoneForItem;
 
 function toggleActiveOnlyFilter(checked) {
   activeOnlyFilter = checked;
+  saveAppState();
   renderSchematics(currentBranchId);
 }
 window.toggleActiveOnlyFilter = toggleActiveOnlyFilter;
 
 function toggleGlobalMode(checked) {
   globalModeFilter = checked;
+  saveAppState();
   renderSchematics(currentBranchId);
 }
 window.toggleGlobalMode = toggleGlobalMode;
 
 function toggleSvgSchematicView() {
   isSvgViewActive = !isSvgViewActive;
+  if (typeof saveAppState === 'function') saveAppState();
   const grid = document.getElementById('schematics-cards-grid');
   const svg = document.getElementById('schematics-svg-wrapper');
   const btn = document.getElementById('btn-toggle-svg-view');
@@ -1353,6 +1473,8 @@ function openSCIM() {
 window.openSCIM = openSCIM;
 
 function switchScimSidebarTab(tabName) {
+  currentScimTab = tabName;
+  if (typeof saveAppState === 'function') saveAppState();
   const tabs = [
     { id: 'resources', btnId: 'btn_scim_tab_res', paneId: 'scim_tab_pane_resources' },
     { id: 'zones', btnId: 'btn_scim_tab_zones', paneId: 'scim_tab_pane_zones' },
