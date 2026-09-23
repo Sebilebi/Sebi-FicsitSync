@@ -146,6 +146,7 @@ class TacticalMap {
     // Filter & Layer state (SCIM style)
     this.filters = {
       resources: new Set(),
+      resourcesInitialized: false,
       purity: { PURE: true, NORMAL: true, IMPURE: true },
       status: 'all', // 'all', 'available', 'exploited'
       layers: {
@@ -904,7 +905,7 @@ class TacticalMap {
   }
 
   isNodeVisible(node) {
-    if (this.filters.resources.size > 0 && !this.filters.resources.has(node.resourceClass)) {
+    if (this.filters.resourcesInitialized && !this.filters.resources.has(node.resourceClass)) {
       return false;
     }
     if (!this.filters.purity[node.purity]) {
@@ -1233,10 +1234,11 @@ class TacticalMap {
     this.powerLines = powerLines || [];
     this.specialBuildings = specialBuildings || [];
 
-    if (this.filters.resources.size === 0 && this.nodes.length > 0) {
+    if (!this.filters.resourcesInitialized && this.nodes.length > 0) {
       for (const n of this.nodes) {
         this.filters.resources.add(n.resourceClass);
       }
+      this.filters.resourcesInitialized = true;
     }
 
     this.render();
@@ -2692,6 +2694,7 @@ class TacticalMap {
   }
 
   toggleResourceFilter(resourceClass, enabled) {
+    this.filters.resourcesInitialized = true;
     if (enabled) {
       this.filters.resources.add(resourceClass);
     } else {
@@ -2703,6 +2706,7 @@ class TacticalMap {
   }
 
   setAllResources(enabled) {
+    this.filters.resourcesInitialized = true;
     if (enabled) {
       for (const n of this.nodes) {
         this.filters.resources.add(n.resourceClass);

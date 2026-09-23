@@ -12,6 +12,7 @@ let globalModeFilter = false;
 let globalSearchQuery = '';
 
 let currentScimTab = 'resources';
+let currentCollectibleSubTab = 'power_slugs';
 const APP_STATE_KEY = 'ficsit_app_state_v3';
 
 function saveAppState() {
@@ -21,6 +22,7 @@ function saveAppState() {
     currentBranchId,
     currentMode,
     currentScimTab,
+    currentCollectibleSubTab,
     isSvgViewActive,
     map: null
   };
@@ -32,6 +34,8 @@ function saveAppState() {
       purity: window.tacticalMap.filters.purity,
       layers: window.tacticalMap.filters.layers,
       resources: Array.from(window.tacticalMap.filters.resources),
+      resourcesInitialized: window.tacticalMap.filters.resourcesInitialized,
+      collectibles: Array.from(window.tacticalMap.collectibleVisibility),
       cameraX: window.tacticalMap.cameraX,
       cameraY: window.tacticalMap.cameraY,
       scale: window.tacticalMap.scale
@@ -59,6 +63,7 @@ function loadAppState() {
       if (state.currentBranchId) currentBranchId = state.currentBranchId;
       if (state.currentMode) currentMode = state.currentMode;
       if (state.currentScimTab) currentScimTab = state.currentScimTab;
+      if (state.currentCollectibleSubTab) currentCollectibleSubTab = state.currentCollectibleSubTab;
       if (typeof state.isSvgViewActive !== 'undefined') isSvgViewActive = state.isSvgViewActive;
       if (state.map) pendingMapState = state.map;
     }
@@ -103,6 +108,7 @@ function initCommandCenter() {
     toggleSvgSchematicView();
 
     switchScimSidebarTab(currentScimTab);
+    switchCollectibleSubTab(currentCollectibleSubTab);
     
   }, 50);
 
@@ -187,10 +193,19 @@ function switchMainMode(modeId) {
         if (pendingMapState.status) window.tacticalMap.filters.status = pendingMapState.status;
         if (pendingMapState.purity) window.tacticalMap.filters.purity = pendingMapState.purity;
         if (pendingMapState.layers) window.tacticalMap.filters.layers = pendingMapState.layers;
-        if (pendingMapState.resources) window.tacticalMap.filters.resources = new Set(pendingMapState.resources);
-        if (pendingMapState.cameraX !== undefined) window.tacticalMap.cameraX = pendingMapState.cameraX;
-        if (pendingMapState.cameraY !== undefined) window.tacticalMap.cameraY = pendingMapState.cameraY;
-        if (pendingMapState.scale !== undefined) window.tacticalMap.scale = pendingMapState.scale;
+        if (pendingMapState.resources !== undefined) {
+          window.tacticalMap.filters.resources = new Set(pendingMapState.resources);
+          window.tacticalMap.filters.resourcesInitialized = pendingMapState.resourcesInitialized !== undefined ? pendingMapState.resourcesInitialized : true;
+        }
+        if (pendingMapState.collectibles) {
+          window.tacticalMap.collectibleVisibility = new Set(pendingMapState.collectibles);
+        }
+        if (pendingMapState.cameraX !== undefined) {
+          window.tacticalMap.cameraX = pendingMapState.cameraX;
+          window.tacticalMap.cameraY = pendingMapState.cameraY;
+          window.tacticalMap.scale = pendingMapState.scale;
+          window.tacticalMap._hasRestoredCamera = true;
+        }
         
         // Sync DOM Background Pills
         ['realistic', 'topo', 'blueprint'].forEach(bg => {
@@ -203,6 +218,14 @@ function switchMainMode(modeId) {
           btn.classList.toggle('active', btn.dataset.status === window.tacticalMap.filters.status);
         });
         
+        // Sync Purity checkboxes
+        ['PURE', 'NORMAL', 'IMPURE'].forEach(p => {
+          const cb = document.querySelector(`.scim-purity-label input[onchange*="${p}"]`);
+          if (cb && window.tacticalMap.filters.purity[p] !== undefined) {
+            cb.checked = window.tacticalMap.filters.purity[p];
+          }
+        });
+
         // Sync Layer checkboxes
         ['terrain', 'belts', 'pipes', 'power', 'machines'].forEach(layer => {
           const cb = document.querySelector(`.layer-toggle-row input[onchange*="${layer}"]`);
@@ -1155,10 +1178,18 @@ function applyMapData(bldData, zonesData, nodes) {
     bldData.powerLines || [],
     bldData.specialBuildings || []
   );
+  if (bldData.collectables) {
+    window.tacticalMap.setCollectedPathNames(bldData.collectables);
+  }
+  if (typeof renderCollectiblesList === 'function') {
+    renderCollectiblesList(currentCollectibleSubTab);
+  }
   setTimeout(() => {
     if (window.tacticalMap) {
       window.tacticalMap.resizeCanvas();
-      window.tacticalMap.centerOnPlayerBase();
+      if (!window.tacticalMap._hasRestoredCamera) {
+        window.tacticalMap.centerOnPlayerBase();
+      }
     }
   }, 100);
 }
@@ -1489,6 +1520,70 @@ function switchScimSidebarTab(tabName) {
   });
 }
 window.switchScimSidebarTab = switchScimSidebarTab;
+
+// === COLLECTIBLES SIDEBAR ===
+function switchCollectibleSubTab(tabName) {
+  currentCollectibleSubTab = tabName;
+  document.querySelectorAll('.collectibles-sub-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabName);
+  });
+  renderCollectiblesList(tabName);
+  if (typeof saveAppState === 'function') saveAppState();
+}
+window.switchCollectibleSubTab = switchCollectibleSubTab;
+
+function renderCollectiblesList(subTab) {
+  const container = document.getElementById('collectibles-list-container');
+  if (!container || typeof MAP_COLLECTIBLE_TABS === 'undefined') return;
+
+  const tabKey = subTab === 'collectibles_items' ? 'collectibles' : subTab;
+  const tabData = MAP_COLLECTIBLE_TABS[tabKey];
+  if (!tabData) {
+    container.innerHTML = '<p style="color: var(--text-muted); font-size: 12px; padding: 4px;">No hay datos.</p>';
+    return;
+  }
+
+  const collectedSet = window.tacticalMap ? window.tacticalMap.collectedPathNames : new Set();
+  let lastGroupLabel = null;
+  let html = '';
+
+  for (const group of tabData.groups) {
+    const gl = group.groupLabelEs || group.groupLabel || null;
+    if (gl && gl !== lastGroupLabel) {
+      html += `<div style="font-size: 10px; font-weight: 900; color: var(--text-dim); text-transform: uppercase; margin: 8px 0 3px 2px;">${gl.toUpperCase()}</div>`;
+      lastGroupLabel = gl;
+    }
+
+    const collected = group.markers.filter(m => collectedSet.has(m.pathName)).length;
+    const total = group.count;
+    const isActive = window.tacticalMap && window.tacticalMap.collectibleVisibility.has(group.name);
+
+    html += `
+      <label class="collectible-item-row ${isActive ? 'active' : ''}">
+        <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleCollectibleGroup('${group.name.replace(/'/g, "\\'")}')" style="margin: 0; cursor: pointer;" />
+        <div class="collectible-item-icon">
+          ${group.icon ? `<img src="icons/${group.icon}" alt="${group.nameEs}" onerror="this.style.display='none'" style="max-width: 100%; max-height: 100%;" />` : '<span>?</span>'}
+        </div>
+        <span class="collectible-item-name" style="flex: 1;">${group.nameEs || group.name}</span>
+        <span class="collectible-badge" title="${collected} obtenidos de ${total} totales">
+          <span style="color: #F5C04B;">${collected}</span> / <span style="color: #22C55E;">${total - collected}</span>
+        </span>
+      </label>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+window.renderCollectiblesList = renderCollectiblesList;
+
+function toggleCollectibleGroup(groupName) {
+  if (!window.tacticalMap) return;
+  const isActive = window.tacticalMap.collectibleVisibility.has(groupName);
+  window.tacticalMap.setCollectibleGroupVisible(groupName, !isActive);
+  renderCollectiblesList(currentCollectibleSubTab);
+  if (typeof saveAppState === 'function') saveAppState();
+}
+window.toggleCollectibleGroup = toggleCollectibleGroup;
 
 function closeZoneModal() {
   const modal = document.getElementById('zone-modal');
