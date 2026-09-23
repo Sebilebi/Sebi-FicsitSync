@@ -271,10 +271,12 @@ function initBlueprintPanZoom() {
   let isDragging = false;
   let startX = 0;
   let startY = 0;
+  window.hasDraggedBlueprint = false;
 
   viewport.addEventListener('mousedown', (e) => {
     if (e.target.closest('button')) return;
     isDragging = true;
+    window.hasDraggedBlueprint = false;
     viewport.style.cursor = 'grabbing';
     startX = e.clientX - bpPanX;
     startY = e.clientY - bpPanY;
@@ -282,6 +284,7 @@ function initBlueprintPanZoom() {
 
   window.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
+    window.hasDraggedBlueprint = true;
     bpPanX = e.clientX - startX;
     bpPanY = e.clientY - startY;
     updateBlueprintTransform();
@@ -317,6 +320,7 @@ function initBlueprintPanZoom() {
   viewport.addEventListener('touchstart', (e) => {
     if (e.touches.length === 1) {
       isDragging = true;
+      window.hasDraggedBlueprint = false;
       startX = e.touches[0].clientX - bpPanX;
       startY = e.touches[0].clientY - bpPanY;
     } else if (e.touches.length === 2) {
@@ -330,6 +334,7 @@ function initBlueprintPanZoom() {
 
   viewport.addEventListener('touchmove', (e) => {
     if (e.touches.length === 1 && isDragging) {
+      window.hasDraggedBlueprint = true;
       bpPanX = e.touches[0].clientX - startX;
       bpPanY = e.touches[0].clientY - startY;
       updateBlueprintTransform();
@@ -680,7 +685,10 @@ function renderSchematics(branchId) {
   `;
 
   // Auto fit initially if not zoomed by user
-  resetBlueprintZoom(svgWidth, svgHeight);
+  if (window.lastRenderedBranch !== branchId) {
+    resetBlueprintZoom(svgWidth, svgHeight);
+    window.lastRenderedBranch = branchId;
+  }
 }
 window.renderSchematics = renderSchematics;
 
@@ -1100,6 +1108,7 @@ function findMetricForItem(globalMetrics, itemId) {
 let currentModalItemId = null;
 
 function openItemModal(itemId) {
+  if (window.hasDraggedBlueprint) return;
   currentModalItemId = itemId;
   const allItems = SATISFACTORY_CATEGORIES.flatMap(c => c.items);
   const item = allItems.find(i => i.id === itemId);
