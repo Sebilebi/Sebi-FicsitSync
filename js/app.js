@@ -387,7 +387,7 @@ function renderSchematics(branchId) {
   const iconEl = document.getElementById('current-branch-icon');
   const titleEl = document.getElementById('current-branch-title');
   const subEl = document.getElementById('current-branch-subtitle');
-  if (iconEl) iconEl.textContent = cat.icon;
+  if (iconEl) iconEl.innerHTML = cat.icon;
   if (titleEl) titleEl.textContent = cat.name;
   if (subEl) subEl.textContent = `Plano interactivo: [Entrada Insumos] ➔ [Fábrica] ➔ [Almacén Local] ➔ [Salida Mall Central] con enlace a zonas`;
 

@@ -3,7 +3,7 @@ const SATISFACTORY_CATEGORIES = [
   {
     "id": "iron",
     "name": "Hierro y Derivados",
-    "icon": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14l8-8 8 8M4 10l8-8 8 8M12 2v20"/></svg>`,
+    "icon": `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14l8-8 8 8M4 10l8-8 8 8M12 2v20"/></svg>`,
     "color": "#ea580c",
     "items": [
       {
@@ -68,7 +68,7 @@ const SATISFACTORY_CATEGORIES = [
   {
     "id": "copper",
     "name": "Cobre y Electrónica",
-    "icon": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/></svg>`,
+    "icon": `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/></svg>`,
     "color": "#c2410c",
     "items": [
       {
@@ -133,7 +133,7 @@ const SATISFACTORY_CATEGORIES = [
   {
     "id": "steel",
     "name": "Acero y Construcción",
-    "icon": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v18h12V3zM6 8h12M6 13h12M6 18h12"/></svg>`,
+    "icon": `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v18h12V3zM6 8h12M6 13h12M6 18h12"/></svg>`,
     "color": "#334155",
     "items": [
       {
@@ -213,7 +213,7 @@ const SATISFACTORY_CATEGORIES = [
   {
     "id": "oil",
     "name": "Petróleo y Fluidos (Fase 3)",
-    "icon": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`,
+    "icon": `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`,
     "color": "#0891b2",
     "items": [
       {
@@ -271,7 +271,7 @@ const SATISFACTORY_CATEGORIES = [
   {
     "id": "mam",
     "name": "Caterio, Cuarzo, Azufre (MAM)",
-    "icon": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+    "icon": `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
     "color": "#eab308",
     "items": [
       {
@@ -352,7 +352,7 @@ const SATISFACTORY_CATEGORIES = [
   {
     "id": "space",
     "name": "Ascensor Espacial (Fases 1, 2 y 3)",
-    "icon": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21L14 3h-4L3 21"/><path d="M6 16h12"/><path d="M9 10h6"/></svg>`,
+    "icon": `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21L14 3h-4L3 21"/><path d="M6 16h12"/><path d="M9 10h6"/></svg>`,
     "color": "#d97706",
     "items": [
       {
