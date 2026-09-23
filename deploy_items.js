@@ -5,10 +5,10 @@ const FB_USER = 'admin';
 const FB_PASS = 'homelab22';
 
 const filesToUpload = [
-  { local: 'js/remote_items.js', remote: '/web/js/items.js' },
+  { local: 'js/items.js', remote: '/web/js/items.js' },
   { local: 'js/collectibles.js', remote: '/web/js/collectibles.js' },
   { local: 'js/map.js', remote: '/web/js/map.js' },
-  { local: 'js/remote_app_fixed.js', remote: '/web/js/app.js' },
+  { local: 'js/app.js', remote: '/web/js/app.js' },
   { local: 'index.html', remote: '/web/index.html' },
   { local: 'css/style.css', remote: '/web/css/style.css' },
   { local: 'server/parser.js', remote: '/web/server/parser.js' },
