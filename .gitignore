@@ -1,0 +1,21 @@
+# Dependencias de Node
+node_modules/
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de Guardado de Satisfactory (Para no subir partidas pesadas por accidente)
+*.sav
+
+# Variables de entorno y secretos locales
+.env
+.env.local
+
+# Archivos temporales del Sistema Operativo
+.DS_Store
+Thumbs.db
+
+# Logs y volcados temporales
+logs/
+*.log

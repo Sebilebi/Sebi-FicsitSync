@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>FICSIT Operations // Centro de Control Satisfactory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    
+    <!-- HEADER GLOBAL: FICSIT INDUSTRIAL HUD -->
+    <header class="global-header">
+      <!-- Izquierda: Marca y Sincronización -->
+      <div class="header-left">
+        <div class="brand-container">
+          <div class="brand-icon" style="color: #fff !important;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12l5.25-5.25a2.5 2.5 0 0 1 3.53 0L22 18"></path>
+              <path d="M12 2l5.25 5.25a2.5 2.5 0 0 1 0 3.53L6 22"></path>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">FICSIT INC.</span>
+            <span class="brand-subtitle" id="header-phase-text" style="color: var(--ficsit-orange) !important; font-weight: 900; background: #222; padding: 2px 6px; border-radius: 4px; font-size: 12px; margin-top: 2px; display: inline-block;">OS v4.0</span>
+          </div>
+        </div>
+
+        <div class="save-status-wrapper" style="position:relative; display:flex; align-items:stretch; gap:0; height: 32px;">
+          <div id="save-status-badge" class="save-sync-pill ficsit-panel" title="Haz clic para seleccionar otra partida" onclick="toggleSaveDropdown()" style="cursor:pointer; clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%); border-radius:0; padding-right:20px; z-index:3; position:relative;">
+            <span class="sync-pulse"></span>
+            <span id="save-status-text" style="display:inline-block; min-width:260px; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; vertical-align:middle;">Conectando...</span>
+            </div>
+          <div id="save-dropdown" style="display:none; position:absolute; top:calc(100% + 2px); left:0; background:#222; border:1px solid var(--ficsit-orange); width:320px; max-height:200px; overflow-y:auto; z-index:9999;"></div>
+          
+          <button id="btn-pause-sync" class="sync-reload-btn" onclick="togglePauseSync()" title="Pausar Sincronización Automática" style="clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); border-radius:0; padding: 0 15px; margin-left:-10px; z-index:2; background:#333; border-left:1px solid #444;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" id="icon-pause"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+          </button>
+
+          <button id="btn-force-sync" class="sync-reload-btn" onclick="forceSyncNow()" title="Forzar Recarga Manual" style="clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%); border-radius:0; padding: 0 15px; margin-left:-10px; z-index:1; background:var(--ficsit-orange); color:#fff;">
+            <span class="reload-icon" id="reload-icon-spin">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-8.31l5.67-5.67"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Centro: Selector de Modos de Pantalla -->
+      <div class="header-center">
+        <nav class="mode-switcher" style="position:relative; display:flex; gap:0;">
+          <div id="nav-slider-indicator" style="position:absolute; top:0; left:0; height:100%; background:var(--ficsit-orange); transition:all 0.2s cubic-bezier(0,0,0.2,1); z-index:0; clip-path: polygon(0 0, 100% 0, calc(100% - 15px) 100%, 0 100%);"></div>
+          <button id="btn-mode-map" class="mode-btn active" onclick="switchMainMode('live_map')" style="clip-path: polygon(0 0, 100% 0, calc(100% - 15px) 100%, 0 100%); padding-right: 25px; margin:0; z-index:1; background:transparent;">
+            <span style="transition: transform 0.1s; display:inline-block;">MAPA INTERACTIVO</span>
+          </button>
+          <button id="btn-mode-schematics" class="mode-btn" onclick="switchMainMode('schematics')" style="clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%); padding-left: 25px; padding-right: 25px; margin-left: -15px; z-index:1; background:transparent;">
+            <span style="transition: transform 0.1s; display:inline-block;">GRÁFICAS</span>
+          </button>
+          <button id="btn-mode-mall" class="mode-btn" onclick="switchMainMode('mall_summary')" style="clip-path: polygon(15px 0, 100% 0, 100% 100%, 0 100%); padding-left: 25px; margin-left: -15px; z-index:1; background:transparent;">
+            <span style="transition: transform 0.1s; display:inline-block;">MALL CENTRAL</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Derecha: Búsqueda Global, KPIs y Controles -->
+      <div class="header-right">
+        <div class="global-search-wrapper">
+          <span class="search-icon-inside"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+          <input type="text" id="global-search-input" class="global-search-input" 
+                 placeholder="Buscar ítem, máquina, zona..." 
+                 oninput="onGlobalSearch(this.value)" />
+        </div>
+
+        <div class="kpi-ticker">
+          <div class="kpi-chip bld" title="Máquinas del jugador construidas">
+            <span></span> <span id="kpi-machines-count">95</span>
+          </div>
+          <div class="kpi-chip power" title="Líneas de alta tensión conectadas">
+            <span></span> <span id="kpi-power-count">348</span>
+          </div>
+          <div class="kpi-chip prod" title="Minas explotadas / Total en el mundo">
+            <span></span> <span id="kpi-miners-count">24/607</span>
+          </div>
+        </div>
+
+        <button class="icon-action-btn" onclick="toggleTheme()" title="Cambiar Tema">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ficsit-orange);"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+        
+      </div>
+    </header>
+
+    <!-- ÁREA PRINCIPAL DE TRABAJO (FULL VIEWPORT) -->
+    <main class="workspace-viewport">
+
+      <!-- ====================================================================
+           VISTA 1: MAPA TÁCTICO & ZONAS SCIM
+           ==================================================================== -->
+      <div id="view-live-map" class="view-container active">
+        <div class="map-view-layout">
+          <div class="map-canvas-wrapper">
+            
+            <!-- Barra de Herramientas Flotante del Mapa -->
+            <div class="floating-map-toolbar">
+              <!-- Selector de Modos: Navegación Libre vs Transformar Zonas -->
+              <div class="map-tool-mode-pills" title="Modo de Interacción">
+                <button id="tool-pan-mode" class="tool-mode-btn active" onclick="window.tacticalMap.setInteractionMode('pan')" title="Navegación Libre">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0v4"/><path d="M14 10V5a2 2 0 0 0-4 0v5"/><path d="M10 10.5V4a2 2 0 0 0-4 0v9.5"/><path d="M8 14H5.5a2.5 2.5 0 0 0-2.5 2.5v3.6C3 21.7 4.3 23 6 23h9.6c1.7 0 3.3-1 4-2.5l2.2-5A3 3 0 0 0 19 11h-1"/></svg>
+                </button>
+                <button id="tool-transform-zone-mode" class="tool-mode-btn" onclick="window.tacticalMap.setInteractionMode('transform_zone')" title="Editar Zonas">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 12h16"/><path d="M12 4v16"/></svg>
+                </button>
+              </div>
+
+              <button id="btn-toggle-draw-zone" class="map-hud-btn action-orange" onclick="toggleDrawZoneMode()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                CREAR ZONA
+              </button>
+              
+              <div id="zone-edit-tools" style="display:none; flex-direction:column; gap:4px;">
+                <button id="btn-save-zone-edits" class="map-hud-btn action-orange" onclick="window.tacticalMap && window.tacticalMap.commitZoneChanges()" disabled style="opacity:0.5;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                  GUARDAR
+                </button>
+                <div style="display:flex; gap:4px;">
+                  <button id="btn-undo-zone" class="map-hud-btn" onclick="window.tacticalMap && window.tacticalMap.undo()" disabled style="flex:1; justify-content:center; padding:0; height:32px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg>
+                  </button>
+                  <button id="btn-redo-zone" class="map-hud-btn" onclick="window.tacticalMap && window.tacticalMap.redo()" disabled style="flex:1; justify-content:center; padding:0; height:32px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 14 20 9 15 4"></polyline><path d="M4 20v-7a4 4 0 0 1 4-4h12"></path></svg>
+                  </button>
+                </div>
+              </div>
+              <button id="btn-save-zone-edits" class="map-hud-btn action-orange" onclick="window.tacticalMap && window.tacticalMap.commitZoneChanges()" disabled style="opacity:0.5;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                GUARDAR
+              </button>
+            </div>
+
+            <!-- Chips Flotantes de Zonas Rápidas (Inferior Izquierda) -->
+            <div id="quick-zones-bar" class="quick-zones-bar"></div>
+
+            <!-- Tarjeta Flotante de Inspección de Nodo/Recurso -->
+            <div id="scim-node-inspector" class="scim-node-inspector"></div>
+
+            <!-- Canvas de Renderizado Táctico -->
+            <canvas id="tactical-map-canvas"></canvas>
+
+            <div class="map-bottom-hint">
+              <span> Rueda: Zoom centrado &bull; Arrastra: Panorámica &bull; Clic: Inspeccionar</span>
+            </div>
+          </div>
+
+          <!-- Drawer Lateral Flotante Colapsable (FICSIT Inspector) -->
+          <aside id="map-drawer" class="map-drawer">
+            <button id="drawer-toggle-btn" class="drawer-toggle-handle" onclick="toggleMapDrawer()" title="Colapsar / Expandir Panel"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left:-2px;"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+
+            <div class="map-drawer-header">
+              <div class="drawer-tabs-nav">
+                <button class="drawer-tab-btn active" id="btn_scim_tab_res" onclick="switchScimSidebarTab('resources')">
+                  RECURSOS
+                </button>
+                <button class="drawer-tab-btn" id="btn_scim_tab_zones" onclick="switchScimSidebarTab('zones')">
+                  ZONAS
+                </button>
+                <button class="drawer-tab-btn" id="btn_scim_tab_layers" onclick="switchScimSidebarTab('layers')">
+                  CAPAS
+                </button>
+                
+              </div>
+            </div>
+
+            <!-- Panel 1: Recursos y Minas -->
+            <div id="scim_tab_pane_resources" class="drawer-content-pane active">
+              
+    
+                <div class="scim-status-group">
+                  <button class="scim-status-toggle-btn active" data-status="all" onclick="window.tacticalMap.setStatusFilter('all')">
+                    Todos
+                  </button>
+                  <button class="scim-status-toggle-btn" data-status="available" onclick="window.tacticalMap.setStatusFilter('available')">
+                     Libres
+                  </button>
+                  <button class="scim-status-toggle-btn" data-status="exploited" onclick="window.tacticalMap.setStatusFilter('exploited')">
+                     Obtenidos
+                  </button>
+                </div>
+                <div class="scim-purity-group">
+                  <label class="scim-purity-label" style="border-color: #22C55E; color: #22C55E; border-radius: 0;">
+                    <input type="checkbox" checked onchange="window.tacticalMap.setPurityFilter('PURE', this.checked)" />
+                    PURO
+                  </label>
+                  <label class="scim-purity-label" style="border-color: #FA9549; color: #FA9549; border-radius: 0;">
+                    <input type="checkbox" checked onchange="window.tacticalMap.setPurityFilter('NORMAL', this.checked)" />
+                    NORMAL
+                  </label>
+                  <label class="scim-purity-label" style="border-color: #EF4444; color: #EF4444; border-radius: 0;">
+                    <input type="checkbox" checked onchange="window.tacticalMap.setPurityFilter('IMPURE', this.checked)" />
+                    IMPURO
+                  </label>
+                </div>
+
+
+    <div class="rail-section-title" style="margin-top:10px; margin-bottom: 6px;">COLECCIONABLES</div>
+  
+
+              <div class="collectibles-sub-tabs">
+                <button class="collectibles-sub-tab active" data-tab="power_slugs" onclick="switchCollectibleSubTab('power_slugs')">Babosas</button>
+                <button class="collectibles-sub-tab" data-tab="artifacts" onclick="switchCollectibleSubTab('artifacts')">Artefactos</button>
+                <button class="collectibles-sub-tab" data-tab="collectibles_items" onclick="switchCollectibleSubTab('collectibles_items')">Coleccionables</button>
+              </div>
+              <div id="collectibles-list-container" class="collectibles-list-container"></div>
+<script>setTimeout(()=> { if(window.switchCollectibleSubTab) window.switchCollectibleSubTab("power_slugs"); }, 1000);</script>
+              <div style="height: 15px;"></div>
+              
+
+              <div class="scim-quick-actions">
+                <button class="scim-quick-btn" onclick="window.tacticalMap.setAllResources(true)"> Todos</button>
+                <button class="scim-quick-btn" onclick="window.tacticalMap.setAllResources(false)"> Ninguno</button>
+              </div>
+
+              <input type="text" placeholder=" Filtrar recurso por nombre..." class="global-search-input" 
+                     style="width: 100%;"
+                     oninput="if(window.tacticalMap) { window.tacticalMap.filters.searchQuery = this.value; window.tacticalMap.render(); }" />
+
+              <div id="scim-resource-list" class="scim-resource-list"></div>
+            
+
+              
+            
+</div>
+
+            <!-- Panel 2: Zonas Delimitadas -->
+            <div id="scim_tab_pane_zones" class="drawer-content-pane">
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-weight: 800; font-size: 12px; color: var(--text-main);">FÁBRICAS DELIMITADAS</span>
+                <button class="map-hud-btn action-orange" style="padding: 4px 8px; font-size: 11px;" onclick="toggleDrawZoneMode()">
+                   Crear
+                </button>
+              </div>
+              <p style="font-size: 11px; color: var(--text-muted); margin: 0; line-height: 1.4;">
+                Dibuja un recuadro en el mapa para calcular el balance de máquinas y producción de esa sección.
+              </p>
+              <div id="zones-list-container" class="zones-list-container"></div>
+            </div>
+
+            <!-- Panel 3: Capas Visuales -->
+            <div id="scim_tab_pane_layers" class="drawer-content-pane">
+              
+
+              <span style="font-weight: 800; font-size: 11px; color: var(--text-muted); text-transform: uppercase;">FONDO DEL MAPA</span>
+              <div class="map-bg-pills" style="margin-top: 8px; margin-bottom: 16px; position: static; flex-direction: row; width: 100%;">
+                <button class="bg-pill-btn active" id="btn-bg-realistic" onclick="window.tacticalMap.setMapBackground('realistic')" style="flex: 1;">SATÉLITE</button>
+                <button class="bg-pill-btn" id="btn-bg-topo" onclick="window.tacticalMap.setMapBackground('topo')" style="flex: 1;">TOPO</button>
+                <button class="bg-pill-btn" id="btn-bg-blueprint" onclick="window.tacticalMap.setMapBackground('blueprint')" style="flex: 1;">BLUEPRINT</button>
+              </div>
+
+              <span style="font-weight: 800; font-size: 11px; color: var(--text-muted); text-transform: uppercase;">ENTIDADES VISIBLES</span>
+              <div style="margin-top: 8px;">
+              <label class="layer-toggle-row">
+                <input type="checkbox" checked onchange="window.tacticalMap.setLayerVisible('terrain', this.checked)" />
+                <span>Mostrar Fondo</span>
+              </label>
+              <label class="layer-toggle-row">
+                <input type="checkbox" checked onchange="window.tacticalMap.setLayerVisible('belts', this.checked)" />
+                <span>Cintas Transportadoras</span>
+              </label>
+              <label class="layer-toggle-row">
+                <input type="checkbox" checked onchange="window.tacticalMap.setLayerVisible('pipes', this.checked)" />
+                <span>Tuberías</span>
+              </label>
+              <label class="layer-toggle-row">
+                <input type="checkbox" checked onchange="window.tacticalMap.setLayerVisible('power', this.checked)" />
+                <span>Red Eléctrica</span>
+              </label>
+              <label class="layer-toggle-row">
+                <input type="checkbox" checked onchange="window.tacticalMap.setLayerVisible('machines', this.checked)" />
+                <span>Máquinas y Fábricas</span>
+              </label>
+              </div>
+            </div>
+
+            <!-- Panel 4: Coleccionables del Mapa -->
+            </aside>
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           VISTA 2: ESQUEMÁS DE PRODUCCIÓN INTERACTIVOS
+           ==================================================================== -->
+      <div id="view-schematics" class="view-container">
+        <div class="schematics-layout">
+          
+          <!-- Rail Lateral de Ramas Industriales -->
+          <aside class="schematics-rail">
+            <div class="rail-section-title">RAMÁS INDUSTRIALES</div>
+            <div id="branch-nav-container" style="display: flex; flex-direction: column; gap: 6px;"></div>
+
+            <div style="margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border-glass);">
+              <label class="layer-toggle-row" style="font-size: 11px;">
+                <input type="checkbox" id="filter-active-only" onchange="toggleActiveOnlyFilter(this.checked)" />
+                <span> Solo activos en tu partida</span>
+              </label>
+            </div>
+          </aside>
+
+          <!-- Espacio de Proceso y Gráficas SVG Interactivas -->
+          <div class="schematics-workspace">
+            <div class="schematics-header-bar">
+              <div class="schematics-title-group">
+                <span id="current-branch-icon" style="font-size: 22px;"></span>
+                <div>
+                  <h2 id="current-branch-title" class="schematics-title">Hierro y Derivados</h2>
+                  <span id="current-branch-subtitle" style="font-size: 12px; color: var(--text-muted);">
+                    Diseño SVG interactivo: [Entrada Insumos]  [Fábrica]  [Almacén Local]  [Salida Mall Central]
+                  </span>
+                </div>
+              </div>
+
+              <!-- Controles de Pan y Zoom del SVG -->
+              <div class="svg-zoom-controls">
+                <button class="map-hud-btn icon-only" onclick="zoomBlueprintIn()" title="Acercar Zoom">
+                  
+                </button>
+                <span id="svg-blueprint-zoom-val" class="map-zoom-pill">100%</span>
+                <button class="map-hud-btn icon-only" onclick="zoomBlueprintOut()" title="Alejar Zoom">
+                  
+                </button>
+                <button class="map-hud-btn" onclick="resetBlueprintZoom()" title="Centrar y reajustar plano al 100%">
+                  <span>⟲</span> Centrar
+                </button>
+              </div>
+            </div>
+
+            <!-- Contenedor Maestro de Plano SVG Interactivo (Pan & Zoom) -->
+            <div id="svg-blueprint-viewport" class="svg-blueprint-viewport">
+              <svg id="blueprint-canvas-svg" class="blueprint-canvas-svg">
+                <defs>
+                  <pattern id="blueprint-grid-pat" width="30" height="30" patternUnits="userSpaceOnUse">
+                    <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(56, 189, 248, 0.08)" stroke-width="1"/>
+                  </pattern>
+                  <marker id="bp-arrow-blue" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 9 5 L 0 9 z" fill="#0284c7" />
+                  </marker>
+                  <marker id="bp-arrow-amber" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 9 5 L 0 9 z" fill="#f59e0b" />
+                  </marker>
+                  <marker id="bp-arrow-red" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 9 5 L 0 9 z" fill="#ef4444" />
+                  </marker>
+                  <marker id="bp-arrow-green" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 9 5 L 0 9 z" fill="#10b981" />
+                  </marker>
+                </defs>
+
+                <!-- Fondo cuadriculado interactivo -->
+                <rect width="100%" height="100%" fill="url(#blueprint-grid-pat)" />
+
+                <!-- Capa transformable sujeta a Pan & Zoom -->
+                <g id="blueprint-pan-zoom-stage"></g>
+              </svg>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           VISTA 3: MALL CENTRAL (48 ÍTEMS)
+           ==================================================================== -->
+      <div id="view-mall" class="view-container">
+        <div class="mall-view-layout">
+          
+          <div class="mall-hero-card">
+            <div>
+              <h2 style="font-size: 18px; font-weight: 900; color: var(--text-main); margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px;">
+                <span></span> MALL CENTRAL: MATRIZ DE LOS 48 ÍTEMS ESENCIALES
+              </h2>
+              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">
+                Centro logístico de recogida para el pionero. Toca cualquier ítem para ver su receta y balance de producción en tiempo real.
+              </p>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="padding: 5px 10px; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; border-radius: 6px; font-size: 11px; font-weight: 900; color: #fca5a5;">
+                 SOLO ENTRADA (NO SALE A FÁBRICAS)
+              </span>
+            </div>
+          </div>
+
+          <!-- Cuadrícula Dinámica del Mall -->
+          <div id="mall-grid" class="mall-grid-matrix"></div>
+
+          <!-- Banner Awesome Sink -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 10px; font-size: 12px; color: #fef3c7;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 24px;"></span>
+              <div>
+                <strong style="color: #fde68a; font-size: 13px;">AWESOME SINK CONECTADO AL DESBORDAMIENTO:</strong>
+                <p style="color: #fef3c7; margin: 2px 0 0 0; font-size: 11.5px;">
+                  Si cualquiera de los 48 contenedores se llena al 100%, el divisor inteligente desvía el exceso al triturador, generando cupones y evitando atascos en la red de trenes.
+                </p>
+              </div>
+            </div>
+            <span style="padding: 5px 10px; background: #f59e0b; color: #0f172a; font-weight: 900; border-radius: 6px; font-size: 11px; white-space: nowrap;">
+              CERO ATASCOS
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- ====================================================================
+       MODALES FLOTANTES
+       ==================================================================== -->
+
+  <!-- Modal Detallado de Ítem -->
+  <div id="item-modal" class="modal-overlay" onclick="closeModal()">
+    <div class="modal-content ficsit-panel" onclick="event.stopPropagation()">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-glass-bright); padding-bottom: 10px; margin-bottom: 14px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <img id="modal-icon" src="" style="width: 44px; height: 44px; object-fit: contain;" alt="Icon" />
+          <div>
+            <h3 id="modal-title" style="margin: 0; font-size: 16px; font-weight: 900; color: var(--text-main);"></h3>
+            <span id="modal-id" style="font-size: 11px; color: var(--cyber-blue); font-weight: 700; font-family: ui-monospace, monospace;"></span>
+          </div>
+        </div>
+        <button onclick="closeModal()" style="border: none; background: transparent; font-size: 18px; cursor: pointer; color: var(--text-muted);"></button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12px;">
+        <div style="padding: 10px; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border-glass);">
+          <strong style="color: var(--text-muted); display: block; margin-bottom: 4px; text-transform: uppercase; font-size: 10px;"> Insumos que llegan a Estación Entrada:</strong>
+          <span id="modal-input" style="color: var(--cyber-blue); font-weight: 800; font-size: 13px;"></span>
+        </div>
+
+        <div style="padding: 10px; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border-glass);">
+          <strong style="color: var(--text-muted); display: block; margin-bottom: 4px; text-transform: uppercase; font-size: 10px;"> Máquina e Instalación:</strong>
+          <span id="modal-type" style="color: var(--text-main); font-weight: 700;"></span>
+        </div>
+
+        <div style="padding: 10px; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border-glass);">
+          <strong style="color: var(--text-muted); display: block; margin-bottom: 4px; text-transform: uppercase; font-size: 10px;"> Logística de Salida:</strong>
+          <span style="color: #f87171; font-weight: 700;">Estación Salida  Vía FICSIT  Mall Central</span>
+        </div>
+
+        <div id="modal-live-metrics" style="display: none; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border: 1px solid var(--neon-green);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong style="color: var(--neon-green); font-size: 12px; display: flex; align-items: center; gap: 4px;">
+              <span></span> PRODUCCIÓN REAL EN PARTIDA:
+            </strong>
+            <span id="modal-live-rate" style="font-size: 14px; font-weight: 900; color: #34d399;"></span>
+          </div>
+          <div id="modal-live-zones" style="font-size: 11px; color: var(--text-main); line-height: 1.5;"></div>
+          <button id="modal-btn-view-map" onclick="viewItemOnMap()" class="map-hud-btn primary" style="margin-top: 8px; width: 100%; justify-content: center;">
+             Ver Fábrica en el Mapa Táctico
+          </button>
+        </div>
+      </div>
+
+      <button onclick="closeModal()" class="map-hud-btn" style="width: 100%; margin-top: 14px; justify-content: center; background: rgba(255,255,255,0.08);">
+        Cerrar
+      </button>
+    </div>
+  </div>
+
+  <!-- Máquinas -->
+  <div id="scim-machine-modal" class="modal-overlay" onclick="closeMachineModal()">
+    <div class="scim-machine-dialog" onclick="event.stopPropagation()">
+      <div class="scim-m-header">
+        <div class="scim-m-title">
+          <span id="scim-m-name" class="scim-m-name">Fundición</span>
+          <span id="scim-m-recipe" class="scim-m-recipe">(Lingote de Hierro)</span>
+        </div>
+        <button class="scim-m-close" onclick="closeMachineModal()"></button>
+      </div>
+
+      <div id="scim-m-body-wrapper" class="scim-m-body-wrapper">
+        <div class="scim-m-columns">
+          <!-- ENTRADA -->
+          <div class="scim-m-col">
+            <div id="scim-m-inputs" class="scim-m-slot-list"></div>
+            <div class="scim-m-col-label">ENTRADA (INSUMÁS)</div>
+          </div>
+
+          <!-- ESTADO CENTRAL / VISTA 3D -->
+          <div class="scim-m-col scim-m-center">
+            <div class="scim-m-preview-box">
+              <img id="scim-m-center-icon" src="icons/Iron_Ingot.png" alt="" />
+            </div>
+            <div id="scim-m-status-pill" class="scim-m-status-pill idle">
+              <span id="scim-m-status-text">En Espera - 0%</span>
+            </div>
+            <div class="scim-m-stats-row">
+              <span id="scim-m-power"> 4 MW</span>
+              <span id="scim-m-time"> 2s</span>
+            </div>
+          </div>
+
+          <!-- SALIDA -->
+          <div class="scim-m-col">
+            <div id="scim-m-outputs" class="scim-m-slot-list"></div>
+            <div class="scim-m-col-label">SALIDA (PRODUCTOS)</div>
+          </div>
+        </div>
+
+        <!-- VELOCIDAD DE RELOJ Y ESTADO -->
+        <div class="scim-m-bottom-bar">
+          <div class="scim-m-clock-box">
+            <div class="scim-m-clock-hdr">
+              <span>Velocidad de Reloj:</span>
+              <strong id="scim-m-clock-val" style="color: #ff9900;">100 %</strong>
+            </div>
+            <div class="scim-m-clock-track">
+              <div id="scim-m-clock-bar" class="scim-m-clock-fill" style="width: 100%;"></div>
+            </div>
+            <div class="scim-m-shards-row">
+              <div class="scim-m-shard-slot"><img src="icons/Power_Shard.png" onerror="this.style.display='none'" /></div>
+              <div class="scim-m-shard-slot"></div>
+              <div class="scim-m-shard-slot"></div>
+            </div>
+          </div>
+
+          <div class="scim-m-standby-box">
+            <div class="scim-m-standby-label">ESTADO</div>
+            <div id="scim-m-standby-switch" class="scim-m-rocker on">
+              <div class="scim-m-rocker-led"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scim-m-actions">
+        <button id="scim-m-btn-center" class="scim-m-btn primary"> Centrar en Mapa</button>
+        <button id="scim-m-btn-copy" class="scim-m-btn secondary"> Copiar Coords</button>
+        <button id="scim-m-btn-recipe" class="scim-m-btn accent"> Ficha Técnica</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Crear / Editar Zona Delimitada -->
+  <div id="zone-modal" class="modal-overlay" onclick="closeZoneModal()">
+    <div class="modal-content ficsit-panel" onclick="event.stopPropagation()" style="max-width: 440px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-glass-bright); padding-bottom: 10px; margin-bottom: 14px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 20px;"></span>
+          <h3 style="margin: 0; font-size: 15px; font-weight: 900; color: var(--text-main);">DELIMITAR NUEVA ZONA</h3>
+        </div>
+        <button onclick="closeZoneModal()" style="border: none; background: transparent; font-size: 18px; cursor: pointer; color: var(--text-muted);"></button>
+      </div>
+
+      <form id="zone-form" onsubmit="submitZoneForm(event)" style="display: flex; flex-direction: column; gap: 12px; font-size: 12px;">
+        <input type="hidden" id="zone-bounds-minx">
+        <input type="hidden" id="zone-bounds-maxx">
+        <input type="hidden" id="zone-bounds-miny">
+        <input type="hidden" id="zone-bounds-maxy">
+
+        <div>
+          <label style="font-weight: 700; color: var(--text-main); display: block; margin-bottom: 4px;">Nombre de la Fábrica / Sección:</label>
+          <input type="text" id="zone-name-input" required class="global-search-input" style="width: 100%;" placeholder="Ej. Fábrica Central de Hierro">
+        </div>
+
+        <div>
+          <label style="font-weight: 700; color: var(--text-main); display: block; margin-bottom: 4px;">Ítem Fábricado Principal (Opcional):</label>
+          <select id="zone-item-select" class="global-search-input" style="width: 100%; background: var(--bg-card);">
+            <option value="">-- General / Múltiples Ítems --</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="font-weight: 700; color: var(--text-main); display: block; margin-bottom: 4px;">Color Identificativo:</label>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="color" id="zone-color-input" value="#38bdf8" style="width: 40px; height: 32px; border: none; border-radius: 4px; cursor: pointer; background: transparent;">
+            <span style="font-size: 11px; color: var(--text-muted);">Elige el color para el recuadro del mapa</span>
+          </div>
+        </div>
+
+        <div id="zone-machines-preview" style="padding: 10px; background: rgba(56, 189, 248, 0.1); border: 1px solid var(--cyber-blue); border-radius: 8px; font-size: 12px; color: var(--cyber-blue); font-weight: 700;">
+          0 máquinas detectadas dentro de este recuadro.
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 6px;">
+          <button type="submit" class="map-hud-btn action-orange" style="flex: 1; justify-content: center;">
+             Guardar Zona
+          </button>
+          <button type="button" onclick="closeZoneModal()" class="map-hud-btn" style="padding: 8px 16px;">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/items.js"></script>
+  <script src="js/collectibles.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

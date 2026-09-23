@@ -34,7 +34,7 @@ El proyecto se divide en dos partes principales:
    ```
 2. Instala las dependencias necesarias:
    ```bash
-   npm install
+   pnpm install
    ```
 3. Configura las variables de entorno para conectar con tu servidor Filebrowser:
    ```bash
@@ -73,7 +73,7 @@ This project consists of two main parts:
 1. Clone the repository.
 2. Install dependencies:
    ```bash
-   npm install
+   pnpm install
    ```
 3. Set your environment variables for your server's Filebrowser:
    ```bash

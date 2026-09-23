@@ -1,0 +1,38 @@
+[
+  {
+    "id": "zone-hierro-fundicion",
+    "name": "Fábrica Central - Fundiciones",
+    "item": "iron_ingot",
+    "color": "#e06c75",
+    "bounds": {
+      "minX": -50000,
+      "maxX": -40000,
+      "minY": 204000,
+      "maxY": 210000
+    }
+  },
+  {
+    "id": "zone-placas-varillas",
+    "name": "Complejo Placas y Logística",
+    "item": "iron_plate",
+    "color": "#61afef",
+    "bounds": {
+      "minX": -55000,
+      "maxX": -45000,
+      "minY": 201000,
+      "maxY": 206000
+    }
+  },
+  {
+    "id": "zone-avanzada-ensamblaje",
+    "name": "Zona de Ensamblaje Avanzado",
+    "item": "reinforced_iron_plate",
+    "color": "#98c379",
+    "bounds": {
+      "minX": -65000,
+      "maxX": -55000,
+      "minY": 202000,
+      "maxY": 208000
+    }
+  }
+]

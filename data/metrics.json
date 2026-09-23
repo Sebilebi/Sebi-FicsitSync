@@ -1,0 +1,363 @@
+{
+  "last_sync": "2026-09-23T10:01:54.951Z",
+  "session": {
+    "sessionName": "test",
+    "saveVersion": 60,
+    "buildVersion": 502094,
+    "playTimeFormatted": "93h 5m",
+    "playDurationSeconds": 335117,
+    "saveDateTime": "2026-09-23T10:01:54.596Z",
+    "fileSizeBytes": 1395070
+  },
+  "global": {
+    "Iron_Ingot": {
+      "name": "Iron Ingot",
+      "production_nominal": 585,
+      "machines_count": 17,
+      "zones_breakdown": {
+        "Fábrica Central - Fundiciones": 75
+      }
+    },
+    "Iron_Plate": {
+      "name": "Iron Plate",
+      "production_nominal": 87.99999952316284,
+      "machines_count": 4,
+      "zones_breakdown": {
+        "Fábrica Central - Fundiciones": 30,
+        "Complejo Placas y Logística": 30
+      }
+    },
+    "Iron_Rod": {
+      "name": "Iron Rod",
+      "production_nominal": 117.00000017881393,
+      "machines_count": 8,
+      "zones_breakdown": {
+        "Fábrica Central - Fundiciones": 30,
+        "Complejo Placas y Logística": 15
+      }
+    },
+    "Copper_Ingot": {
+      "name": "Copper Ingot",
+      "production_nominal": 315,
+      "machines_count": 11,
+      "zones_breakdown": {}
+    },
+    "Wire": {
+      "name": "Wire",
+      "production_nominal": 180,
+      "machines_count": 6,
+      "zones_breakdown": {}
+    },
+    "Cable": {
+      "name": "Cable",
+      "production_nominal": 60,
+      "machines_count": 2,
+      "zones_breakdown": {}
+    },
+    "Screw": {
+      "name": "Screw",
+      "production_nominal": 280,
+      "machines_count": 7,
+      "zones_breakdown": {
+        "Fábrica Central - Fundiciones": 40,
+        "Complejo Placas y Logística": 40,
+        "Zona de Ensamblaje Avanzado": 80
+      }
+    },
+    "Reinforced_Iron_Plate": {
+      "name": "Reinforced Iron Plate",
+      "production_nominal": 15.50000011920929,
+      "machines_count": 3,
+      "zones_breakdown": {
+        "Complejo Placas y Logística": 5,
+        "Zona de Ensamblaje Avanzado": 7.5
+      }
+    },
+    "Biomass": {
+      "name": "Biomass",
+      "production_nominal": 360,
+      "machines_count": 2,
+      "zones_breakdown": {}
+    },
+    "Solid_Biofuel": {
+      "name": "Solid Biofuel",
+      "production_nominal": 120,
+      "machines_count": 2,
+      "zones_breakdown": {}
+    },
+    "Rotor": {
+      "name": "Rotor",
+      "production_nominal": 4,
+      "machines_count": 1,
+      "zones_breakdown": {}
+    },
+    "Copper_Sheet": {
+      "name": "Copper Sheet",
+      "production_nominal": 32.5,
+      "machines_count": 2,
+      "zones_breakdown": {}
+    },
+    "Concrete": {
+      "name": "Concrete",
+      "production_nominal": 114.00000214576721,
+      "machines_count": 7,
+      "zones_breakdown": {}
+    },
+    "Silica": {
+      "name": "Silica",
+      "production_nominal": 37.5,
+      "machines_count": 1,
+      "zones_breakdown": {
+        "Fábrica Central - Fundiciones": 37.5
+      }
+    },
+    "Quartz_Crystal": {
+      "name": "Quartz Crystal",
+      "production_nominal": 67.5,
+      "machines_count": 3,
+      "zones_breakdown": {
+        "Fábrica Central - Fundiciones": 67.5
+      }
+    },
+    "Caterium_Ingot": {
+      "name": "Caterium Ingot",
+      "production_nominal": 45,
+      "machines_count": 3,
+      "zones_breakdown": {}
+    },
+    "Quickwire": {
+      "name": "Quickwire",
+      "production_nominal": 180,
+      "machines_count": 3,
+      "zones_breakdown": {}
+    },
+    "Steel_Ingot": {
+      "name": "Steel Ingot",
+      "production_nominal": 168.00000607967377,
+      "machines_count": 3,
+      "zones_breakdown": {}
+    },
+    "Steel_Beam": {
+      "name": "Steel Beam",
+      "production_nominal": 42.000000178813934,
+      "machines_count": 3,
+      "zones_breakdown": {}
+    },
+    "Encased_Industrial_Beam": {
+      "name": "Encased Industrial Beam",
+      "production_nominal": 9,
+      "machines_count": 1,
+      "zones_breakdown": {}
+    },
+    "Stator": {
+      "name": "Stator",
+      "production_nominal": 10,
+      "machines_count": 1,
+      "zones_breakdown": {}
+    },
+    "Automated_Wiring": {
+      "name": "Automated Wiring",
+      "production_nominal": 2.5,
+      "machines_count": 1,
+      "zones_breakdown": {}
+    },
+    "Modular_Frame": {
+      "name": "Modular Frame",
+      "production_nominal": 2,
+      "machines_count": 1,
+      "zones_breakdown": {}
+    },
+    "Smart_Plating": {
+      "name": "Smart Plating",
+      "production_nominal": 5,
+      "machines_count": 1,
+      "zones_breakdown": {}
+    },
+    "Motor": {
+      "name": "Motor",
+      "production_nominal": 5,
+      "machines_count": 1,
+      "zones_breakdown": {}
+    },
+    "Plastic": {
+      "name": "Plastic",
+      "production_nominal": 100,
+      "machines_count": 5,
+      "zones_breakdown": {}
+    },
+    "Heavy_Oil_Residue": {
+      "name": "Heavy Oil Residue",
+      "production_nominal": 150,
+      "machines_count": 10,
+      "zones_breakdown": {}
+    },
+    "Rubber": {
+      "name": "Rubber",
+      "production_nominal": 100,
+      "machines_count": 5,
+      "zones_breakdown": {}
+    },
+    "Packaged_Fuel": {
+      "name": "Packaged Fuel",
+      "production_nominal": 120,
+      "machines_count": 3,
+      "zones_breakdown": {}
+    },
+    "Empty_Canister": {
+      "name": "Empty Canister",
+      "production_nominal": 120,
+      "machines_count": 2,
+      "zones_breakdown": {}
+    },
+    "Fuel": {
+      "name": "Fuel",
+      "production_nominal": 100,
+      "machines_count": 3,
+      "zones_breakdown": {}
+    }
+  },
+  "zones": {
+    "zone-hierro-fundicion": {
+      "zoneId": "zone-hierro-fundicion",
+      "zoneName": "Fábrica Central - Fundiciones",
+      "assignedItem": "iron_ingot",
+      "color": "#e06c75",
+      "totalMachines": 10,
+      "totalStorages": 7,
+      "production": {
+        "Iron_Ingot": {
+          "name": "Iron Ingot",
+          "rate": 75,
+          "count": 2
+        },
+        "Iron_Plate": {
+          "name": "Iron Plate",
+          "rate": 30,
+          "count": 1
+        },
+        "Iron_Rod": {
+          "name": "Iron Rod",
+          "rate": 30,
+          "count": 2
+        },
+        "Screw": {
+          "name": "Screw",
+          "rate": 40,
+          "count": 1
+        },
+        "Silica": {
+          "name": "Silica",
+          "rate": 37.5,
+          "count": 1
+        },
+        "Quartz_Crystal": {
+          "name": "Quartz Crystal",
+          "rate": 67.5,
+          "count": 3
+        }
+      },
+      "consumption": {
+        "Iron_Ore": {
+          "name": "Iron Ore",
+          "rate": 75
+        },
+        "Iron_Ingot": {
+          "name": "Iron Ingot",
+          "rate": 75
+        },
+        "Iron_Rod": {
+          "name": "Iron Rod",
+          "rate": 10
+        },
+        "Raw_Quartz": {
+          "name": "Raw Quartz",
+          "rate": 135
+        }
+      }
+    },
+    "zone-placas-varillas": {
+      "zoneId": "zone-placas-varillas",
+      "zoneName": "Complejo Placas y Logística",
+      "assignedItem": "iron_plate",
+      "color": "#61afef",
+      "totalMachines": 4,
+      "totalStorages": 18,
+      "production": {
+        "Iron_Plate": {
+          "name": "Iron Plate",
+          "rate": 30,
+          "count": 1
+        },
+        "Iron_Rod": {
+          "name": "Iron Rod",
+          "rate": 15,
+          "count": 1
+        },
+        "Screw": {
+          "name": "Screw",
+          "rate": 40,
+          "count": 1
+        },
+        "Reinforced_Iron_Plate": {
+          "name": "Reinforced Iron Plate",
+          "rate": 5,
+          "count": 1
+        }
+      },
+      "consumption": {
+        "Iron_Ingot": {
+          "name": "Iron Ingot",
+          "rate": 60
+        },
+        "Iron_Rod": {
+          "name": "Iron Rod",
+          "rate": 10
+        },
+        "Iron_Plate": {
+          "name": "Iron Plate",
+          "rate": 30
+        },
+        "Screw": {
+          "name": "Screw",
+          "rate": 60
+        }
+      }
+    },
+    "zone-avanzada-ensamblaje": {
+      "zoneId": "zone-avanzada-ensamblaje",
+      "zoneName": "Zona de Ensamblaje Avanzado",
+      "assignedItem": "reinforced_iron_plate",
+      "color": "#98c379",
+      "totalMachines": 3,
+      "totalStorages": 4,
+      "production": {
+        "Screw": {
+          "name": "Screw",
+          "rate": 80,
+          "count": 2
+        },
+        "Reinforced_Iron_Plate": {
+          "name": "Reinforced Iron Plate",
+          "rate": 7.5,
+          "count": 1
+        }
+      },
+      "consumption": {
+        "Iron_Rod": {
+          "name": "Iron Rod",
+          "rate": 20
+        },
+        "Iron_Plate": {
+          "name": "Iron Plate",
+          "rate": 45
+        },
+        "Screw": {
+          "name": "Screw",
+          "rate": 90
+        }
+      }
+    }
+  },
+  "active_save_file": "test_autosave_2.sav",
+  "save_modified": "2026-09-23T12:00:07.919727392+02:00"
+}
