@@ -8,6 +8,7 @@ let currentBranchId = 'iron';
 let currentSchematicsViewMode = 'flow'; // 'flow' | 'cards'
 let isSvgViewActive = false;
 let activeOnlyFilter = false;
+let globalModeFilter = false;
 let globalSearchQuery = '';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -400,7 +401,9 @@ function renderSchematics(branchId) {
   if (activeOnlyFilter && window.liveMetrics?.global) {
     items = items.filter(item => {
       const metric = findMetricForItem(window.liveMetrics.global, item.id);
-      return metric && metric.production_nominal > 0;
+      let r = 0;
+      if (metric) r = globalModeFilter ? metric.production_nominal : Object.values(metric.zones_breakdown || {}).reduce((s, v) => s + v, 0);
+      return r > 0;
     });
     if (items.length === 0) items = cat.items;
   }
@@ -445,12 +448,14 @@ function renderSchematics(branchId) {
   function renderRow(item, index, side) {
     const y = startY + index * rowSpacing;
     const metric = findMetricForItem(window.liveMetrics?.global, item.id);
-    const isProducing = metric && metric.production_nominal > 0;
-    const rateText = isProducing ? `+${Math.round(metric.production_nominal * 10) / 10}/m` : '0/m (Buffer)';
+    let itemRate = 0;
+    if (metric) itemRate = globalModeFilter ? metric.production_nominal : Object.values(metric.zones_breakdown || {}).reduce((s, v) => s + v, 0);
+    const isProducing = itemRate > 0;
+    const rateText = isProducing ? `+${Math.round(itemRate * 10) / 10}/m` : '0/m (Buffer)';
     const machineType = getMachineType(item);
     const linkedZone = getLinkedZone(item);
-    const zoneBadgeText = linkedZone ? `🏭 ${linkedZone.name.substring(0, 14)}` : '⚠️ Sin zona';
-    const zoneColor = linkedZone ? '#38bdf8' : '#eab308';
+    const zoneBadgeText = linkedZone ? `🏭 ${linkedZone.name.substring(0, 14)}` : (globalModeFilter && metric && metric.production_nominal > 0 ? '🌍 Global' : '⚠️ Sin zona');
+    const zoneColor = linkedZone ? '#38bdf8' : (globalModeFilter && metric && metric.production_nominal > 0 ? '#10b981' : '#eab308');
     const itemColor = item.color || '#ea580c';
 
     if (side === 'left') {
@@ -635,9 +640,11 @@ function renderSchematics(branchId) {
             const col = idx % 9;
             const row = Math.floor(idx / 9);
             const metric = findMetricForItem(window.liveMetrics?.global, item.id);
-            const isProd = metric && metric.production_nominal > 0;
+            let itemRate = 0;
+            if (metric) itemRate = globalModeFilter ? metric.production_nominal : Object.values(metric.zones_breakdown || {}).reduce((s, v) => s + v, 0);
+            const isProd = itemRate > 0;
             return `
-              <g transform="translate(${col * 33}, ${row * 34})" class="bp-node-clickable" onclick="window.openItemModal('${item.id}')" title="${item.name}: ${isProd ? '+' + Math.round(metric.production_nominal) + '/m' : 'Buffer'}">
+              <g transform="translate(${col * 33}, ${row * 34})" class="bp-node-clickable" onclick="window.openItemModal('${item.id}')" title="${item.name}: ${isProd ? '+' + Math.round(itemRate) + '/m' : 'Buffer'}">
                 <rect x="0" y="0" width="28" height="28" rx="4" fill="#0f172a" stroke="${isProd ? '#10b981' : (item.color || '#38bdf8')}" stroke-width="${isProd ? '2' : '1.5'}" />
                 <image href="icons/${item.id}.png" x="3" y="3" width="22" height="22" preserveAspectRatio="xMidYMid meet" />
               </g>
@@ -725,6 +732,12 @@ function toggleActiveOnlyFilter(checked) {
   renderSchematics(currentBranchId);
 }
 window.toggleActiveOnlyFilter = toggleActiveOnlyFilter;
+
+function toggleGlobalMode(checked) {
+  globalModeFilter = checked;
+  renderSchematics(currentBranchId);
+}
+window.toggleGlobalMode = toggleGlobalMode;
 
 function toggleSvgSchematicView() {
   isSvgViewActive = !isSvgViewActive;
