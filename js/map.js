@@ -310,6 +310,7 @@ class TacticalMap {
     c.addEventListener('mousemove', (e) => this.onMouseMove(e));
     window.addEventListener('mouseup', (e) => this.onMouseUp(e));
     c.addEventListener('wheel', (e) => this.onWheel(e), { passive: false });
+    c.addEventListener('dblclick', (e) => this.onDoubleClick(e));
 
     // Touch support for tablets/mobile
     let touchStartDist = 0;
@@ -467,6 +468,53 @@ class TacticalMap {
     ).catch(() => null);
   }
 
+  onDoubleClick(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const rect = this.canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    // Reset any pending drag or transform action from the initial mousedown
+    this.isDragging = false;
+    this.transformAction = null;
+    this.transformPreZonesSnapshot = null;
+    this.transformZoneStartBounds = null;
+
+    // 1. Check if double-clicked on any zone title pill
+    for (let i = this.zones.length - 1; i >= 0; i--) {
+      const z = this.zones[i];
+      if (z.titlePillRect &&
+          mouseX >= z.titlePillRect.x && mouseX <= z.titlePillRect.x + z.titlePillRect.w &&
+          mouseY >= z.titlePillRect.y && mouseY <= z.titlePillRect.y + z.titlePillRect.h) {
+        this.selectedZone = z;
+        this.render();
+        if (typeof window.editZone === 'function') {
+          window.editZone(z.id);
+        }
+        return;
+      }
+    }
+
+    // 2. Check if double-clicked inside any zone bounds
+    const worldMouse = this.screenToWorld(mouseX, mouseY);
+    for (let i = this.zones.length - 1; i >= 0; i--) {
+      const z = this.zones[i];
+      if (!z.bounds) continue;
+      if (worldMouse.x >= z.bounds.minX && worldMouse.x <= z.bounds.maxX &&
+          worldMouse.y >= z.bounds.minY && worldMouse.y <= z.bounds.maxY) {
+        this.selectedZone = z;
+        this.render();
+        if (typeof window.editZone === 'function') {
+          window.editZone(z.id);
+        }
+        return;
+      }
+    }
+  }
+
   onMouseDown(e) {
     const rect = this.canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
@@ -481,7 +529,17 @@ class TacticalMap {
     }
 
     if (this.interactionMode === 'transform_zone') {
-      // 1. Check if clicking on delete button
+      // 1. Check if clicking on edit button
+      if (this.zoneEditBtnRect && 
+          mouseX >= this.zoneEditBtnRect.x && mouseX <= this.zoneEditBtnRect.x + this.zoneEditBtnRect.w &&
+          mouseY >= this.zoneEditBtnRect.y && mouseY <= this.zoneEditBtnRect.y + this.zoneEditBtnRect.h) {
+        if (this.selectedZone && typeof window.editZone === 'function') {
+          window.editZone(this.selectedZone.id);
+          return;
+        }
+      }
+
+      // 2. Check if clicking on delete button
       if (this.zoneDeleteBtnRect && 
           mouseX >= this.zoneDeleteBtnRect.x && mouseX <= this.zoneDeleteBtnRect.x + this.zoneDeleteBtnRect.w &&
           mouseY >= this.zoneDeleteBtnRect.y && mouseY <= this.zoneDeleteBtnRect.y + this.zoneDeleteBtnRect.h) {
@@ -491,7 +549,22 @@ class TacticalMap {
         }
       }
 
-      // 2. Check if clicking on resize handles of selected zone
+      // 3. Check if clicking on any zone's title pill
+      for (let i = this.zones.length - 1; i >= 0; i--) {
+        const z = this.zones[i];
+        if (z.titlePillRect &&
+            mouseX >= z.titlePillRect.x && mouseX <= z.titlePillRect.x + z.titlePillRect.w &&
+            mouseY >= z.titlePillRect.y && mouseY <= z.titlePillRect.y + z.titlePillRect.h) {
+          this.selectedZone = z;
+          this.render();
+          if (typeof window.editZone === 'function') {
+            window.editZone(z.id);
+          }
+          return;
+        }
+      }
+
+      // 4. Check if clicking on resize handles of selected zone
       if (this.selectedZone) {
         const handle = this.getZoneHandleAtPos(this.selectedZone, mouseX, mouseY);
         if (handle) {
@@ -503,7 +576,7 @@ class TacticalMap {
         }
       }
 
-      // 3. Check if clicking inside any zone
+      // 5. Check if clicking inside any zone
       const worldMouse = this.screenToWorld(mouseX, mouseY);
       let clickedZone = null;
       for (let i = this.zones.length - 1; i >= 0; i--) {
@@ -528,6 +601,21 @@ class TacticalMap {
         this.selectedZone = null;
         this.transformAction = null;
         this.transformPreZonesSnapshot = null;
+      }
+    } else {
+      // In pan mode: check if clicking on any zone's title pill to edit
+      for (let i = this.zones.length - 1; i >= 0; i--) {
+        const z = this.zones[i];
+        if (z.titlePillRect &&
+            mouseX >= z.titlePillRect.x && mouseX <= z.titlePillRect.x + z.titlePillRect.w &&
+            mouseY >= z.titlePillRect.y && mouseY <= z.titlePillRect.y + z.titlePillRect.h) {
+          this.selectedZone = z;
+          this.render();
+          if (typeof window.editZone === 'function') {
+            window.editZone(z.id);
+          }
+          return;
+        }
       }
     }
 
@@ -903,12 +991,58 @@ class TacticalMap {
       needsRender = true;
     }
 
-    this.canvas.style.cursor = (closestMiner || closestNode || closestMachine || closestAttachment || closestPole || closestStorage || closestBelt || closestPipe) 
-      ? 'pointer' 
-      : (this.interactionMode === 'transform_zone' ? 'default' : (this.isDrawMode ? 'crosshair' : 'grab'));
+    if (this.interactionMode === 'transform_zone') {
+      let zoneCursor = 'default';
 
+      if (this.zoneEditBtnRect && 
+          mouseX >= this.zoneEditBtnRect.x && mouseX <= this.zoneEditBtnRect.x + this.zoneEditBtnRect.w &&
+          mouseY >= this.zoneEditBtnRect.y && mouseY <= this.zoneEditBtnRect.y + this.zoneEditBtnRect.h) {
+        zoneCursor = 'pointer';
+      } else if (this.zoneDeleteBtnRect && 
+          mouseX >= this.zoneDeleteBtnRect.x && mouseX <= this.zoneDeleteBtnRect.x + this.zoneDeleteBtnRect.w &&
+          mouseY >= this.zoneDeleteBtnRect.y && mouseY <= this.zoneDeleteBtnRect.y + this.zoneDeleteBtnRect.h) {
+        zoneCursor = 'pointer';
+      } else if (this.zones.some(z => z.titlePillRect &&
+          mouseX >= z.titlePillRect.x && mouseX <= z.titlePillRect.x + z.titlePillRect.w &&
+          mouseY >= z.titlePillRect.y && mouseY <= z.titlePillRect.y + z.titlePillRect.h)) {
+        zoneCursor = 'pointer';
+      } else if (this.selectedZone) {
+        const handle = this.getZoneHandleAtPos(this.selectedZone, mouseX, mouseY);
+        if (handle) {
+          if (handle === 'nw' || handle === 'se') zoneCursor = 'nwse-resize';
+          else if (handle === 'ne' || handle === 'sw') zoneCursor = 'nesw-resize';
+          else if (handle === 'n' || handle === 's') zoneCursor = 'ns-resize';
+          else if (handle === 'e' || handle === 'w') zoneCursor = 'ew-resize';
+        } else {
+          const r = this.getZoneScreenRect(this.selectedZone);
+          if (r && mouseX >= r.x && mouseX <= r.x + r.w && mouseY >= r.y && mouseY <= r.y + r.h) {
+            zoneCursor = 'move';
+          }
+        }
+      }
+
+      if (zoneCursor === 'default') {
+        const worldMouse = this.screenToWorld(mouseX, mouseY);
+        if (this.zones.some(z => z.bounds && 
+            worldMouse.x >= z.bounds.minX && worldMouse.x <= z.bounds.maxX &&
+            worldMouse.y >= z.bounds.minY && worldMouse.y <= z.bounds.maxY)) {
+          zoneCursor = 'pointer';
+        }
+      }
+
+      this.canvas.style.cursor = zoneCursor;
+    } else {
+      const isOverZonePill = this.zones.some(z => z.titlePillRect &&
+          mouseX >= z.titlePillRect.x && mouseX <= z.titlePillRect.x + z.titlePillRect.w &&
+          mouseY >= z.titlePillRect.y && mouseY <= z.titlePillRect.y + z.titlePillRect.h);
+
+      this.canvas.style.cursor = (closestMiner || closestNode || closestMachine || closestAttachment || closestPole || closestStorage || closestBelt || closestPipe || isOverZonePill) 
+        ? 'pointer' 
+        : (this.isDrawMode ? 'crosshair' : 'grab');
+    }
+
+    this.hoverPos = { x: mouseX, y: mouseY };
     if (needsRender) {
-      this.hoverPos = { x: mouseX, y: mouseY };
       this.render();
     }
   }
@@ -922,6 +1056,21 @@ class TacticalMap {
   }
 
   handleClick(mouseX, mouseY) {
+    // 1. Check if clicking on any zone's title pill
+    for (let i = this.zones.length - 1; i >= 0; i--) {
+      const z = this.zones[i];
+      if (z.titlePillRect &&
+          mouseX >= z.titlePillRect.x && mouseX <= z.titlePillRect.x + z.titlePillRect.w &&
+          mouseY >= z.titlePillRect.y && mouseY <= z.titlePillRect.y + z.titlePillRect.h) {
+        this.selectedZone = z;
+        this.render();
+        if (typeof window.editZone === 'function') {
+          window.editZone(z.id);
+        }
+        return;
+      }
+    }
+
     if (this.hoveredMiner) {
       if (typeof window.openMachineInGameModal === 'function') {
         window.openMachineInGameModal(this.hoveredMiner);
@@ -1604,9 +1753,22 @@ class TacticalMap {
   renderZones(ctx) {
     ctx.save();
     this.zoneDeleteBtnRect = null;
+    this.zoneEditBtnRect = null;
 
-    for (const zone of this.zones) {
-      if (!zone.bounds) continue;
+    // Draw unselected zones first, selected zone last so its handles/buttons are always on top
+    const unselected = [];
+    let selected = null;
+    for (const z of this.zones) {
+      if (!z.bounds) continue;
+      if (z === this.selectedZone) {
+        selected = z;
+      } else {
+        unselected.push(z);
+      }
+    }
+    const zonesToDraw = selected ? [...unselected, selected] : unselected;
+
+    for (const zone of zonesToDraw) {
       const p1 = this.worldToScreen(zone.bounds.minX, zone.bounds.minY);
       const p2 = this.worldToScreen(zone.bounds.maxX, zone.bounds.maxY);
 
@@ -1620,7 +1782,7 @@ class TacticalMap {
 
       // 1. Subtle translucent tint fill
       ctx.beginPath();
-      ctx.fillStyle = isSelected ? color + '22' : color + '0d';
+      ctx.fillStyle = isSelected ? color + '25' : color + '0e';
       ctx.fillRect(x, y, width, height);
 
       // 2. Dashed boundary
@@ -1637,30 +1799,35 @@ class TacticalMap {
       ctx.setLineDash([]);
 
       // 3. Clean HUD title pill (inside or on top of zone)
-      const labelText = ` ${zone.name}`;
+      const labelText = `🏷️ ${zone.name}`;
       ctx.font = 'bold 11px Inter, system-ui, sans-serif';
       const tw = ctx.measureText(labelText).width;
-      const pillW = tw + 20;
+      const pillW = tw + 18;
       const pillH = 22;
 
       const pillX = x + 4;
       const pillY = y > 30 ? y - pillH - 3 : y + 4;
+      zone.titlePillRect = { x: pillX, y: pillY, w: pillW, h: pillH };
+
+      const isPillHovered = this.hoverPos && 
+        this.hoverPos.x >= pillX && this.hoverPos.x <= pillX + pillW &&
+        this.hoverPos.y >= pillY && this.hoverPos.y <= pillY + pillH;
 
       ctx.beginPath();
-      ctx.fillStyle = 'rgba(44, 44, 44, 0.92)';
+      ctx.fillStyle = isPillHovered ? 'rgba(38, 42, 50, 0.98)' : 'rgba(28, 28, 30, 0.92)';
       ctx.rect(pillX, pillY, pillW, pillH);
       ctx.fill();
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = isPillHovered ? '#ffffff' : color;
+      ctx.lineWidth = isPillHovered ? 1.5 : 1.2;
       ctx.stroke();
 
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 11px Inter, system-ui, sans-serif';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText(labelText, pillX + 8, pillY + pillH / 2);
+      ctx.fillText(labelText, pillX + 6, pillY + pillH / 2);
 
-      // If selected in transform mode: draw handles and delete button
+      // If selected in transform mode: draw handles, edit button and delete button
       if (this.interactionMode === 'transform_zone' && isSelected) {
         const handles = [
           { x: x, y: y },
@@ -1683,26 +1850,55 @@ class TacticalMap {
           ctx.stroke();
         }
 
-        // Delete button next to top pill
-        const delX = pillX + pillW + 6;
+        // 1. Edit button next to title pill
+        const editX = pillX + pillW + 6;
+        const editY = pillY;
+        const editW = 62;
+        const editH = pillH;
+        this.zoneEditBtnRect = { x: editX, y: editY, w: editW, h: editH };
+
+        const isEditHovered = this.hoverPos &&
+          this.hoverPos.x >= editX && this.hoverPos.x <= editX + editW &&
+          this.hoverPos.y >= editY && this.hoverPos.y <= editY + editH;
+
+        ctx.beginPath();
+        ctx.fillStyle = isEditHovered ? 'rgba(56, 189, 248, 0.45)' : 'rgba(56, 189, 248, 0.22)';
+        ctx.rect(editX, editY, editW, editH);
+        ctx.fill();
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = isEditHovered ? 1.6 : 1.2;
+        ctx.stroke();
+
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 10.5px Inter, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('✏️ Editar', editX + 6, editY + editH / 2);
+
+        // 2. Delete button next to edit button
+        const delX = editX + editW + 6;
         const delY = pillY;
-        const delW = 56;
+        const delW = 60;
         const delH = pillH;
         this.zoneDeleteBtnRect = { x: delX, y: delY, w: delW, h: delH };
 
+        const isDelHovered = this.hoverPos &&
+          this.hoverPos.x >= delX && this.hoverPos.x <= delX + delW &&
+          this.hoverPos.y >= delY && this.hoverPos.y <= delY + delH;
+
         ctx.beginPath();
-        ctx.fillStyle = 'rgba(239, 68, 68, 0.25)';
+        ctx.fillStyle = isDelHovered ? 'rgba(239, 68, 68, 0.45)' : 'rgba(239, 68, 68, 0.25)';
         ctx.rect(delX, delY, delW, delH);
         ctx.fill();
         ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 1.2;
+        ctx.lineWidth = isDelHovered ? 1.6 : 1.2;
         ctx.stroke();
 
         ctx.fillStyle = '#f87171';
         ctx.font = 'bold 10.5px Inter, sans-serif';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText(' Borrar', delX + 6, delY + pillH / 2);
+        ctx.fillText('🗑️ Borrar', delX + 6, delY + delH / 2);
       }
     }
     ctx.restore();
@@ -2583,6 +2779,9 @@ class TacticalMap {
 
     const modal = document.getElementById('zone-modal');
     if (!modal) return;
+
+    const titleEl = document.getElementById('zone-modal-title');
+    if (titleEl) titleEl.textContent = 'DELIMITAR NUEVA ZONA';
 
     delete modal.dataset.editingZoneId;
     document.getElementById('zone-bounds-minx').value = Math.round(bounds.minX);

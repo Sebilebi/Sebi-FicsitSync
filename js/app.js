@@ -2071,6 +2071,8 @@ function closeZoneModal() {
   if (modal) {
     modal.classList.remove('active');
     delete modal.dataset.editingZoneId;
+    const titleEl = document.getElementById('zone-modal-title');
+    if (titleEl) titleEl.textContent = 'DELIMITAR NUEVA ZONA';
   }
   if (window.tacticalMap) window.tacticalMap.setDrawMode(false);
 }
@@ -2084,14 +2086,21 @@ function editZone(zoneId) {
   const modal = document.getElementById('zone-modal');
   if (!modal) return;
 
+  const titleEl = document.getElementById('zone-modal-title');
+  if (titleEl) titleEl.textContent = 'CONFIGURAR / EDITAR ZONA';
+
   document.getElementById('zone-bounds-minx').value = Math.round(zone.bounds.minX);
   document.getElementById('zone-bounds-maxx').value = Math.round(zone.bounds.maxX);
   document.getElementById('zone-bounds-miny').value = Math.round(zone.bounds.minY);
   document.getElementById('zone-bounds-maxy').value = Math.round(zone.bounds.maxY);
   document.getElementById('zone-name-input').value = zone.name;
 
-  if (document.getElementById('zone-item-select')) {
-    document.getElementById('zone-item-select').value = zone.item || '';
+  const itemSel = document.getElementById('zone-item-select');
+  if (itemSel) {
+    if (itemSel.options.length <= 1 && typeof populateZoneItemSelect === 'function') {
+      populateZoneItemSelect();
+    }
+    itemSel.value = zone.item || '';
   }
   if (document.getElementById('zone-color-input')) {
     document.getElementById('zone-color-input').value = zone.color || '#38bdf8';
@@ -2104,6 +2113,9 @@ function editZone(zoneId) {
   );
   document.getElementById('zone-machines-preview').textContent = 
     `Editando zona con ${inside.length} máquina(s) detectadas.`;
+
+  window.tacticalMap.selectedZone = zone;
+  window.tacticalMap.render();
 
   modal.classList.add('active');
 }
