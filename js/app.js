@@ -592,6 +592,11 @@ function getItemRateInfo(item, zones, isGlobalMode = globalModeFilter) {
       itemRate = 0;
       machinesCount = 0;
     }
+
+    if (metric && metric.production_nominal !== undefined) {
+      itemRate = Math.min(itemRate, metric.production_nominal);
+      machinesCount = Math.min(machinesCount, metric.machines_count);
+    }
   }
 
   const isProducing = itemRate > 0;
@@ -1272,18 +1277,21 @@ function recalculateLiveMetrics() {
     }
   }
 
-  // 3. Process zone-specific metrics
+  // 3. Process zone-specific metrics (deduplicated across overlapping zones)
+  const assignments = (typeof getZoneAssignments === 'function')
+    ? getZoneAssignments(zones, buildings, nodes)
+    : (window.getZoneAssignments ? window.getZoneAssignments(zones, buildings, nodes) : null);
+
   const zoneMetrics = {};
 
   for (const zone of zones) {
     if (!zone || !zone.bounds) continue;
-    const { minX, maxX, minY, maxY } = zone.bounds;
-
-    const machinesInZone = buildings.filter(b => 
-      b.x >= minX && b.x <= maxX && b.y >= minY && b.y <= maxY
+    const assigned = assignments ? assignments[zone.id] : null;
+    const machinesInZone = assigned ? assigned.machines : buildings.filter(b => 
+      b.x >= zone.bounds.minX && b.x <= zone.bounds.maxX && b.y >= zone.bounds.minY && b.y <= zone.bounds.maxY
     );
-    const nodesInZone = nodes.filter(n =>
-      n.isExploited && n.x >= minX && n.x <= maxX && n.y >= minY && n.y <= maxY
+    const nodesInZone = assigned ? assigned.nodes : nodes.filter(n =>
+      n.isExploited && n.x >= zone.bounds.minX && n.x <= zone.bounds.maxX && n.y >= zone.bounds.minY && n.y <= zone.bounds.maxY
     );
 
     const production = {};
@@ -1336,6 +1344,7 @@ function recalculateLiveMetrics() {
       assignedItem: zone.item,
       color: zone.color,
       totalMachines: machinesInZone.length + nodesInZone.length,
+      overlappingCount: assigned ? assigned.overlappingCount : 0,
       production,
       consumption
     };
@@ -2108,11 +2117,16 @@ function editZone(zoneId) {
 
   modal.dataset.editingZoneId = zoneId;
 
-  const inside = window.tacticalMap.buildings.filter(b => 
+  const inside = window.tacticalMap?.buildings ? window.tacticalMap.buildings.filter(b => 
     b.x >= zone.bounds.minX && b.x <= zone.bounds.maxX && b.y >= zone.bounds.minY && b.y <= zone.bounds.maxY
-  );
-  document.getElementById('zone-machines-preview').textContent = 
-    `Editando zona con ${inside.length} máquina(s) detectadas.`;
+  ) : [];
+  const zm = window.tacticalMap ? window.tacticalMap.getZoneMetrics(zone) : null;
+  const count = zm ? zm.machines.length : inside.length;
+  let previewText = `Editando zona con ${count} máquina(s) exclusivas activas.`;
+  if (zm && zm.overlappingCount > 0) {
+    previewText += ` (${zm.overlappingCount} compartida(s) con otra zona prioritaria - sin duplicados).`;
+  }
+  document.getElementById('zone-machines-preview').textContent = previewText;
 
   window.tacticalMap.selectedZone = zone;
   window.tacticalMap.render();

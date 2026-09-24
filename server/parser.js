@@ -460,7 +460,92 @@ function parseSaveFile(saveFilePath) {
 }
 
 /**
- * Cross-references all buildings in the save with the user's defined zones.
+ * Deduplicates machine and storage assignments across overlapping zones.
+ */
+function getZoneAssignments(zones, buildings = [], storages = []) {
+  const validZones = (zones || []).filter(z => z && z.bounds);
+  const zoneMap = {};
+  for (const z of validZones) {
+    zoneMap[z.id] = { machines: [], storages: [], overlappingCount: 0 };
+  }
+  if (validZones.length === 0) return zoneMap;
+
+  const zoneMeta = validZones.map((z, idx) => {
+    const w = Math.max(0, (z.bounds.maxX || 0) - (z.bounds.minX || 0));
+    const h = Math.max(0, (z.bounds.maxY || 0) - (z.bounds.minY || 0));
+    return {
+      zone: z,
+      id: z.id,
+      index: idx,
+      area: w * h,
+      cleanItem: (z.item || '').toLowerCase().replace(/_/g, '')
+    };
+  });
+
+  function findBestZone(x, y, entityOutputs = []) {
+    const candidates = zoneMeta.filter(zm => {
+      const b = zm.zone.bounds;
+      return x >= b.minX && x <= b.maxX && y >= b.minY && y <= b.maxY;
+    });
+
+    if (candidates.length === 0) return null;
+    if (candidates.length === 1) return candidates[0].zone;
+
+    candidates.sort((a, b) => {
+      let aAffinity = 1;
+      let bAffinity = 1;
+
+      if (a.cleanItem) {
+        const matchesA = entityOutputs.some(out => {
+          const cOut = ((out.item || out.name || '') + '').toLowerCase().replace(/_/g, '');
+          return cOut === a.cleanItem || cOut.includes(a.cleanItem) || a.cleanItem.includes(cOut);
+        });
+        aAffinity = matchesA ? 2 : 0;
+      }
+
+      if (b.cleanItem) {
+        const matchesB = entityOutputs.some(out => {
+          const cOut = ((out.item || out.name || '') + '').toLowerCase().replace(/_/g, '');
+          return cOut === b.cleanItem || cOut.includes(b.cleanItem) || b.cleanItem.includes(cOut);
+        });
+        bAffinity = matchesB ? 2 : 0;
+      }
+
+      if (aAffinity !== bAffinity) return bAffinity - aAffinity;
+      if (a.area !== b.area) return a.area - b.area;
+      return a.index - b.index;
+    });
+
+    const chosen = candidates[0].zone;
+    for (let i = 1; i < candidates.length; i++) {
+      if (zoneMap[candidates[i].id]) {
+        zoneMap[candidates[i].id].overlappingCount++;
+      }
+    }
+    return chosen;
+  }
+
+  for (const b of buildings) {
+    if (b.x === undefined || b.y === undefined) continue;
+    const best = findBestZone(b.x, b.y, b.outputs || []);
+    if (best && zoneMap[best.id]) {
+      zoneMap[best.id].machines.push(b);
+    }
+  }
+
+  for (const s of storages) {
+    if (s.x === undefined || s.y === undefined) continue;
+    const best = findBestZone(s.x, s.y, []);
+    if (best && zoneMap[best.id]) {
+      zoneMap[best.id].storages.push(s);
+    }
+  }
+
+  return zoneMap;
+}
+
+/**
+ * Cross-references all buildings in the save with the user's defined zones without duplicate machine counts.
  */
 function calculateMetrics(saveData, zones = []) {
   if (!saveData || !saveData.buildings) return { global: {}, zones: {} };
@@ -481,18 +566,14 @@ function calculateMetrics(saveData, zones = []) {
     }
   }
 
+  const assignments = getZoneAssignments(zones, saveData.buildings || [], saveData.storages || []);
   const zoneMetrics = {};
+
   for (const zone of zones) {
-    const { minX, maxX, minY, maxY } = zone.bounds || {};
-    if (minX === undefined) continue;
-
-    const machinesInZone = saveData.buildings.filter(b => 
-      b.x >= minX && b.x <= maxX && b.y >= minY && b.y <= maxY
-    );
-
-    const storagesInZone = saveData.storages.filter(s =>
-      s.x >= minX && s.x <= maxX && s.y >= minY && s.y <= maxY
-    );
+    if (!zone || !zone.bounds) continue;
+    const assigned = assignments[zone.id] || { machines: [], storages: [], overlappingCount: 0 };
+    const machinesInZone = assigned.machines;
+    const storagesInZone = assigned.storages;
 
     const production = {};
     const consumption = {};
@@ -525,6 +606,7 @@ function calculateMetrics(saveData, zones = []) {
       color: zone.color,
       totalMachines: machinesInZone.length,
       totalStorages: storagesInZone.length,
+      overlappingCount: assigned.overlappingCount,
       production,
       consumption
     };

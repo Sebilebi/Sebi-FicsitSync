@@ -83,6 +83,106 @@ function translateBuildingType(type) {
 }
 if (typeof window !== 'undefined') window.translateBuildingType = translateBuildingType;
 
+function getZoneAssignments(zones, buildings = [], nodes = [], storages = []) {
+  const validZones = (zones || []).filter(z => z && z.bounds);
+  const zoneMap = {};
+  for (const z of validZones) {
+    zoneMap[z.id] = { machines: [], nodes: [], storages: [], overlappingCount: 0 };
+  }
+  if (validZones.length === 0) return zoneMap;
+
+  const zoneMeta = validZones.map((z, idx) => {
+    const w = Math.max(0, (z.bounds.maxX || 0) - (z.bounds.minX || 0));
+    const h = Math.max(0, (z.bounds.maxY || 0) - (z.bounds.minY || 0));
+    return {
+      zone: z,
+      id: z.id,
+      index: idx,
+      area: w * h,
+      cleanItem: (z.item || '').toLowerCase().replace(/_/g, '')
+    };
+  });
+
+  function findBestZone(x, y, entityOutputs = []) {
+    const candidates = zoneMeta.filter(zm => {
+      const b = zm.zone.bounds;
+      return x >= b.minX && x <= b.maxX && y >= b.minY && y <= b.maxY;
+    });
+
+    if (candidates.length === 0) return null;
+    if (candidates.length === 1) return candidates[0].zone;
+
+    // Rank candidates:
+    // 1. Output item affinity (2 if output matches cleanItem, 1 if no specific item assigned, 0 if different item)
+    // 2. Specificity (smaller area wins)
+    // 3. Creation index (earlier first)
+    candidates.sort((a, b) => {
+      let aAffinity = 1;
+      let bAffinity = 1;
+
+      if (a.cleanItem) {
+        const matchesA = entityOutputs.some(out => {
+          const cOut = ((out.item || out.name || '') + '').toLowerCase().replace(/_/g, '');
+          return cOut === a.cleanItem || cOut.includes(a.cleanItem) || a.cleanItem.includes(cOut);
+        });
+        aAffinity = matchesA ? 2 : 0;
+      }
+
+      if (b.cleanItem) {
+        const matchesB = entityOutputs.some(out => {
+          const cOut = ((out.item || out.name || '') + '').toLowerCase().replace(/_/g, '');
+          return cOut === b.cleanItem || cOut.includes(b.cleanItem) || b.cleanItem.includes(cOut);
+        });
+        bAffinity = matchesB ? 2 : 0;
+      }
+
+      if (aAffinity !== bAffinity) return bAffinity - aAffinity;
+      if (a.area !== b.area) return a.area - b.area;
+      return a.index - b.index;
+    });
+
+    const chosen = candidates[0].zone;
+    for (let i = 1; i < candidates.length; i++) {
+      if (zoneMap[candidates[i].id]) {
+        zoneMap[candidates[i].id].overlappingCount++;
+      }
+    }
+    return chosen;
+  }
+
+  // 1. Assign machines (buildings)
+  for (const b of buildings) {
+    if (b.x === undefined || b.y === undefined) continue;
+    const best = findBestZone(b.x, b.y, b.outputs || []);
+    if (best && zoneMap[best.id]) {
+      zoneMap[best.id].machines.push(b);
+    }
+  }
+
+  // 2. Assign exploited resource nodes
+  const resMap = (typeof RESOURCE_CLASS_TO_ITEM !== 'undefined') ? RESOURCE_CLASS_TO_ITEM : {};
+  for (const n of nodes) {
+    if (!n.isExploited || n.x === undefined || n.y === undefined) continue;
+    const itemId = resMap[n.resourceClass] || (n.resourceClass || '').replace('Desc_', '').replace('_C', '') || 'RawResource';
+    const best = findBestZone(n.x, n.y, [{ item: itemId, name: n.resourceName || itemId }]);
+    if (best && zoneMap[best.id]) {
+      zoneMap[best.id].nodes.push(n);
+    }
+  }
+
+  // 3. Assign storages
+  for (const s of storages) {
+    if (s.x === undefined || s.y === undefined) continue;
+    const best = findBestZone(s.x, s.y, []);
+    if (best && zoneMap[best.id]) {
+      zoneMap[best.id].storages.push(s);
+    }
+  }
+
+  return zoneMap;
+}
+if (typeof window !== 'undefined') window.getZoneAssignments = getZoneAssignments;
+
 class TacticalMap {
   constructor(canvasId) {
     this.canvas = document.getElementById(canvasId);
@@ -2789,6 +2889,17 @@ class TacticalMap {
     document.getElementById('zone-bounds-miny').value = Math.round(bounds.minY);
     document.getElementById('zone-bounds-maxy').value = Math.round(bounds.maxY);
 
+    // Check how many machines in this area are already in existing zones
+    const alreadyInZones = [];
+    for (const b of inside) {
+      for (const z of this.zones) {
+        if (z.bounds && b.x >= z.bounds.minX && b.x <= z.bounds.maxX && b.y >= z.bounds.minY && b.y <= z.bounds.maxY) {
+          alreadyInZones.push(z.name || 'Zona');
+          break;
+        }
+      }
+    }
+
     // Auto-detect principal produced item from enclosed machines
     const itemCounts = {};
     for (const b of inside) {
@@ -2829,6 +2940,10 @@ class TacticalMap {
     const previewEl = document.getElementById('zone-machines-preview');
     if (previewEl) {
       let previewMsg = `${inside.length} máquina(s) detectada(s) dentro de este recuadro.`;
+      if (alreadyInZones.length > 0) {
+        const uniqueNames = [...new Set(alreadyInZones)].join(', ');
+        previewMsg += ` (${alreadyInZones.length} compartida(s) con ${uniqueNames} - sin duplicar producción).`;
+      }
       if (sortedDetected.length > 0) {
         const prodSummary = sortedDetected.slice(0, 3).map(([it, count]) => `${count} máq. de ${it}`).join(', ');
         previewMsg += ` Producción: ${prodSummary}`;
@@ -2840,13 +2955,26 @@ class TacticalMap {
   }
 
   getZoneMetrics(zone) {
-    if (!zone || !zone.bounds) return { machines: [], storages: [], miners: [], production: {}, consumption: {} };
-    const { minX, maxX, minY, maxY } = zone.bounds;
-    const machines = this.buildings.filter(b => b.x >= minX && b.x <= maxX && b.y >= minY && b.y <= maxY);
-    const storages = this.storages.filter(s => s.x >= minX && s.x <= maxX && s.y >= minY && s.y <= maxY);
-    const exploitedNodes = (this.nodes || []).filter(n => 
-      n.isExploited && n.x >= minX && n.x <= maxX && n.y >= minY && n.y <= maxY
-    );
+    if (!zone || !zone.bounds) return { machines: [], storages: [], miners: [], production: {}, consumption: {}, overlappingCount: 0 };
+
+    const assignments = (typeof getZoneAssignments === 'function')
+      ? getZoneAssignments(this.zones, this.buildings, this.nodes, this.storages)
+      : (window.getZoneAssignments ? window.getZoneAssignments(this.zones, this.buildings, this.nodes, this.storages) : null);
+
+    let machines, storages, exploitedNodes, overlappingCount = 0;
+    if (assignments && assignments[zone.id]) {
+      machines = assignments[zone.id].machines;
+      storages = assignments[zone.id].storages;
+      exploitedNodes = assignments[zone.id].nodes;
+      overlappingCount = assignments[zone.id].overlappingCount;
+    } else {
+      const { minX, maxX, minY, maxY } = zone.bounds;
+      machines = this.buildings.filter(b => b.x >= minX && b.x <= maxX && b.y >= minY && b.y <= maxY);
+      storages = this.storages.filter(s => s.x >= minX && s.x <= maxX && s.y >= minY && s.y <= maxY);
+      exploitedNodes = (this.nodes || []).filter(n => 
+        n.isExploited && n.x >= minX && n.x <= maxX && n.y >= minY && n.y <= maxY
+      );
+    }
 
     const production = {};
     const consumption = {};
@@ -2886,7 +3014,7 @@ class TacticalMap {
       production[itemId].count += 1;
     }
 
-    return { machines, storages, miners: exploitedNodes, production, consumption };
+    return { machines, storages, miners: exploitedNodes, production, consumption, overlappingCount };
   }
 
   updateZoneListUI() {
@@ -2902,6 +3030,7 @@ class TacticalMap {
       const metrics = this.getZoneMetrics(z);
       const machineCount = metrics.machines.length;
       const storageCount = metrics.storages.length;
+      const overlappingCount = metrics.overlappingCount || 0;
 
       const prodItems = Object.values(metrics.production);
       const consItems = Object.values(metrics.consumption);
@@ -2917,7 +3046,9 @@ class TacticalMap {
               `).join('')}
             </div>
            </div>`
-        : `<div style="font-size: 10px; color: var(--text-muted);">Sin máquinas de producción activas</div>`;
+        : (overlappingCount > 0
+            ? `<div style="font-size: 10px; color: var(--text-muted);">Sin máquinas exclusivas (${overlappingCount} ya asignadas a otra zona prioritaria)</div>`
+            : `<div style="font-size: 10px; color: var(--text-muted);">Sin máquinas de producción activas</div>`);
 
       const consHtml = consItems.length > 0
         ? `<div class="zone-rate-group">
@@ -2932,13 +3063,17 @@ class TacticalMap {
            </div>`
         : '';
 
+      const machineSub = (machineCount === 0 && overlappingCount > 0)
+        ? `0 máq. exclusivas (${overlappingCount} compartidas) &bull; ${storageCount} almacén(es)`
+        : `${machineCount} máquina(s) &bull; ${storageCount} almacén(es)`;
+
       return `
         <div class="zone-card" style="border-left: 4px solid ${z.color || '#61afef'};">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
             <div>
               <div style="font-weight: 800; font-size: 13px; color: var(--text-main);">${z.name}</div>
               <div style="font-size: 11px; color: var(--text-muted); margin-top: 1px;">
-                 ${machineCount} máquina(s) &bull;  ${storageCount} almacén(es)
+                 ${machineSub}
               </div>
             </div>
             <div style="display: flex; gap: 3px;">
