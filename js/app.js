@@ -2730,15 +2730,14 @@ function renderCollectiblesList(subTab) {
     const collected = group.markers.filter(m => collectedSet.has(m.pathName)).length;
     const total = group.count;
     const isActive = window.tacticalMap && window.tacticalMap.collectibleVisibility.has(group.name);
+    const isChecked = Boolean(isActive);
 
     html += `
-      <label class="collectible-item-row ${isActive ? 'active' : ''}">
-        <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleCollectibleGroup('${group.name.replace(/'/g, "\\'")}')" style="margin: 0; cursor: pointer;" />
-        <div class="collectible-item-icon">
-          ${group.icon ? `<img src="icons/${group.icon}" alt="${group.nameEs}" onerror="this.style.display='none'" style="max-width: 100%; max-height: 100%;" />` : '<span>?</span>'}
-        </div>
-        <span class="collectible-item-name" style="flex: 1;">${group.nameEs || group.name}</span>
-        <span class="collectible-badge" title="${collected} obtenidos de ${total} totales">
+      <label class="scim-resource-item ${isChecked ? 'active' : ''}">
+        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCollectibleGroup('${group.name.replace(/'/g, "\\'")}', this.checked)" />
+        <img src="icons/${group.icon}" class="scim-res-icon" alt="${group.nameEs || group.name}" onerror="this.style.display='none'" />
+        <span class="scim-res-name">${group.nameEs || group.name}</span>
+        <span class="scim-res-counter" title="${collected} obtenidos de ${total} totales">
           <span style="color: #F5C04B;">${collected}</span> / <span style="color: #22C55E;">${total - collected}</span>
         </span>
       </label>
@@ -2749,10 +2748,10 @@ function renderCollectiblesList(subTab) {
 }
 window.renderCollectiblesList = renderCollectiblesList;
 
-function toggleCollectibleGroup(groupName) {
+function toggleCollectibleGroup(groupName, isChecked) {
   if (!window.tacticalMap) return;
-  const isActive = window.tacticalMap.collectibleVisibility.has(groupName);
-  window.tacticalMap.setCollectibleGroupVisible(groupName, !isActive);
+  const shouldBeActive = isChecked !== undefined ? isChecked : !window.tacticalMap.collectibleVisibility.has(groupName);
+  window.tacticalMap.setCollectibleGroupVisible(groupName, shouldBeActive);
   renderCollectiblesList(currentCollectibleSubTab);
   if (typeof saveAppState === 'function') saveAppState();
 }
