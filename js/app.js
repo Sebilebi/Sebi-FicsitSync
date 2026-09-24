@@ -156,7 +156,23 @@ function initCommandCenter() {
 // ==========================================
 // 2. GESTIÓN DE MODOS DE PANTALLA PRINCIPALES
 // ==========================================
+function closeAllModals() {
+  const itemModal = document.getElementById('item-modal');
+  if (itemModal) itemModal.classList.remove('active');
+  const machineModal = document.getElementById('scim-machine-modal');
+  if (machineModal) machineModal.classList.remove('active');
+  const zoneModal = document.getElementById('zone-modal');
+  if (zoneModal) zoneModal.classList.remove('active');
+  document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+  window.hasDraggedBlueprint = false;
+  if (window.tacticalMap && typeof window.tacticalMap.setDrawMode === 'function') {
+    window.tacticalMap.setDrawMode(false);
+  }
+}
+window.closeAllModals = closeAllModals;
+
 function switchMainMode(modeId) {
+  closeAllModals();
   currentMode = modeId;
   if (window.location.hash !== `#${modeId}`) {
     window.history.replaceState(null, null, `#${modeId}`);
@@ -259,6 +275,7 @@ window.switchMainMode = switchMainMode;
 
 // Compatibility alias for legacy calls
 window.switchTab = (tabId) => {
+  closeAllModals();
   if (tabId === 'live_map') switchMainMode('live_map');
   else if (tabId === 'mall_summary') switchMainMode('mall_summary');
   else {
@@ -290,6 +307,7 @@ function renderBranchNavRail() {
 }
 
 function selectBranch(branchId) {
+  closeAllModals();
   currentBranchId = branchId;
   saveAppState();
   renderBranchNavRail();
@@ -418,12 +436,16 @@ function initBlueprintPanZoom() {
   let isDragging = false;
   let startX = 0;
   let startY = 0;
+  let dragOriginClientX = 0;
+  let dragOriginClientY = 0;
   window.hasDraggedBlueprint = false;
 
   viewport.addEventListener('mousedown', (e) => {
     if (e.target.closest('button')) return;
     isDragging = true;
     window.hasDraggedBlueprint = false;
+    dragOriginClientX = e.clientX;
+    dragOriginClientY = e.clientY;
     viewport.style.cursor = 'grabbing';
     startX = e.clientX - bpPanX;
     startY = e.clientY - bpPanY;
@@ -431,17 +453,26 @@ function initBlueprintPanZoom() {
 
   window.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-    window.hasDraggedBlueprint = true;
+    if (Math.hypot(e.clientX - dragOriginClientX, e.clientY - dragOriginClientY) > 5) {
+      window.hasDraggedBlueprint = true;
+    }
     bpPanX = e.clientX - startX;
     bpPanY = e.clientY - startY;
     updateBlueprintTransform();
   });
 
   window.addEventListener('mouseup', () => {
-    if (isDragging) {
-      isDragging = false;
-      viewport.style.cursor = 'grab';
-    }
+    isDragging = false;
+    if (viewport) viewport.style.cursor = 'grab';
+    setTimeout(() => {
+      window.hasDraggedBlueprint = false;
+    }, 60);
+  });
+
+  window.addEventListener('blur', () => {
+    isDragging = false;
+    window.hasDraggedBlueprint = false;
+    if (viewport) viewport.style.cursor = 'grab';
   });
 
   viewport.addEventListener('wheel', (e) => {
@@ -1011,7 +1042,8 @@ window.renderSchematics = renderSchematics;
 
 
 function jumpToZone(zoneIdOrName) {
-  if (typeof closeModal === 'function') closeModal();
+  if (typeof closeAllModals === 'function') closeAllModals();
+  else if (typeof closeModal === 'function') closeModal();
   switchMainMode('live_map');
   setTimeout(() => {
     if (!window.tacticalMap) return;
@@ -1025,6 +1057,8 @@ function jumpToZone(zoneIdOrName) {
 window.jumpToZone = jumpToZone;
 
 function jumpToCreateZoneForItem(itemId, itemName) {
+  if (typeof closeAllModals === 'function') closeAllModals();
+  else if (typeof closeModal === 'function') closeModal();
   switchMainMode('live_map');
   setTimeout(() => {
     if (!window.tacticalMap) return;
@@ -1107,6 +1141,8 @@ function renderMallSummary() {
 // 5. NAVEGACIÓN INSTANTÁNEA: DE ÍTEM A MAPA
 // ==========================================
 function jumpToItemOnMap(itemId) {
+  if (typeof closeAllModals === 'function') closeAllModals();
+  else if (typeof closeModal === 'function') closeModal();
   switchMainMode('live_map');
 
   setTimeout(() => {
@@ -1825,7 +1861,10 @@ function findMetricForItem(globalMetrics, itemId) {
 let currentModalItemId = null;
 
 function openItemModal(itemId) {
-  if (window.hasDraggedBlueprint) return;
+  if (window.hasDraggedBlueprint) {
+    window.hasDraggedBlueprint = false;
+    return;
+  }
   currentModalItemId = itemId;
   const allItems = SATISFACTORY_CATEGORIES.flatMap(c => c.items);
   const item = allItems.find(i => i.id === itemId);
@@ -1976,11 +2015,12 @@ window.openItemModalByName = openItemModalByName;
 function closeModal() {
   const modal = document.getElementById('item-modal');
   if (modal) modal.classList.remove('active');
+  window.hasDraggedBlueprint = false;
 }
 window.closeModal = closeModal;
 
 function viewItemOnMap() {
-  closeModal();
+  closeAllModals();
   if (currentModalItemId) {
     const zones = window.cachedZonesData || window.tacticalMap?.zones || [];
     const allItems = SATISFACTORY_CATEGORIES.flatMap(c => c.items);
