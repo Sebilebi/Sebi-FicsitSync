@@ -2505,6 +2505,7 @@ function drawPowerOscilloscopeFrame(canvas) {
 // ==========================================
 function formatItemIcon(itemKey) {
   if (!itemKey) return 'Iron_Ingot.png';
+  if (itemKey.endsWith('.png')) return itemKey;
   let clean = itemKey.replace('Desc_', '').replace('_C', '');
   if (clean === 'OreIron') return 'Iron_Ore.png';
   if (clean === 'IronIngot') return 'Iron_Ingot.png';
@@ -2521,7 +2522,7 @@ function formatItemIcon(itemKey) {
   if (clean === 'SteelIngot') return 'Steel_Ingot.png';
   if (clean === 'SteelPlate') return 'Steel_Beam.png';
   if (clean === 'SteelPipe') return 'Steel_Pipe.png';
-  return clean + '.png';
+  return clean.replace(/ /g, '_') + '.png';
 }
 
 function openMachineInGameModal(b) {
@@ -2529,22 +2530,26 @@ function openMachineInGameModal(b) {
   const modal = document.getElementById('scim-machine-modal');
   if (!modal) return;
 
-  document.getElementById('scim-m-name').textContent = b.nameEs || b.type;
-  document.getElementById('scim-m-recipe').textContent = `(${b.recipeName || 'Sin receta'})`;
+  const machineName = b.nameEs || (typeof translateBuildingType === 'function' ? translateBuildingType(b.type || b.className) : b.type);
+  document.getElementById('scim-m-name').textContent = machineName;
+  document.getElementById('scim-m-recipe').textContent = b.recipeName && b.recipeName !== 'Sin receta' ? `(${b.recipeName})` : '';
 
   // Inputs
   const inputsEl = document.getElementById('scim-m-inputs');
   if (inputsEl) {
     if (b.inputs && b.inputs.length > 0) {
-      inputsEl.innerHTML = b.inputs.map(inp => `
+      inputsEl.innerHTML = b.inputs.map(inp => {
+        const inpName = (typeof getItemNameEs === 'function') ? getItemNameEs(inp.item || inp.name) : (inp.nameEs || inp.name);
+        return `
         <div class="scim-m-slot-row">
-          <img src="icons/${formatItemIcon(inp.item)}" onerror="this.src='icons/Iron_Ore.png'" class="scim-m-slot-icon" alt="${inp.name}" />
+          <img src="icons/${formatItemIcon(inp.item)}" onerror="this.src='icons/Iron_Ore.png'" class="scim-m-slot-icon" alt="${inpName}" />
           <div>
-            <div style="font-size: 11px; font-weight: 800; color: #fff;">${inp.name}</div>
+            <div style="font-size: 11px; font-weight: 800; color: #fff;">${inpName}</div>
             <div style="font-size: 10px; color: #94a3b8;">${Math.round(inp.rate * 10) / 10}/min</div>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     } else {
       inputsEl.innerHTML = `<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 8px;">Sin insumos requeridos</div>`;
     }
@@ -2554,15 +2559,18 @@ function openMachineInGameModal(b) {
   const outputsEl = document.getElementById('scim-m-outputs');
   if (outputsEl) {
     if (b.outputs && b.outputs.length > 0) {
-      outputsEl.innerHTML = b.outputs.map(out => `
+      outputsEl.innerHTML = b.outputs.map(out => {
+        const outName = (typeof getItemNameEs === 'function') ? getItemNameEs(out.item || out.name) : (out.nameEs || out.name);
+        return `
         <div class="scim-m-slot-row">
-          <img src="icons/${formatItemIcon(out.item)}" onerror="this.src='icons/Iron_Ingot.png'" class="scim-m-slot-icon" alt="${out.name}" />
+          <img src="icons/${formatItemIcon(out.item)}" onerror="this.src='icons/Iron_Ingot.png'" class="scim-m-slot-icon" alt="${outName}" />
           <div>
-            <div style="font-size: 11px; font-weight: 800; color: #fff;">${out.name}</div>
+            <div style="font-size: 11px; font-weight: 800; color: #fff;">${outName}</div>
             <div style="font-size: 10px; color: #34d399;">+${Math.round(out.rate * 10) / 10}/min</div>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     } else {
       outputsEl.innerHTML = `<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 8px;">Sin producto asignado</div>`;
     }

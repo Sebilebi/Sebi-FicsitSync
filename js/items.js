@@ -410,7 +410,21 @@ const RESOURCE_CLASS_TO_ITEM = {
   'Desc_SAM_C': 'SAM'
 };
 
+// Synchronize item names with official Spanish translations
+if (typeof getItemNameEs === 'function') {
+  for (const cat of SATISFACTORY_CATEGORIES) {
+    for (const item of cat.items) {
+      const official = getItemNameEs(item.id);
+      if (official && official !== item.id) {
+        item.name = official.toUpperCase();
+        item.nameEs = official;
+      }
+    }
+  }
+}
+
 if (typeof window !== 'undefined') {
+  window.SATISFACTORY_CATEGORIES = SATISFACTORY_CATEGORIES;
   window.RESOURCE_CLASS_TO_ITEM = RESOURCE_CLASS_TO_ITEM;
 }
 if (typeof module !== 'undefined' && module.exports) {

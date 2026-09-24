@@ -1,17 +1,18 @@
 {
-  "last_sync": "2026-09-24T10:29:34.413Z",
+  "last_sync": "2026-09-24T10:51:23.451Z",
   "session": {
     "sessionName": "test",
     "saveVersion": 60,
     "buildVersion": 502094,
-    "playTimeFormatted": "117h 25m",
-    "playDurationSeconds": 422715,
-    "saveDateTime": "2026-09-24T10:29:33.995Z",
-    "fileSizeBytes": 1563754
+    "playTimeFormatted": "104h 50m",
+    "playDurationSeconds": 377412,
+    "saveDateTime": "2026-09-23T21:49:15.916Z",
+    "fileSizeBytes": 1567344
   },
   "global": {
     "Iron_Ingot": {
-      "name": "Iron Ingot",
+      "name": "Lingote de hierro",
+      "nameEs": "Lingote de hierro",
       "production_nominal": 585,
       "machines_count": 17,
       "zones_breakdown": {
@@ -19,7 +20,8 @@
       }
     },
     "Iron_Plate": {
-      "name": "Iron Plate",
+      "name": "Plancha de hierro",
+      "nameEs": "Plancha de hierro",
       "production_nominal": 87.99999952316284,
       "machines_count": 4,
       "zones_breakdown": {
@@ -27,7 +29,8 @@
       }
     },
     "Iron_Rod": {
-      "name": "Iron Rod",
+      "name": "Varilla de hierro",
+      "nameEs": "Varilla de hierro",
       "production_nominal": 117.00000017881393,
       "machines_count": 8,
       "zones_breakdown": {
@@ -36,25 +39,29 @@
       }
     },
     "Copper_Ingot": {
-      "name": "Copper Ingot",
+      "name": "Lingote de cobre",
+      "nameEs": "Lingote de cobre",
       "production_nominal": 315,
       "machines_count": 11,
       "zones_breakdown": {}
     },
     "Wire": {
-      "name": "Wire",
+      "name": "Alambre",
+      "nameEs": "Alambre",
       "production_nominal": 180,
       "machines_count": 6,
       "zones_breakdown": {}
     },
     "Cable": {
       "name": "Cable",
+      "nameEs": "Cable",
       "production_nominal": 60,
       "machines_count": 2,
       "zones_breakdown": {}
     },
     "Screw": {
-      "name": "Screw",
+      "name": "Tornillo",
+      "nameEs": "Tornillo",
       "production_nominal": 280,
       "machines_count": 7,
       "zones_breakdown": {
@@ -63,7 +70,8 @@
       }
     },
     "Reinforced_Iron_Plate": {
-      "name": "Reinforced Iron Plate",
+      "name": "Plancha de hierro reforzada",
+      "nameEs": "Plancha de hierro reforzada",
       "production_nominal": 15.50000011920929,
       "machines_count": 3,
       "zones_breakdown": {
@@ -72,37 +80,43 @@
       }
     },
     "Biomass": {
-      "name": "Biomass",
+      "name": "Biomasa",
+      "nameEs": "Biomasa",
       "production_nominal": 360,
       "machines_count": 2,
       "zones_breakdown": {}
     },
     "Solid_Biofuel": {
-      "name": "Solid Biofuel",
+      "name": "Biocombustible sólido",
+      "nameEs": "Biocombustible sólido",
       "production_nominal": 120,
       "machines_count": 2,
       "zones_breakdown": {}
     },
     "Rotor": {
       "name": "Rotor",
+      "nameEs": "Rotor",
       "production_nominal": 4,
       "machines_count": 1,
       "zones_breakdown": {}
     },
     "Copper_Sheet": {
-      "name": "Copper Sheet",
+      "name": "Lámina de cobre",
+      "nameEs": "Lámina de cobre",
       "production_nominal": 32.5,
       "machines_count": 2,
       "zones_breakdown": {}
     },
     "Concrete": {
-      "name": "Concrete",
+      "name": "Hormigón",
+      "nameEs": "Hormigón",
       "production_nominal": 114.00000214576721,
       "machines_count": 7,
       "zones_breakdown": {}
     },
     "Silica": {
-      "name": "Silica",
+      "name": "Sílice",
+      "nameEs": "Sílice",
       "production_nominal": 37.5,
       "machines_count": 1,
       "zones_breakdown": {
@@ -110,7 +124,8 @@
       }
     },
     "Quartz_Crystal": {
-      "name": "Quartz Crystal",
+      "name": "Cristal de cuarzo",
+      "nameEs": "Cristal de cuarzo",
       "production_nominal": 67.5,
       "machines_count": 3,
       "zones_breakdown": {
@@ -118,103 +133,120 @@
       }
     },
     "Caterium_Ingot": {
-      "name": "Caterium Ingot",
+      "name": "Lingote de caterio",
+      "nameEs": "Lingote de caterio",
       "production_nominal": 45,
       "machines_count": 3,
       "zones_breakdown": {}
     },
     "Quickwire": {
-      "name": "Quickwire",
+      "name": "Cable rápido",
+      "nameEs": "Cable rápido",
       "production_nominal": 180,
       "machines_count": 3,
       "zones_breakdown": {}
     },
     "Steel_Ingot": {
-      "name": "Steel Ingot",
+      "name": "Lingote de acero",
+      "nameEs": "Lingote de acero",
       "production_nominal": 168.00000607967377,
       "machines_count": 3,
       "zones_breakdown": {}
     },
     "Steel_Beam": {
-      "name": "Steel Beam",
+      "name": "Viga de acero",
+      "nameEs": "Viga de acero",
       "production_nominal": 42.000000178813934,
       "machines_count": 3,
       "zones_breakdown": {}
     },
     "Encased_Industrial_Beam": {
-      "name": "Encased Industrial Beam",
+      "name": "Viga industrial cubierta",
+      "nameEs": "Viga industrial cubierta",
       "production_nominal": 9,
       "machines_count": 1,
       "zones_breakdown": {}
     },
     "Stator": {
-      "name": "Stator",
+      "name": "Estator",
+      "nameEs": "Estator",
       "production_nominal": 10,
       "machines_count": 1,
       "zones_breakdown": {}
     },
     "Automated_Wiring": {
-      "name": "Automated Wiring",
+      "name": "Cableado automatizado",
+      "nameEs": "Cableado automatizado",
       "production_nominal": 2.5,
       "machines_count": 1,
       "zones_breakdown": {}
     },
     "Modular_Frame": {
-      "name": "Modular Frame",
+      "name": "Estructura modular",
+      "nameEs": "Estructura modular",
       "production_nominal": 2,
       "machines_count": 1,
       "zones_breakdown": {}
     },
     "Smart_Plating": {
-      "name": "Smart Plating",
+      "name": "Blindaje inteligente",
+      "nameEs": "Blindaje inteligente",
       "production_nominal": 2,
       "machines_count": 1,
       "zones_breakdown": {}
     },
     "Motor": {
       "name": "Motor",
+      "nameEs": "Motor",
       "production_nominal": 5,
       "machines_count": 1,
       "zones_breakdown": {}
     },
     "Plastic": {
-      "name": "Plastic",
+      "name": "Plástico",
+      "nameEs": "Plástico",
       "production_nominal": 200,
       "machines_count": 10,
       "zones_breakdown": {}
     },
     "Heavy_Oil_Residue": {
-      "name": "Heavy Oil Residue",
+      "name": "Residuo de petróleo pesado",
+      "nameEs": "Residuo de petróleo pesado",
       "production_nominal": 300,
       "machines_count": 20,
       "zones_breakdown": {}
     },
     "Rubber": {
-      "name": "Rubber",
+      "name": "Goma",
+      "nameEs": "Goma",
       "production_nominal": 200,
       "machines_count": 10,
       "zones_breakdown": {}
     },
     "Packaged_Fuel": {
-      "name": "Packaged Fuel",
+      "name": "Combustible envasado",
+      "nameEs": "Combustible envasado",
       "production_nominal": 120,
       "machines_count": 3,
       "zones_breakdown": {}
     },
     "Empty_Canister": {
-      "name": "Empty Canister",
+      "name": "Recipiente vacío",
+      "nameEs": "Recipiente vacío",
       "production_nominal": 120,
       "machines_count": 2,
       "zones_breakdown": {}
     },
     "Fuel": {
-      "name": "Fuel",
+      "name": "Combustible",
+      "nameEs": "Combustible",
       "production_nominal": 500,
       "machines_count": 13,
       "zones_breakdown": {}
     },
     "Polymer_Resin": {
-      "name": "Polymer Resin",
+      "name": "Resina de polímero",
+      "nameEs": "Resina de polímero",
       "production_nominal": 300,
       "machines_count": 10,
       "zones_breakdown": {}
@@ -231,37 +263,44 @@
       "overlappingCount": 8,
       "production": {
         "Iron_Ingot": {
-          "name": "Iron Ingot",
+          "name": "Lingote de hierro",
+          "nameEs": "Lingote de hierro",
           "rate": 75,
           "count": 2
         },
         "Iron_Rod": {
-          "name": "Iron Rod",
+          "name": "Varilla de hierro",
+          "nameEs": "Varilla de hierro",
           "rate": 15,
           "count": 1
         },
         "Silica": {
-          "name": "Silica",
+          "name": "Sílice",
+          "nameEs": "Sílice",
           "rate": 37.5,
           "count": 1
         },
         "Quartz_Crystal": {
-          "name": "Quartz Crystal",
+          "name": "Cristal de cuarzo",
+          "nameEs": "Cristal de cuarzo",
           "rate": 67.5,
           "count": 3
         }
       },
       "consumption": {
         "Iron_Ore": {
-          "name": "Iron Ore",
+          "name": "Mineral de hierro",
+          "nameEs": "Mineral de hierro",
           "rate": 75
         },
         "Iron_Ingot": {
-          "name": "Iron Ingot",
+          "name": "Lingote de hierro",
+          "nameEs": "Lingote de hierro",
           "rate": 15
         },
         "Raw_Quartz": {
-          "name": "Raw Quartz",
+          "name": "Cuarzo puro",
+          "nameEs": "Cuarzo puro",
           "rate": 135
         }
       }
@@ -276,41 +315,49 @@
       "overlappingCount": 0,
       "production": {
         "Iron_Plate": {
-          "name": "Iron Plate",
+          "name": "Plancha de hierro",
+          "nameEs": "Plancha de hierro",
           "rate": 30,
           "count": 1
         },
         "Iron_Rod": {
-          "name": "Iron Rod",
+          "name": "Varilla de hierro",
+          "nameEs": "Varilla de hierro",
           "rate": 15,
           "count": 1
         },
         "Screw": {
-          "name": "Screw",
+          "name": "Tornillo",
+          "nameEs": "Tornillo",
           "rate": 40,
           "count": 1
         },
         "Reinforced_Iron_Plate": {
-          "name": "Reinforced Iron Plate",
+          "name": "Plancha de hierro reforzada",
+          "nameEs": "Plancha de hierro reforzada",
           "rate": 5,
           "count": 1
         }
       },
       "consumption": {
         "Iron_Ingot": {
-          "name": "Iron Ingot",
+          "name": "Lingote de hierro",
+          "nameEs": "Lingote de hierro",
           "rate": 60
         },
         "Iron_Rod": {
-          "name": "Iron Rod",
+          "name": "Varilla de hierro",
+          "nameEs": "Varilla de hierro",
           "rate": 10
         },
         "Iron_Plate": {
-          "name": "Iron Plate",
+          "name": "Plancha de hierro",
+          "nameEs": "Plancha de hierro",
           "rate": 30
         },
         "Screw": {
-          "name": "Screw",
+          "name": "Tornillo",
+          "nameEs": "Tornillo",
           "rate": 60
         }
       }
@@ -325,27 +372,32 @@
       "overlappingCount": 0,
       "production": {
         "Screw": {
-          "name": "Screw",
+          "name": "Tornillo",
+          "nameEs": "Tornillo",
           "rate": 80,
           "count": 2
         },
         "Reinforced_Iron_Plate": {
-          "name": "Reinforced Iron Plate",
+          "name": "Plancha de hierro reforzada",
+          "nameEs": "Plancha de hierro reforzada",
           "rate": 7.5,
           "count": 1
         }
       },
       "consumption": {
         "Iron_Rod": {
-          "name": "Iron Rod",
+          "name": "Varilla de hierro",
+          "nameEs": "Varilla de hierro",
           "rate": 20
         },
         "Iron_Plate": {
-          "name": "Iron Plate",
+          "name": "Plancha de hierro",
+          "nameEs": "Plancha de hierro",
           "rate": 45
         },
         "Screw": {
-          "name": "Screw",
+          "name": "Tornillo",
+          "nameEs": "Tornillo",
           "rate": 90
         }
       }
@@ -355,7 +407,7 @@
     "capacity": 6875,
     "production": 6875,
     "consumptionNominal": 2428.6,
-    "consumptionCurrent": 1373.7,
+    "consumptionCurrent": 1516.5,
     "fuseTriggered": false,
     "primaryCircuitId": 18,
     "circuits": [
@@ -364,19 +416,19 @@
         "capacity": 6875,
         "production": 6875,
         "consumptionNominal": 2428.6,
-        "consumptionCurrent": 1373.7,
+        "consumptionCurrent": 1516.5,
         "fuseTriggered": false,
         "generators": [
           {
             "type": "GeneratorFuel",
-            "nameEs": "Generador de Combustible",
+            "nameEs": "Generador de combustible",
             "icon": "Fuel.png",
             "count": 20,
             "capacityTotal": 5000
           },
           {
             "type": "GeneratorCoal",
-            "nameEs": "Generador de Carbón",
+            "nameEs": "Generador de carbón",
             "icon": "Coal.png",
             "count": 25,
             "capacityTotal": 1875
@@ -384,17 +436,17 @@
         ],
         "consumers": [
           {
-            "type": "OilRefinery",
+            "type": "Refinery",
             "nameEs": "Refinería",
             "icon": "Plastic.png",
             "count": 23,
             "powerNominal": 672.0000007892509,
-            "powerCurrent": 402.0000007892509,
-            "producingCount": 14
+            "powerCurrent": 372.0000007892509,
+            "producingCount": 13
           },
           {
             "type": "OilPump",
-            "nameEs": "Extractor de Petróleo",
+            "nameEs": "Extractor de petróleo",
             "icon": "Crude_Oil.png",
             "count": 2,
             "powerNominal": 268.61980331594134,
@@ -402,26 +454,26 @@
             "producingCount": 1
           },
           {
-            "type": "ConstructorMk1",
+            "type": "Constructor",
             "nameEs": "Constructor",
             "icon": "Iron_Plate.png",
             "count": 61,
             "powerNominal": 265.0714701152,
-            "powerCurrent": 203.47147000996654,
-            "producingCount": 45
+            "powerCurrent": 191.47147000996654,
+            "producingCount": 42
           },
           {
             "type": "WaterPump",
-            "nameEs": "Extractor de Agua",
+            "nameEs": "Extractor de agua",
             "icon": "Water.png",
             "count": 10,
             "powerNominal": 261.33793402884055,
-            "powerCurrent": 20,
-            "producingCount": 1
+            "powerCurrent": 167.15495082898533,
+            "producingCount": 6
           },
           {
-            "type": "AssemblerMk1",
-            "nameEs": "Ensamblador",
+            "type": "Assembler",
+            "nameEs": "Ensambladora",
             "icon": "Reinforced_Iron_Plate.png",
             "count": 11,
             "powerNominal": 201.40972098843682,
@@ -430,43 +482,43 @@
           },
           {
             "type": "MinerMk2",
-            "nameEs": "Minero Mk.2",
+            "nameEs": "Taladro Mk.2",
             "icon": "Iron_Ore.png",
             "count": 7,
             "powerNominal": 158.1041488811537,
-            "powerCurrent": 128.10415085428082,
-            "producingCount": 6
+            "powerCurrent": 158.1041488811537,
+            "producingCount": 7
           },
           {
             "type": "ResourceSink",
-            "nameEs": "Trituradora FICSIT (Sink)",
+            "nameEs": "Trituradora FICSIT",
             "icon": "Ficsit_Coupon.png",
             "count": 5,
             "powerNominal": 150,
-            "powerCurrent": 30,
-            "producingCount": 1
+            "powerCurrent": 0,
+            "producingCount": 0
           },
           {
-            "type": "SmelterMk1",
-            "nameEs": "Fundición",
+            "type": "Smelter",
+            "nameEs": "Horno",
             "icon": "Iron_Ingot.png",
             "count": 23,
             "powerNominal": 107.27319206975744,
-            "powerCurrent": 85.67319196452398,
-            "producingCount": 17
+            "powerCurrent": 97.67319196452398,
+            "producingCount": 20
           },
           {
             "type": "MinerMk1",
-            "nameEs": "Minero Mk.1",
+            "nameEs": "Taladro Mk.1",
             "icon": "Iron_Ore.png",
             "count": 19,
             "powerNominal": 106.18298333139703,
-            "powerCurrent": 43.545745799963804,
-            "producingCount": 8
+            "powerCurrent": 69.18298319985522,
+            "producingCount": 11
           },
           {
             "type": "TruckStation",
-            "nameEs": "Estación de Camiones",
+            "nameEs": "Estación de camiones",
             "icon": "Iron_Plate.png",
             "count": 4,
             "powerNominal": 80,
@@ -474,8 +526,8 @@
             "producingCount": 4
           },
           {
-            "type": "FoundryMk1",
-            "nameEs": "Fundición Avanzada",
+            "type": "Foundry",
+            "nameEs": "Fundición",
             "icon": "Steel_Ingot.png",
             "count": 3,
             "powerNominal": 64.14927116974441,
@@ -484,7 +536,7 @@
           },
           {
             "type": "Packager",
-            "nameEs": "Empaquetador",
+            "nameEs": "Empaquetadora",
             "icon": "Empty_Canister.png",
             "count": 3,
             "powerNominal": 60,
@@ -493,7 +545,7 @@
           },
           {
             "type": "PipelinePump",
-            "nameEs": "Bomba de Tubería",
+            "nameEs": "Bomba de tubería Mk.1",
             "icon": "Water.png",
             "count": 6,
             "powerNominal": 24,
@@ -502,7 +554,7 @@
           },
           {
             "type": "PipeHyperStart",
-            "nameEs": "Entrada de Hipertubo",
+            "nameEs": "Entrada de hipertubo",
             "icon": "Iron_Plate.png",
             "count": 35,
             "powerNominal": 10.500000000000004,
@@ -522,7 +574,7 @@
         "consumers": [
           {
             "type": "OilPump",
-            "nameEs": "Extractor de Petróleo",
+            "nameEs": "Extractor de petróleo",
             "icon": "Crude_Oil.png",
             "count": 1,
             "powerNominal": 134.30990165797067,

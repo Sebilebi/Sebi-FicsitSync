@@ -51,34 +51,73 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
 }
 
 function translateBuildingType(type) {
+  if (typeof window !== 'undefined' && typeof window.getBuildingNameEs === 'function') {
+    return window.getBuildingNameEs(type);
+  }
   if (!type) return 'Máquina';
-  const t = type.toLowerCase();
-  if (t.includes('smelter')) return 'Fundición';
-  if (t.includes('foundry')) return 'Fundición Avanzada';
+  const t = type.toLowerCase().replace('build_', '').replace('_c', '');
+  
+  // Production machines (Official Satisfactory Spanish - NO Mk tiers!)
+  if (t.includes('smelter')) return 'Horno';
+  if (t.includes('foundry')) return 'Fundición';
   if (t.includes('constructor')) return 'Constructor';
   if (t.includes('assembler')) return 'Ensambladora';
-  if (t.includes('manufacturer')) return 'Fabricante';
+  if (t.includes('manufacturer')) return 'Fabricadora';
   if (t.includes('oilrefinery') || t.includes('refinery')) return 'Refinería';
-  if (t.includes('minermk1')) return 'Taladradora / Minero Mk.1';
-  if (t.includes('minermk2')) return 'Taladradora / Minero Mk.2';
-  if (t.includes('minermk3')) return 'Taladradora / Minero Mk.3';
-  if (t.includes('resourceminer') || t.includes('miner')) return 'Taladradora / Minero';
-  if (t.includes('waterextractor')) return 'Extractor de Agua';
-  if (t.includes('oilextractor')) return 'Extractor de Petróleo';
-  if (t.includes('generatorbiomass')) return 'Quemador de Biomasa';
-  if (t.includes('generatorcoal')) return 'Generador de Carbón';
-  if (t.includes('generatorfuel')) return 'Generador de Combustible';
-  if (t.includes('generatornuclear')) return 'Planta de Energía Nuclear';
-  if (t.includes('storageintegrated') || t.includes('storageplayer')) return 'Caja de Almacén Personal';
-  if (t.includes('storage') && t.includes('mk2')) return 'Contenedor Industrial Mk.2';
-  if (t.includes('storage')) return 'Contenedor de Almacenamiento';
-  if (t.includes('spaceelevator')) return 'Ascensor Espacial';
-  if (t.includes('splitter')) return 'Divisor de Cintas';
-  if (t.includes('merger')) return 'Compactador de Cintas';
-  if (t.includes('powerpole')) return 'Poste Eléctrico';
-  if (t.includes('powerline')) return 'Línea de Alta Tensión';
-  if (t.includes('conveyorbelt')) return 'Cinta Transportadora';
-  if (t.includes('pipeline')) return 'Tubería de Fluidos';
+  if (t.includes('packager')) return 'Empaquetadora';
+  if (t.includes('blender')) return 'Mezcladora';
+  if (t.includes('particleaccelerator') || t.includes('accelerator')) return 'Acelerador de partículas';
+  if (t.includes('quantumencoder')) return 'Codificador cuántico';
+  if (t.includes('converter')) return 'Convertidor';
+
+  // Resource Extractors (DO have Mk tiers)
+  if (t.includes('minermk3')) return 'Taladro Mk.3';
+  if (t.includes('minermk2')) return 'Taladro Mk.2';
+  if (t.includes('minermk1') || t.includes('miner')) return 'Taladro Mk.1';
+  if (t.includes('waterextractor') || t.includes('waterpump')) return 'Extractor de agua';
+  if (t.includes('oilextractor') || t.includes('oilpump')) return 'Extractor de petróleo';
+  if (t.includes('frackingsmasher') || t.includes('resourcewellpressurizer')) return 'Presurizador de yacimientos';
+
+  // Logistics & Attachments
+  if (t.includes('splitterprogrammable')) return 'Divisor programable';
+  if (t.includes('splittersmart')) return 'Divisor inteligente';
+  if (t.includes('splitter')) return 'Divisor de cinta';
+  if (t.includes('merger')) return 'Unión de cintas';
+
+  // Conveyors & Lifts
+  if (t.includes('conveyorbeltmk6')) return 'Cinta transportadora Mk.6';
+  if (t.includes('conveyorbeltmk5')) return 'Cinta transportadora Mk.5';
+  if (t.includes('conveyorbeltmk4')) return 'Cinta transportadora Mk.4';
+  if (t.includes('conveyorbeltmk3')) return 'Cinta transportadora Mk.3';
+  if (t.includes('conveyorbeltmk2')) return 'Cinta transportadora Mk.2';
+  if (t.includes('conveyorbeltmk1') || t.includes('conveyorbelt')) return 'Cinta transportadora Mk.1';
+
+  // Pipes & Pumps
+  if (t.includes('pipelinemk2')) return 'Tubería Mk.2';
+  if (t.includes('pipeline')) return 'Tubería Mk.1';
+  if (t.includes('pipelinepumpmk2')) return 'Bomba de tubería Mk.2';
+  if (t.includes('pipelinepump')) return 'Bomba de tubería Mk.1';
+
+  // Power Generation
+  if (t.includes('generatorintegratedbiomass')) return 'Quemador de biomasa integrado';
+  if (t.includes('generatorbiomass')) return 'Quemador de biomasa';
+  if (t.includes('generatorcoal')) return 'Generador de carbón';
+  if (t.includes('generatorfuel')) return 'Generador de combustible';
+  if (t.includes('generatornuclear')) return 'Central nuclear';
+  if (t.includes('generatorgeothermal')) return 'Generador geotérmico';
+
+  // Storage
+  if (t.includes('storagecontainermk2')) return 'Contenedor industrial';
+  if (t.includes('storagecontainermk1') || t.includes('storagecontainer')) return 'Contenedor';
+  if (t.includes('storageintegrated')) return 'Contenedor integrado';
+  if (t.includes('storageplayer')) return 'Caja personal';
+
+  // Infrastructure
+  if (t.includes('spaceelevator')) return 'Ascensor espacial';
+  if (t.includes('powerpole')) return 'Poste eléctrico';
+  if (t.includes('powerline')) return 'Línea eléctrica';
+  if (t.includes('powerstorage')) return 'Almacén de energía';
+
   return type;
 }
 if (typeof window !== 'undefined') window.translateBuildingType = translateBuildingType;
@@ -1401,19 +1440,19 @@ class TacticalMap {
         ${statusHtml}
 
         <div style="margin-top: 10px; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">
-          Rendimiento por Minero (100%):
+          Rendimiento por Taladro (100%):
         </div>
         <div class="scim-rate-table">
           <div class="scim-rate-row">
-            <span>Minero Mk.1:</span>
+            <span>Taladro Mk.1:</span>
             <strong>${mk1Rate} ${unit}</strong>
           </div>
           <div class="scim-rate-row">
-            <span>Minero Mk.2:</span>
+            <span>Taladro Mk.2:</span>
             <strong>${mk2Rate} ${unit}</strong>
           </div>
           <div class="scim-rate-row">
-            <span>Minero Mk.3:</span>
+            <span>Taladro Mk.3:</span>
             <strong>${mk3Rate} ${unit}</strong>
           </div>
         </div>
@@ -2587,7 +2626,7 @@ class TacticalMap {
   renderNodeTooltip(ctx, node, pos) {
     ctx.save();
     const title = `${node.resourceNameEs || node.resourceName} (${node.purity})`;
-    const minerType = node.miner?.type ? translateBuildingType(node.miner.type) : 'Taladradora / Minero';
+    const minerType = node.miner?.type ? translateBuildingType(node.miner.type) : 'Taladro';
     const status = node.isExploited 
       ? ` Explotado: ${node.currentRate}/min (${minerType})`
       : ` Disponible: Base ${node.baseRate}/min`;
@@ -2603,7 +2642,7 @@ class TacticalMap {
     const x = Math.min(pos.x + 12, this.canvas.width - boxW - 10);
     const y = Math.max(pos.y - boxH - 10, 10);
 
-    ctx.fillStyle = 'rgba(44, 44, 44, 0.95)';
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
     ctx.strokeStyle = node.isExploited ? '#F5C04B' : '#22C55E';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
@@ -2628,24 +2667,40 @@ class TacticalMap {
 
   renderMachineTooltip(ctx, obj, pos) {
     ctx.save();
-    const typeEs = translateBuildingType(obj.type || obj.className);
-    const title = ` ${obj.nameEs || typeEs}${obj.recipeName ? `: ${obj.recipeName}` : ''}`;
-    const rateText = obj.outputs && obj.outputs.length > 0 
-      ? `Producción: ${obj.outputs.map(o => `+${o.rate}/min ${o.name}`).join(', ')}` 
-      : 'Sin salida activa';
-    const clockText = `Velocidad: ${Math.round((obj.potential || 1.0) * 100)}%  ${obj.status === 'producing' ? ' En Producción' : ' En Espera'}`;
+    const typeEs = obj.nameEs || translateBuildingType(obj.type || obj.className);
+    const recipeTitle = obj.recipeName && obj.recipeName !== 'Sin receta' ? obj.recipeName : '';
 
-    ctx.font = 'bold 12px Inter, sans-serif';
-    const w1 = ctx.measureText(title).width;
+    const hasOutputs = obj.outputs && obj.outputs.length > 0;
+    const primaryOut = hasOutputs ? obj.outputs[0] : null;
+    const outItemName = primaryOut ? (typeof getItemNameEs === 'function' ? getItemNameEs(primaryOut.item || primaryOut.name) : (primaryOut.nameEs || primaryOut.name)) : null;
+    const outRate = primaryOut ? `+${Math.round(primaryOut.rate * 10) / 10} / min` : null;
+
+    let iconName = obj.icon;
+    if (!iconName && primaryOut && primaryOut.item) {
+      iconName = (typeof formatItemIcon === 'function') ? formatItemIcon(primaryOut.item) : `${primaryOut.item}.png`;
+    }
+    const iconImg = iconName ? this.getIconImage(iconName) : null;
+    const hasValidIcon = iconImg && iconImg.complete && iconImg.naturalWidth > 0;
+
+    const clockPct = Math.round((obj.potential || 1.0) * 100);
+    const statusText = obj.status === 'producing' ? 'En Producción' : (obj.status === 'idle' ? 'En Espera' : 'Detenida');
+    const statusColor = obj.status === 'producing' ? '#22c55e' : (obj.status === 'idle' ? '#f59e0b' : '#ef4444');
+    const powerText = `⚡ ${obj.power || 4} MW`;
+
+    ctx.font = 'bold 13px Inter, sans-serif';
+    const wTitle = ctx.measureText(`🏭 ${typeEs}`).width;
     ctx.font = '11px Inter, sans-serif';
-    const w2 = ctx.measureText(rateText).width;
-    const boxW = Math.max(w1, w2, 170) + 20;
-    const boxH = 70;
+    const wRec = recipeTitle ? ctx.measureText(`Receta: ${recipeTitle}`).width : 0;
+    ctx.font = 'bold 12px Inter, sans-serif';
+    const wItem = outItemName ? ctx.measureText(outItemName).width + 42 : 0;
+
+    const boxW = Math.max(wTitle, wRec, wItem, 200) + 24;
+    const boxH = hasOutputs ? 94 : 74;
 
     const x = Math.min(pos.x + 12, this.canvas.width - boxW - 10);
     const y = Math.max(pos.y - boxH - 10, 10);
 
-    ctx.fillStyle = 'rgba(44, 44, 44, 0.95)';
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.96)';
     ctx.strokeStyle = obj.color || '#FA9549';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
@@ -2654,16 +2709,62 @@ class TacticalMap {
     ctx.stroke();
 
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 12px Inter, sans-serif';
-    ctx.fillText(title, x + 10, y + 20);
+    ctx.font = 'bold 13px Inter, sans-serif';
+    ctx.fillText(`🏭 ${typeEs}`, x + 10, y + 20);
 
-    ctx.fillStyle = '#34d399';
-    ctx.font = '11px Inter, sans-serif';
-    ctx.fillText(rateText, x + 10, y + 38);
+    if (hasOutputs && outItemName) {
+      const iconSize = 28;
+      const iconX = x + 10;
+      const iconY = y + 28;
 
-    ctx.fillStyle = '#A3A3A3';
-    ctx.font = '10px monospace';
-    ctx.fillText(clockText, x + 10, y + 54);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.rect(iconX, iconY, iconSize, iconSize);
+      ctx.fill();
+      ctx.stroke();
+
+      if (hasValidIcon) {
+        ctx.drawImage(iconImg, iconX + 2, iconY + 2, iconSize - 4, iconSize - 4);
+      } else {
+        ctx.fillStyle = '#f97316';
+        ctx.font = 'bold 14px sans-serif';
+        ctx.fillText('⚙️', iconX + 6, iconY + 20);
+      }
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = 'bold 12px Inter, sans-serif';
+      ctx.fillText(outItemName, iconX + iconSize + 8, iconY + 13);
+
+      ctx.fillStyle = '#34d399';
+      ctx.font = 'bold 11px monospace';
+      ctx.fillText(outRate, iconX + iconSize + 8, iconY + 26);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px Inter, sans-serif';
+      ctx.fillText(`Reloj: ${clockPct}%`, x + 10, y + 80);
+
+      ctx.fillStyle = statusColor;
+      ctx.fillText(`● ${statusText}`, x + 85, y + 80);
+
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillText(powerText, x + boxW - 55, y + 80);
+    } else {
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px Inter, sans-serif';
+      ctx.fillText(obj.isGenerator ? 'Generador de energía' : 'Sin salida activa', x + 10, y + 40);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px Inter, sans-serif';
+      ctx.fillText(`Reloj: ${clockPct}%`, x + 10, y + 60);
+
+      ctx.fillStyle = statusColor;
+      ctx.fillText(`● ${statusText}`, x + 85, y + 60);
+
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillText(powerText, x + boxW - 55, y + 60);
+    }
 
     ctx.restore();
   }
@@ -2751,7 +2852,7 @@ class TacticalMap {
   renderAttachmentTooltip(ctx, att, pos) {
     ctx.save();
     const isSplitter = att.type === 'Splitter' || (att.className && att.className.includes('Splitter'));
-    const title = isSplitter ? ' Divisor de Cinta (Splitter)' : ' Compactador de Cinta (Merger)';
+    const title = isSplitter ? ' Divisor de cinta' : ' Unión de cintas';
 
     const inCount = this.connectedInBelts.size;
     const outCount = this.connectedOutBelts.size;
@@ -2835,21 +2936,41 @@ class TacticalMap {
 
   renderMinerTooltip(ctx, miner, pos) {
     ctx.save();
-    const minerName = miner.nameEs || (miner.className || 'Build_MinerMk1_C').replace('Build_', '').replace('_C', '');
-    const title = ` ${minerName}`;
+    const minerName = miner.nameEs || translateBuildingType(miner.type || miner.className || 'Build_MinerMk1_C');
     const clockPct = Math.round((miner.potential || 1.0) * 100);
-    const rateText = `Velocidad: ${clockPct}%  Extracción de recursos activa`;
-    const coords = `Coord: X: ${Math.round(miner.x / 100)}m, Y: ${Math.round(miner.y / 100)}m`;
 
+    let matchedNode = null;
+    if (this.nodes && this.nodes.length > 0) {
+      matchedNode = this.nodes.find(n => (n.miner && (n.miner.x === miner.x && n.miner.y === miner.y)) ||
+        (n.fullPath && miner.targetResource && n.fullPath === miner.targetResource));
+      if (!matchedNode) {
+        for (const n of this.nodes) {
+          const dx = n.x - miner.x, dy = n.y - miner.y;
+          if (dx * dx + dy * dy < 2500 * 2500) {
+            matchedNode = n;
+            break;
+          }
+        }
+      }
+    }
+
+    const resName = matchedNode ? (matchedNode.resourceNameEs || matchedNode.resourceName) : null;
+    const rateText = matchedNode ? `+${matchedNode.currentRate || 60} / min` : 'Extracción de recursos activa';
+    const iconName = matchedNode?.icon || 'Iron_Ore.png';
+    const iconImg = this.getIconImage(iconName);
+    const hasValidIcon = iconImg && iconImg.complete && iconImg.naturalWidth > 0;
+
+    ctx.font = 'bold 13px Inter, sans-serif';
+    const w1 = ctx.measureText(`⛏️ ${minerName}`).width;
     ctx.font = 'bold 12px Inter, sans-serif';
-    const w1 = ctx.measureText(title).width;
-    const boxW = Math.max(w1, 200) + 20;
-    const boxH = 68;
+    const w2 = resName ? ctx.measureText(resName).width + 42 : 0;
+    const boxW = Math.max(w1, w2, 200) + 24;
+    const boxH = resName ? 94 : 70;
 
     const x = Math.min(pos.x + 12, this.canvas.width - boxW - 10);
     const y = Math.max(pos.y - boxH - 10, 10);
 
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.96)';
     ctx.strokeStyle = '#e58837';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
@@ -2858,16 +2979,52 @@ class TacticalMap {
     ctx.stroke();
 
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 12px Inter, sans-serif';
-    ctx.fillText(title, x + 10, y + 20);
+    ctx.font = 'bold 13px Inter, sans-serif';
+    ctx.fillText(`⛏️ ${minerName}`, x + 10, y + 20);
 
-    ctx.fillStyle = '#fb923c';
-    ctx.font = '11px Inter, sans-serif';
-    ctx.fillText(rateText, x + 10, y + 38);
+    if (resName) {
+      const iconSize = 28;
+      const iconX = x + 10;
+      const iconY = y + 28;
 
-    ctx.fillStyle = '#A3A3A3';
-    ctx.font = '10px monospace';
-    ctx.fillText(coords, x + 10, y + 54);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.rect(iconX, iconY, iconSize, iconSize);
+      ctx.fill();
+      ctx.stroke();
+
+      if (hasValidIcon) {
+        ctx.drawImage(iconImg, iconX + 2, iconY + 2, iconSize - 4, iconSize - 4);
+      }
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = 'bold 12px Inter, sans-serif';
+      ctx.fillText(resName, iconX + iconSize + 8, iconY + 13);
+
+      ctx.fillStyle = '#34d399';
+      ctx.font = 'bold 11px monospace';
+      ctx.fillText(rateText, iconX + iconSize + 8, iconY + 26);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px Inter, sans-serif';
+      ctx.fillText(`Reloj: ${clockPct}%`, x + 10, y + 80);
+
+      ctx.fillStyle = '#22c55e';
+      ctx.fillText(`● En Producción`, x + 85, y + 80);
+
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillText(`⚡ ${miner.power || 5} MW`, x + boxW - 55, y + 80);
+    } else {
+      ctx.fillStyle = '#fb923c';
+      ctx.font = '11px Inter, sans-serif';
+      ctx.fillText(`Velocidad: ${clockPct}% · Extracción activa`, x + 10, y + 40);
+
+      ctx.fillStyle = '#A3A3A3';
+      ctx.font = '10px monospace';
+      ctx.fillText(`Coord: X: ${Math.round(miner.x / 100)}m, Y: ${Math.round(miner.y / 100)}m`, x + 10, y + 56);
+    }
 
     ctx.restore();
   }

@@ -5,6 +5,7 @@ const FB_USER = 'admin';
 const FB_PASS = 'homelab22';
 
 const filesToUpload = [
+  { local: 'js/items_es.js', remote: '/web/js/items_es.js' },
   { local: 'js/items.js', remote: '/web/js/items.js' },
   { local: 'js/collectibles.js', remote: '/web/js/collectibles.js' },
   { local: 'js/map.js', remote: '/web/js/map.js' },

@@ -14,42 +14,54 @@ try {
 }
 
 const ITEM_METADATA = require('./item_metadata.json');
+const { getItemNameEs, getBuildingNameEs, ITEM_NAMES_ES } = require('../js/items_es');
 
 const MACHINE_SPECS = {
-  Smelter: { width: 900, length: 1000, color: '#e58837', strokeColor: '#ff3700', power: 4, duration: 2, defaultIcon: 'Iron_Ingot.png', nameEs: 'Fundición' },
-  Foundry: { width: 1000, length: 1100, color: '#e58837', strokeColor: '#ff3700', power: 16, duration: 4, defaultIcon: 'Steel_Ingot.png', nameEs: 'Fundición Avanzada' },
+  Smelter: { width: 900, length: 1000, color: '#e58837', strokeColor: '#ff3700', power: 4, duration: 2, defaultIcon: 'Iron_Ingot.png', nameEs: 'Horno' },
+  SmelterMk1: { width: 900, length: 1000, color: '#e58837', strokeColor: '#ff3700', power: 4, duration: 2, defaultIcon: 'Iron_Ingot.png', nameEs: 'Horno' },
+  Foundry: { width: 1000, length: 1100, color: '#e58837', strokeColor: '#ff3700', power: 16, duration: 4, defaultIcon: 'Steel_Ingot.png', nameEs: 'Fundición' },
+  FoundryMk1: { width: 1000, length: 1100, color: '#e58837', strokeColor: '#ff3700', power: 16, duration: 4, defaultIcon: 'Steel_Ingot.png', nameEs: 'Fundición' },
   Constructor: { width: 800, length: 1000, color: '#e58837', strokeColor: '#ff3700', power: 4, duration: 4, defaultIcon: 'Iron_Plate.png', nameEs: 'Constructor' },
-  Assembler: { width: 1000, length: 1500, color: '#e58837', strokeColor: '#ff3700', power: 15, duration: 12, defaultIcon: 'Reinforced_Iron_Plate.png', nameEs: 'Ensamblador' },
-  Manufacturer: { width: 1800, length: 1900, color: '#e58837', strokeColor: '#ff3700', power: 55, duration: 24, defaultIcon: 'Heavy_Modular_Frame.png', nameEs: 'Fabricante' },
+  ConstructorMk1: { width: 800, length: 1000, color: '#e58837', strokeColor: '#ff3700', power: 4, duration: 4, defaultIcon: 'Iron_Plate.png', nameEs: 'Constructor' },
+  Assembler: { width: 1000, length: 1500, color: '#e58837', strokeColor: '#ff3700', power: 15, duration: 12, defaultIcon: 'Reinforced_Iron_Plate.png', nameEs: 'Ensambladora' },
+  AssemblerMk1: { width: 1000, length: 1500, color: '#e58837', strokeColor: '#ff3700', power: 15, duration: 12, defaultIcon: 'Reinforced_Iron_Plate.png', nameEs: 'Ensambladora' },
+  Manufacturer: { width: 1800, length: 1900, color: '#e58837', strokeColor: '#ff3700', power: 55, duration: 24, defaultIcon: 'Heavy_Modular_Frame.png', nameEs: 'Fabricadora' },
+  ManufacturerMk1: { width: 1800, length: 1900, color: '#e58837', strokeColor: '#ff3700', power: 55, duration: 24, defaultIcon: 'Heavy_Modular_Frame.png', nameEs: 'Fabricadora' },
   Refinery: { width: 1000, length: 2000, color: '#e58837', strokeColor: '#ff3700', power: 30, duration: 6, defaultIcon: 'Plastic.png', nameEs: 'Refinería' },
-  Packager: { width: 800, length: 800, color: '#e58837', strokeColor: '#ff3700', power: 20, duration: 2, defaultIcon: 'Empty_Canister.png', nameEs: 'Empaquetador' },
+  OilRefinery: { width: 1000, length: 2000, color: '#e58837', strokeColor: '#ff3700', power: 30, duration: 6, defaultIcon: 'Plastic.png', nameEs: 'Refinería' },
+  Packager: { width: 800, length: 800, color: '#e58837', strokeColor: '#ff3700', power: 20, duration: 2, defaultIcon: 'Empty_Canister.png', nameEs: 'Empaquetadora' },
   Blender: { width: 1800, length: 1600, color: '#e58837', strokeColor: '#ff3700', power: 75, duration: 12, defaultIcon: 'Motor.png', nameEs: 'Mezcladora' },
-  GeneratorCoal: { width: 1000, length: 2600, color: '#4b5563', strokeColor: '#1f2937', power: -75, duration: 4, defaultIcon: 'Coal.png', nameEs: 'Generador de Carbón' },
-  GeneratorFuel: { width: 2000, length: 2000, color: '#4b5563', strokeColor: '#1f2937', power: -250, duration: 4, defaultIcon: 'Fuel.png', nameEs: 'Generador de Combustible' },
-  GeneratorNuclear: { width: 3800, length: 3800, color: '#4b5563', strokeColor: '#1f2937', power: -2500, duration: 4, defaultIcon: 'Uranium_Fuel_Rod.png', nameEs: 'Planta Nuclear' },
-  GeneratorBiomass: { width: 800, length: 800, color: '#4b5563', strokeColor: '#1f2937', power: -30, duration: 4, defaultIcon: 'Biomass.png', nameEs: 'Quemador de Biomasa' },
-  GeneratorIntegratedBiomass: { width: 800, length: 800, color: '#4b5563', strokeColor: '#1f2937', power: -20, duration: 4, defaultIcon: 'Biomass.png', nameEs: 'Quemador de Biomasa Integrado' },
-  MinerMk1: { width: 600, length: 1400, color: '#e58837', strokeColor: '#ff3700', power: 5, defaultIcon: 'Iron_Ore.png', nameEs: 'Minero Mk.1' },
-  MinerMk2: { width: 600, length: 1400, color: '#e58837', strokeColor: '#ff3700', power: 12, defaultIcon: 'Iron_Ore.png', nameEs: 'Minero Mk.2' },
-  MinerMk3: { width: 600, length: 1400, color: '#e58837', strokeColor: '#ff3700', power: 30, defaultIcon: 'Iron_Ore.png', nameEs: 'Minero Mk.3' },
-  OilPump: { width: 800, length: 1600, color: '#e58837', strokeColor: '#ff3700', power: 40, defaultIcon: 'Crude_Oil.png', nameEs: 'Extractor de Petróleo' },
-  WaterPump: { width: 1800, length: 1800, color: '#0284c7', strokeColor: '#38bdf8', power: 20, defaultIcon: 'Water.png', nameEs: 'Extractor de Agua' },
-  PipelinePump: { width: 600, length: 600, color: '#0284c7', strokeColor: '#38bdf8', power: 4, defaultIcon: 'Water.png', nameEs: 'Bomba de Tubería' },
-  PipelinePumpMk2: { width: 800, length: 800, color: '#0284c7', strokeColor: '#38bdf8', power: 8, defaultIcon: 'Water.png', nameEs: 'Bomba de Tubería Mk.2' },
-  PipeHyperStart: { width: 400, length: 600, color: '#3b82f6', strokeColor: '#60a5fa', power: 0.3, defaultIcon: null, nameEs: 'Entrada de Hipertubo' },
-  ResourceSink: { width: 1200, length: 1200, color: '#e58837', strokeColor: '#ff3700', power: 30, defaultIcon: 'Ficsit_Coupon.png', nameEs: 'Trituradora FICSIT (Sink)' },
-  TruckStation: { width: 1000, length: 1600, color: '#e58837', strokeColor: '#ff3700', power: 20, defaultIcon: null, nameEs: 'Estación de Camiones' },
-  TrainStation: { width: 1600, length: 2600, color: '#e58837', strokeColor: '#ff3700', power: 50, defaultIcon: null, nameEs: 'Estación de Tren' },
-  PowerStorage: { width: 600, length: 600, color: '#0ea5e9', strokeColor: '#38bdf8', power: 0, defaultIcon: null, nameEs: 'Almacenamiento de Energía' },
-  StorageContainer: { width: 500, length: 1000, color: '#e58837', strokeColor: '#ff3700', defaultIcon: null, nameEs: 'Contenedor de Almacenamiento' },
-  StorageIntegrated: { width: 500, length: 1000, color: '#e58837', strokeColor: '#ff3700', defaultIcon: null, nameEs: 'Contenedor Integrado' },
-  StoragePlayer: { width: 500, length: 1000, color: '#e58837', strokeColor: '#ff3700', defaultIcon: null, nameEs: 'Caja del Jugador' }
+  ParticleAccelerator: { width: 2400, length: 3600, color: '#e58837', strokeColor: '#ff3700', power: 1500, duration: 60, defaultIcon: 'Nuclear_Pasta.png', nameEs: 'Acelerador de partículas' },
+  GeneratorCoal: { width: 1000, length: 2600, color: '#4b5563', strokeColor: '#1f2937', power: -75, duration: 4, defaultIcon: 'Coal.png', nameEs: 'Generador de carbón' },
+  GeneratorFuel: { width: 2000, length: 2000, color: '#4b5563', strokeColor: '#1f2937', power: -250, duration: 4, defaultIcon: 'Fuel.png', nameEs: 'Generador de combustible' },
+  GeneratorNuclear: { width: 3800, length: 3800, color: '#4b5563', strokeColor: '#1f2937', power: -2500, duration: 4, defaultIcon: 'Uranium_Fuel_Rod.png', nameEs: 'Central nuclear' },
+  GeneratorBiomass: { width: 800, length: 800, color: '#4b5563', strokeColor: '#1f2937', power: -30, duration: 4, defaultIcon: 'Biomass.png', nameEs: 'Quemador de biomasa' },
+  GeneratorIntegratedBiomass: { width: 800, length: 800, color: '#4b5563', strokeColor: '#1f2937', power: -20, duration: 4, defaultIcon: 'Biomass.png', nameEs: 'Quemador de biomasa integrado' },
+  MinerMk1: { width: 600, length: 1400, color: '#e58837', strokeColor: '#ff3700', power: 5, defaultIcon: 'Iron_Ore.png', nameEs: 'Taladro Mk.1' },
+  MinerMk2: { width: 600, length: 1400, color: '#e58837', strokeColor: '#ff3700', power: 12, defaultIcon: 'Iron_Ore.png', nameEs: 'Taladro Mk.2' },
+  MinerMk3: { width: 600, length: 1400, color: '#e58837', strokeColor: '#ff3700', power: 30, defaultIcon: 'Iron_Ore.png', nameEs: 'Taladro Mk.3' },
+  OilPump: { width: 800, length: 1600, color: '#e58837', strokeColor: '#ff3700', power: 40, defaultIcon: 'Crude_Oil.png', nameEs: 'Extractor de petróleo' },
+  WaterPump: { width: 1800, length: 1800, color: '#0284c7', strokeColor: '#38bdf8', power: 20, defaultIcon: 'Water.png', nameEs: 'Extractor de agua' },
+  PipelinePump: { width: 600, length: 600, color: '#0284c7', strokeColor: '#38bdf8', power: 4, defaultIcon: 'Water.png', nameEs: 'Bomba de tubería Mk.1' },
+  PipelinePumpMk2: { width: 800, length: 800, color: '#0284c7', strokeColor: '#38bdf8', power: 8, defaultIcon: 'Water.png', nameEs: 'Bomba de tubería Mk.2' },
+  PipeHyperStart: { width: 400, length: 600, color: '#3b82f6', strokeColor: '#60a5fa', power: 0.3, defaultIcon: null, nameEs: 'Entrada de hipertubo' },
+  ResourceSink: { width: 1200, length: 1200, color: '#e58837', strokeColor: '#ff3700', power: 30, defaultIcon: 'Ficsit_Coupon.png', nameEs: 'Trituradora FICSIT' },
+  TruckStation: { width: 1000, length: 1600, color: '#e58837', strokeColor: '#ff3700', power: 20, defaultIcon: null, nameEs: 'Estación de camiones' },
+  TrainStation: { width: 1600, length: 2600, color: '#e58837', strokeColor: '#ff3700', power: 50, defaultIcon: null, nameEs: 'Estación de tren' },
+  PowerStorage: { width: 600, length: 600, color: '#0ea5e9', strokeColor: '#38bdf8', power: 0, defaultIcon: null, nameEs: 'Almacén de energía' },
+  StorageContainer: { width: 500, length: 1000, color: '#e58837', strokeColor: '#ff3700', defaultIcon: null, nameEs: 'Contenedor' },
+  StorageContainerMk1: { width: 500, length: 1000, color: '#e58837', strokeColor: '#ff3700', defaultIcon: null, nameEs: 'Contenedor' },
+  StorageContainerMk2: { width: 500, length: 1000, color: '#e58837', strokeColor: '#ff3700', defaultIcon: null, nameEs: 'Contenedor industrial' },
+  StorageIntegrated: { width: 500, length: 1000, color: '#e58837', strokeColor: '#ff3700', defaultIcon: null, nameEs: 'Contenedor integrado' },
+  StoragePlayer: { width: 500, length: 1000, color: '#e58837', strokeColor: '#ff3700', defaultIcon: null, nameEs: 'Caja del jugador' }
 };
 
 function getMachineSpec(raw) {
   if (!raw) return null;
   const clean = raw.replace('Build_', '').replace('_C', '');
   if (MACHINE_SPECS[clean]) return MACHINE_SPECS[clean];
+  const unMk = clean.replace(/Mk1$/i, '');
+  if (MACHINE_SPECS[unMk]) return MACHINE_SPECS[unMk];
   for (const [k, v] of Object.entries(MACHINE_SPECS)) {
     if (clean.toLowerCase().includes(k.toLowerCase())) return v;
   }
@@ -246,6 +258,12 @@ function parseSaveFile(saveFilePath) {
     }
 
     const machSpec = getMachineSpec(rawType);
+    let normalizedType = shortType;
+    if (/^(Smelter|Constructor|Assembler|Manufacturer|Foundry|StorageContainer)Mk1$/i.test(shortType)) {
+      normalizedType = shortType.replace(/Mk1$/i, '');
+    }
+    if (shortType === 'OilRefinery') normalizedType = 'Refinery';
+
     if (machSpec && obj.instanceName) {
       const isGen = machSpec.power < 0;
       const pot = obj.properties?.mCurrentPotential?.value ?? obj.properties?.mPendingPotential?.value ?? 1.0;
@@ -253,7 +271,8 @@ function parseSaveFile(saveFilePath) {
       entityMap.set(obj.instanceName, {
         id: obj.instanceName,
         className,
-        type: shortType,
+        type: normalizedType,
+        nameEs: machSpec.nameEs || getBuildingNameEs(shortType),
         spec: machSpec,
         isGenerator: isGen,
         potential: Number(Number(pot).toFixed(2)),
@@ -286,10 +305,12 @@ function parseSaveFile(saveFilePath) {
       const isSplitter = rawType.includes('Splitter');
       const isMerger = rawType.includes('Merger');
       const isCross = rawType.includes('PipelineJunction');
+      const attType = isSplitter ? 'Splitter' : (isMerger ? 'Merger' : (isCross ? 'PipelineJunction' : shortType));
       attachments.push({
         id: obj.instanceName || `att_${attachments.length}`,
         className,
-        type: isSplitter ? 'Splitter' : (isMerger ? 'Merger' : (isCross ? 'PipelineJunction' : shortType)),
+        type: attType,
+        nameEs: getBuildingNameEs(rawType),
         x: Math.round(pos.x),
         y: Math.round(pos.y),
         z: Math.round(pos.z),
@@ -303,6 +324,7 @@ function parseSaveFile(saveFilePath) {
         id: obj.instanceName || `pole_${powerPoles.length}`,
         className,
         type: shortType,
+        nameEs: getBuildingNameEs(shortType),
         x: Math.round(pos.x),
         y: Math.round(pos.y),
         z: Math.round(pos.z)
@@ -334,7 +356,7 @@ function parseSaveFile(saveFilePath) {
 
       const potential = obj.properties?.mCurrentPotential?.value ?? obj.properties?.mPendingPotential?.value ?? 1.0;
       const isProducing = obj.properties?.mIsProducing?.value !== false;
-      const spec = MACHINE_SPECS[shortType] || { width: 1000, length: 1200, color: '#e58837', strokeColor: '#ff3700', power: 4, duration: 2, defaultIcon: null, nameEs: shortType };
+      const spec = MACHINE_SPECS[normalizedType] || MACHINE_SPECS[shortType] || machSpec || { width: 1000, length: 1200, color: '#e58837', strokeColor: '#ff3700', power: 4, duration: 2, defaultIcon: null, nameEs: getBuildingNameEs(shortType) };
 
       // Determine output icon
       let icon = spec.defaultIcon;
@@ -344,15 +366,34 @@ function parseSaveFile(saveFilePath) {
         icon = formatted;
       }
 
+      let recipeDisplayName = 'Sin receta';
+      if (recipeData) {
+        if (recipeData.name) {
+          if (/^Alternate[:\s]/i.test(recipeData.name)) {
+            const rawAlt = recipeData.name.replace(/^Alternate[:\s]+/i, '').trim();
+            const altKey = rawAlt.replace(/\s+/g, '_');
+            const esAlt = getItemNameEs(altKey) || rawAlt;
+            recipeDisplayName = `Alternativa: ${esAlt}`;
+          } else if (recipeData.outputs && recipeData.outputs.length > 0) {
+            recipeDisplayName = getItemNameEs(recipeData.outputs[0].item) || recipeData.name;
+          } else {
+            recipeDisplayName = recipeData.name;
+          }
+        }
+      } else if (recipeKey) {
+        const cleanRec = recipeKey.replace('Recipe_', '').replace('_C', '');
+        recipeDisplayName = getItemNameEs(cleanRec) || cleanRec;
+      }
+
       const status = isProducing ? 'producing' : (potential > 0 ? 'idle' : 'stopped');
 
       buildings.push({
         id: obj.instanceName || `bld_${buildings.length}`,
         className,
-        type: shortType,
-        nameEs: spec.nameEs,
+        type: normalizedType,
+        nameEs: spec.nameEs || getBuildingNameEs(shortType),
         recipeKey,
-        recipeName: recipeData ? recipeData.name : (recipeKey ? recipeKey.replace('Recipe_', '').replace('_C', '') : 'Sin receta'),
+        recipeName: recipeDisplayName,
         x: Math.round(pos.x),
         y: Math.round(pos.y),
         z: Math.round(pos.z),
@@ -367,19 +408,31 @@ function parseSaveFile(saveFilePath) {
         potential: Number(Number(potential).toFixed(2)),
         isProducing,
         status,
-        inputs: recipeData ? recipeData.inputs.map(inp => ({ ...inp, rate: inp.rate * potential })) : [],
-        outputs: recipeData ? recipeData.outputs.map(out => ({ ...out, rate: out.rate * potential })) : []
+        inputs: recipeData ? recipeData.inputs.map(inp => ({
+          ...inp,
+          name: getItemNameEs(inp.item) || inp.name,
+          nameEs: getItemNameEs(inp.item) || inp.name,
+          rate: inp.rate * potential
+        })) : [],
+        outputs: recipeData ? recipeData.outputs.map(out => ({
+          ...out,
+          name: getItemNameEs(out.item) || out.name,
+          nameEs: getItemNameEs(out.item) || out.name,
+          rate: out.rate * potential
+        })) : []
       });
     }
 
     // Storage containers
     else if (rawType.includes('StorageContainer') || rawType.includes('StorageIntegrated') || rawType.includes('StoragePlayer')) {
-      const spec = MACHINE_SPECS[shortType] || { width: 500, length: 1000, color: '#e58837', strokeColor: '#ff3700', nameEs: 'Almacén' };
+      let normalizedStorageType = shortType;
+      if (shortType === 'StorageContainerMk1') normalizedStorageType = 'StorageContainer';
+      const spec = MACHINE_SPECS[normalizedStorageType] || MACHINE_SPECS[shortType] || machSpec || { width: 500, length: 1000, color: '#e58837', strokeColor: '#ff3700', nameEs: getBuildingNameEs(shortType) };
       storages.push({
         id: obj.instanceName || `str_${storages.length}`,
         className,
-        type: shortType,
-        nameEs: spec.nameEs,
+        type: normalizedStorageType,
+        nameEs: spec.nameEs || getBuildingNameEs(shortType),
         x: Math.round(pos.x),
         y: Math.round(pos.y),
         z: Math.round(pos.z),
@@ -395,12 +448,12 @@ function parseSaveFile(saveFilePath) {
     else if (rawType.includes('Miner') || rawType.includes('OilPump') || rawType.includes('WaterPump')) {
       const resPath = obj.properties?.mExtractableResource?.value?.pathName || '';
       const potential = obj.properties?.mCurrentPotential?.value ?? obj.properties?.mPendingPotential?.value ?? 1.0;
-      const spec = MACHINE_SPECS[shortType] || { width: 800, length: 1400, color: '#e58837', strokeColor: '#ff3700', power: 10, nameEs: 'Extractor' };
+      const spec = MACHINE_SPECS[shortType] || machSpec || { width: 800, length: 1400, color: '#e58837', strokeColor: '#ff3700', power: 10, nameEs: getBuildingNameEs(shortType) };
       miners.push({
         id: obj.instanceName || `mnr_${miners.length}`,
         className,
         type: shortType,
-        nameEs: spec.nameEs,
+        nameEs: spec.nameEs || getBuildingNameEs(shortType),
         x: Math.round(pos.x),
         y: Math.round(pos.y),
         z: Math.round(pos.z),
@@ -423,16 +476,19 @@ function parseSaveFile(saveFilePath) {
         const classKey = rawType.split('.').pop();
         const maxRate = BELT_RATES[classKey] || 60;
         const meta = itemInfo?.item ? ITEM_METADATA[itemInfo.item] : null;
+        const itemKey = itemInfo?.item ? itemInfo.item.replace('Desc_', '').replace('_C', '') : null;
+        const spanishItem = getItemNameEs(itemKey);
 
         belts.push({
           id: fullPath,
           className,
           type: shortType,
+          nameEs: getBuildingNameEs(shortType),
           maxRate,
           item: itemInfo ? itemInfo.item : null,
-          itemName: meta ? meta.name : (itemInfo?.item ? itemInfo.item.replace('Desc_', '').replace('_C', '') : null),
-          itemNameEs: meta ? meta.nameEs : (itemInfo?.item ? itemInfo.item.replace('Desc_', '').replace('_C', '') : null),
-          itemIcon: meta ? meta.icon : null,
+          itemName: meta ? meta.name : (itemKey ? itemKey.replace(/_/g, ' ') : null),
+          itemNameEs: spanishItem || (meta ? meta.nameEs : null),
+          itemIcon: meta ? meta.icon : (itemKey ? `${itemKey}.png` : null),
           itemColor: '#ffbca3',
           itemCount: itemInfo ? itemInfo.count : 0,
           rate: itemInfo && itemInfo.count > 0 ? maxRate : 0,
@@ -452,6 +508,7 @@ function parseSaveFile(saveFilePath) {
           id: fullPath,
           className,
           type: shortType,
+          nameEs: getBuildingNameEs(shortType),
           maxRate,
           item: 'Desc_Water_C',
           itemName: 'Water',
@@ -693,7 +750,8 @@ function calculateMetrics(saveData, zones = []) {
     for (const out of b.outputs) {
       if (!globalRates[out.item]) {
         globalRates[out.item] = {
-          name: out.name,
+          name: getItemNameEs(out.item) || out.name,
+          nameEs: getItemNameEs(out.item) || out.name,
           production_nominal: 0,
           machines_count: 0,
           zones_breakdown: {}
@@ -719,7 +777,12 @@ function calculateMetrics(saveData, zones = []) {
     for (const b of machinesInZone) {
       for (const out of b.outputs) {
         if (!production[out.item]) {
-          production[out.item] = { name: out.name, rate: 0, count: 0 };
+          production[out.item] = {
+            name: getItemNameEs(out.item) || out.name,
+            nameEs: getItemNameEs(out.item) || out.name,
+            rate: 0,
+            count: 0
+          };
         }
         production[out.item].rate += out.rate;
         production[out.item].count += 1;
@@ -731,7 +794,11 @@ function calculateMetrics(saveData, zones = []) {
 
       for (const inp of b.inputs) {
         if (!consumption[inp.item]) {
-          consumption[inp.item] = { name: inp.name, rate: 0 };
+          consumption[inp.item] = {
+            name: getItemNameEs(inp.item) || inp.name,
+            nameEs: getItemNameEs(inp.item) || inp.name,
+            rate: 0
+          };
         }
         consumption[inp.item].rate += inp.rate;
       }
