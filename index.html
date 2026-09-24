@@ -87,6 +87,23 @@
           </div>
         </div>
 
+        <!-- WIDGET DE ENERGÍA DE LA RED FICSIT -->
+        <div id="header-power-widget" class="header-power-widget" onclick="openPowerGridModal()" title="Red Eléctrica FICSIT: Clic para ver Osciloscopio de Potencia">
+          <div class="power-widget-bolt">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <div class="power-widget-info">
+            <span class="power-widget-title">ENERGÍA</span>
+            <div class="power-widget-nums">
+              <span id="header-power-cons" class="power-val-cons">-- MW</span>
+              <span class="power-val-sep">/</span>
+              <span id="header-power-prod" class="power-val-prod">-- MW</span>
+            </div>
+          </div>
+        </div>
+
         <button class="icon-action-btn" onclick="toggleTheme()" title="Cambiar Tema">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ficsit-orange);"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
 </button>
@@ -598,9 +615,141 @@
     </div>
   </div>
 
-  <script src="js/items.js?v=4.8.0"></script>
-  <script src="js/collectibles.js?v=4.8.0"></script>
-  <script src="js/map.js?v=4.8.0"></script>
-  <script src="js/app.js?v=4.8.0"></script>
+  <!-- Modal: Monitor de Red Eléctrica / Osciloscopio FICSIT -->
+  <div id="power-modal" class="modal-overlay" onclick="closePowerModal()">
+    <div class="power-dialog ficsit-panel" onclick="event.stopPropagation()">
+      
+      <!-- Cabecera del Circuito Eléctrico -->
+      <div class="power-modal-header">
+        <div class="power-header-left">
+          <div class="power-header-icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="color: var(--ficsit-orange);">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <div class="power-header-title-box">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <h2 id="power-modal-title" style="margin: 0; font-size: 19px; font-weight: 900; letter-spacing: 0.5px; color: #fff;">
+                CIRCUITO DE ENERGÍA #18
+              </h2>
+              <div id="power-circuit-selector-wrap" style="display: inline-block;">
+                <select id="power-circuit-select" onchange="switchPowerCircuit(this.value)" class="power-circuit-dropdown"></select>
+              </div>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.3px;">
+              MONITOR DE RED DE ALTA TENSIÓN // FICSIT POWER GRID
+            </span>
+          </div>
+        </div>
+
+        <div class="power-header-right">
+          <div id="power-fuse-pill" class="power-fuse-pill ok">
+            <span class="fuse-led"></span>
+            <span id="power-fuse-text">FUSIBLE OPERATIVO</span>
+          </div>
+          <button class="scim-m-close" onclick="closePowerModal()" title="Cerrar (Esc)">✕</button>
+        </div>
+      </div>
+
+      <!-- Barra de KPIs estilo Satisfactory (4 Valores Oficiales) -->
+      <div class="power-kpi-bar">
+        <div class="power-kpi-card card-cons">
+          <div class="power-kpi-label">
+            <span class="legend-color-dot" style="background: #fa9549;"></span>
+            <span>CONSUMO ACTUAL</span>
+          </div>
+          <div class="power-kpi-val" id="pwr-kpi-cons">-- MW</div>
+          <div class="power-kpi-sub">Gasto real en tiempo real</div>
+        </div>
+
+        <div class="power-kpi-card card-max">
+          <div class="power-kpi-label">
+            <span class="legend-color-dot" style="background: #38bdf8;"></span>
+            <span>CONSUMO MÁXIMO</span>
+          </div>
+          <div class="power-kpi-val" id="pwr-kpi-max">-- MW</div>
+          <div class="power-kpi-sub">Capacidad requerida al 100%</div>
+        </div>
+
+        <div class="power-kpi-card card-prod">
+          <div class="power-kpi-label">
+            <span class="legend-color-dot" style="background: #94a3b8;"></span>
+            <span>PRODUCCIÓN</span>
+          </div>
+          <div class="power-kpi-val" id="pwr-kpi-prod">-- MW</div>
+          <div class="power-kpi-sub">Suministro activo actual</div>
+        </div>
+
+        <div class="power-kpi-card card-cap">
+          <div class="power-kpi-label">
+            <span class="legend-color-dot" style="background: #f8fafc;"></span>
+            <span>CAPACIDAD</span>
+          </div>
+          <div class="power-kpi-val" id="pwr-kpi-cap">-- MW</div>
+          <div class="power-kpi-sub">Potencia instalada total</div>
+        </div>
+      </div>
+
+      <!-- Pantalla Osciloscopio CRT de Satisfactory -->
+      <div class="power-screen-container">
+        <div class="power-screen-bezel">
+          <div class="power-screen-header">
+            <div class="screen-legend">
+              <span class="legend-item"><span class="legend-dot" style="background:#fa9549;"></span> Consumo</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span> Consumo Máx</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#94a3b8;"></span> Producción</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#f8fafc;"></span> Capacidad</span>
+            </div>
+            <div class="screen-status-ticker">
+              <span id="power-oscilloscope-freq">ESCALA DINÁMICA // HISTORIAL: 60s</span>
+            </div>
+          </div>
+          <div class="power-canvas-wrapper">
+            <canvas id="power-oscilloscope-canvas" width="860" height="260"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Desglose Inferior: Generadores Conectados y Top Consumidores -->
+      <div class="power-details-grid">
+        <div class="power-details-col">
+          <div class="power-col-title">
+            <span>⚡ GENERADORES EN LÍNEA</span>
+            <span id="power-gen-total-count" class="power-badge">--</span>
+          </div>
+          <div id="power-generators-list" class="power-breakdown-list"></div>
+        </div>
+
+        <div class="power-details-col">
+          <div class="power-col-title">
+            <span>🏭 MAYORES CONSUMIDORES</span>
+            <span id="power-cons-total-count" class="power-badge">--</span>
+          </div>
+          <div id="power-consumers-list" class="power-breakdown-list"></div>
+        </div>
+      </div>
+
+      <!-- Barra Inferior / Palanca de Fusible FICSIT -->
+      <div class="power-footer-bar">
+        <div class="power-headroom-info">
+          <span style="color: var(--neon-green); font-weight: 800; font-size: 13px;">🛡️ MARGEN DISPONIBLE:</span>
+          <strong id="power-headroom-val" style="color: #fff; font-size: 14px; margin-left: 6px;">-- MW</strong>
+          <span id="power-headroom-pct" style="color: var(--text-muted); font-size: 12px; margin-left: 6px;">(--% libre)</span>
+        </div>
+        <div class="power-breaker-lever-wrapper">
+          <button id="btn-power-breaker" class="power-breaker-btn ok" onclick="togglePowerBreaker()">
+            <span class="breaker-handle"></span>
+            <span id="power-breaker-label">FUSIBLE CONECTADO</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/items.js?v=4.9.0"></script>
+  <script src="js/collectibles.js?v=4.9.0"></script>
+  <script src="js/map.js?v=4.9.0"></script>
+  <script src="js/app.js?v=4.9.0"></script>
 </body>
 </html>

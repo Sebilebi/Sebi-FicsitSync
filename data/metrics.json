@@ -1,13 +1,13 @@
 {
-  "last_sync": "2026-09-23T22:02:10.107Z",
+  "last_sync": "2026-09-24T10:29:34.413Z",
   "session": {
     "sessionName": "test",
     "saveVersion": 60,
     "buildVersion": 502094,
-    "playTimeFormatted": "105h 5m",
-    "playDurationSeconds": 378309,
-    "saveDateTime": "2026-09-23T22:02:09.718Z",
-    "fileSizeBytes": 1567612
+    "playTimeFormatted": "117h 25m",
+    "playDurationSeconds": 422715,
+    "saveDateTime": "2026-09-24T10:29:33.995Z",
+    "fileSizeBytes": 1563754
   },
   "global": {
     "Iron_Ingot": {
@@ -23,7 +23,6 @@
       "production_nominal": 87.99999952316284,
       "machines_count": 4,
       "zones_breakdown": {
-        "Fábrica Central - Fundiciones": 30,
         "Complejo Placas y Logística": 30
       }
     },
@@ -32,7 +31,7 @@
       "production_nominal": 117.00000017881393,
       "machines_count": 8,
       "zones_breakdown": {
-        "Fábrica Central - Fundiciones": 30,
+        "Fábrica Central - Fundiciones": 15,
         "Complejo Placas y Logística": 15
       }
     },
@@ -59,7 +58,6 @@
       "production_nominal": 280,
       "machines_count": 7,
       "zones_breakdown": {
-        "Fábrica Central - Fundiciones": 40,
         "Complejo Placas y Logística": 40,
         "Zona de Ensamblaje Avanzado": 80
       }
@@ -228,27 +226,18 @@
       "zoneName": "Fábrica Central - Fundiciones",
       "assignedItem": "iron_ingot",
       "color": "#e06c75",
-      "totalMachines": 10,
-      "totalStorages": 7,
+      "totalMachines": 7,
+      "totalStorages": 2,
+      "overlappingCount": 8,
       "production": {
         "Iron_Ingot": {
           "name": "Iron Ingot",
           "rate": 75,
           "count": 2
         },
-        "Iron_Plate": {
-          "name": "Iron Plate",
-          "rate": 30,
-          "count": 1
-        },
         "Iron_Rod": {
           "name": "Iron Rod",
-          "rate": 30,
-          "count": 2
-        },
-        "Screw": {
-          "name": "Screw",
-          "rate": 40,
+          "rate": 15,
           "count": 1
         },
         "Silica": {
@@ -269,11 +258,7 @@
         },
         "Iron_Ingot": {
           "name": "Iron Ingot",
-          "rate": 75
-        },
-        "Iron_Rod": {
-          "name": "Iron Rod",
-          "rate": 10
+          "rate": 15
         },
         "Raw_Quartz": {
           "name": "Raw Quartz",
@@ -288,6 +273,7 @@
       "color": "#61afef",
       "totalMachines": 6,
       "totalStorages": 18,
+      "overlappingCount": 0,
       "production": {
         "Iron_Plate": {
           "name": "Iron Plate",
@@ -336,6 +322,7 @@
       "color": "#98c379",
       "totalMachines": 3,
       "totalStorages": 5,
+      "overlappingCount": 0,
       "production": {
         "Screw": {
           "name": "Screw",
@@ -364,78 +351,186 @@
       }
     }
   },
-  "active_save_file": "test_autosave_3.sav",
-  "save_modified": "2026-09-24T00:02:26.44105384+02:00",
-  "recentSaves": [
-    {
-      "name": "test_autosave_3.sav",
-      "modified": "2026-09-24T00:02:26.44105384+02:00",
-      "size": 1568768
-    },
-    {
-      "name": "test_autosave_2.sav",
-      "modified": "2026-09-23T23:57:26.410822788+02:00",
-      "size": 1568768
-    },
-    {
-      "name": "test_autosave_1.sav",
-      "modified": "2026-09-23T23:52:26.386650834+02:00",
-      "size": 1568768
-    },
-    {
-      "name": "test_autosave_0.sav",
-      "modified": "2026-09-23T23:47:26.351364989+02:00",
-      "size": 1568768
-    },
-    {
-      "name": "test_autosave_4.sav",
-      "modified": "2026-09-23T23:42:26.33292651+02:00",
-      "size": 1568768
-    },
-    {
-      "name": "test_autosave_2_continue.sav",
-      "modified": "2026-09-23T09:00:00.245798837+02:00",
-      "size": 1396736
-    },
-    {
-      "name": "test_220926-192552.sav",
-      "modified": "2026-09-22T19:26:11.476970778+02:00",
-      "size": 1347584
-    },
-    {
-      "name": "test_220926-185427.sav",
-      "modified": "2026-09-22T18:54:46.343883243+02:00",
-      "size": 1339392
-    },
-    {
-      "name": "test_210926-232031.sav",
-      "modified": "2026-09-21T23:20:47.033256894+02:00",
-      "size": 1097728
-    },
-    {
-      "name": "test_210926-232009.sav",
-      "modified": "2026-09-21T23:20:25.727319574+02:00",
-      "size": 1097728
-    },
-    {
-      "name": "test_autosave_1_continue.sav",
-      "modified": "2026-09-21T09:00:00.148725488+02:00",
-      "size": 954368
-    },
-    {
-      "name": "test_200926-154843.sav",
-      "modified": "2026-09-20T15:48:57.555436417+02:00",
-      "size": 925696
-    },
-    {
-      "name": "test_200926-012528_continue.sav",
-      "modified": "2026-09-20T02:00:00.120358874+02:00",
-      "size": 540672
-    },
-    {
-      "name": "test_200926-012528.sav",
-      "modified": "2026-09-20T01:25:39.513386852+02:00",
-      "size": 540672
-    }
-  ]
+  "power": {
+    "capacity": 6875,
+    "production": 6875,
+    "consumptionNominal": 2428.6,
+    "consumptionCurrent": 1373.7,
+    "fuseTriggered": false,
+    "primaryCircuitId": 18,
+    "circuits": [
+      {
+        "circuitId": 18,
+        "capacity": 6875,
+        "production": 6875,
+        "consumptionNominal": 2428.6,
+        "consumptionCurrent": 1373.7,
+        "fuseTriggered": false,
+        "generators": [
+          {
+            "type": "GeneratorFuel",
+            "nameEs": "Generador de Combustible",
+            "icon": "Fuel.png",
+            "count": 20,
+            "capacityTotal": 5000
+          },
+          {
+            "type": "GeneratorCoal",
+            "nameEs": "Generador de Carbón",
+            "icon": "Coal.png",
+            "count": 25,
+            "capacityTotal": 1875
+          }
+        ],
+        "consumers": [
+          {
+            "type": "OilRefinery",
+            "nameEs": "Refinería",
+            "icon": "Plastic.png",
+            "count": 23,
+            "powerNominal": 672.0000007892509,
+            "powerCurrent": 402.0000007892509,
+            "producingCount": 14
+          },
+          {
+            "type": "OilPump",
+            "nameEs": "Extractor de Petróleo",
+            "icon": "Crude_Oil.png",
+            "count": 2,
+            "powerNominal": 268.61980331594134,
+            "powerCurrent": 134.30990165797067,
+            "producingCount": 1
+          },
+          {
+            "type": "ConstructorMk1",
+            "nameEs": "Constructor",
+            "icon": "Iron_Plate.png",
+            "count": 61,
+            "powerNominal": 265.0714701152,
+            "powerCurrent": 203.47147000996654,
+            "producingCount": 45
+          },
+          {
+            "type": "WaterPump",
+            "nameEs": "Extractor de Agua",
+            "icon": "Water.png",
+            "count": 10,
+            "powerNominal": 261.33793402884055,
+            "powerCurrent": 20,
+            "producingCount": 1
+          },
+          {
+            "type": "AssemblerMk1",
+            "nameEs": "Ensamblador",
+            "icon": "Reinforced_Iron_Plate.png",
+            "count": 11,
+            "powerNominal": 201.40972098843682,
+            "powerCurrent": 145.7724835885454,
+            "producingCount": 8
+          },
+          {
+            "type": "MinerMk2",
+            "nameEs": "Minero Mk.2",
+            "icon": "Iron_Ore.png",
+            "count": 7,
+            "powerNominal": 158.1041488811537,
+            "powerCurrent": 128.10415085428082,
+            "producingCount": 6
+          },
+          {
+            "type": "ResourceSink",
+            "nameEs": "Trituradora FICSIT (Sink)",
+            "icon": "Ficsit_Coupon.png",
+            "count": 5,
+            "powerNominal": 150,
+            "powerCurrent": 30,
+            "producingCount": 1
+          },
+          {
+            "type": "SmelterMk1",
+            "nameEs": "Fundición",
+            "icon": "Iron_Ingot.png",
+            "count": 23,
+            "powerNominal": 107.27319206975744,
+            "powerCurrent": 85.67319196452398,
+            "producingCount": 17
+          },
+          {
+            "type": "MinerMk1",
+            "nameEs": "Minero Mk.1",
+            "icon": "Iron_Ore.png",
+            "count": 19,
+            "powerNominal": 106.18298333139703,
+            "powerCurrent": 43.545745799963804,
+            "producingCount": 8
+          },
+          {
+            "type": "TruckStation",
+            "nameEs": "Estación de Camiones",
+            "icon": "Iron_Plate.png",
+            "count": 4,
+            "powerNominal": 80,
+            "powerCurrent": 80,
+            "producingCount": 4
+          },
+          {
+            "type": "FoundryMk1",
+            "nameEs": "Fundición Avanzada",
+            "icon": "Steel_Ingot.png",
+            "count": 3,
+            "powerNominal": 64.14927116974441,
+            "powerCurrent": 40.82312811747941,
+            "producingCount": 2
+          },
+          {
+            "type": "Packager",
+            "nameEs": "Empaquetador",
+            "icon": "Empty_Canister.png",
+            "count": 3,
+            "powerNominal": 60,
+            "powerCurrent": 60,
+            "producingCount": 3
+          },
+          {
+            "type": "PipelinePump",
+            "nameEs": "Bomba de Tubería",
+            "icon": "Water.png",
+            "count": 6,
+            "powerNominal": 24,
+            "powerCurrent": 0,
+            "producingCount": 0
+          },
+          {
+            "type": "PipeHyperStart",
+            "nameEs": "Entrada de Hipertubo",
+            "icon": "Iron_Plate.png",
+            "count": 35,
+            "powerNominal": 10.500000000000004,
+            "powerCurrent": 0,
+            "producingCount": 0
+          }
+        ]
+      },
+      {
+        "circuitId": 1,
+        "capacity": 0,
+        "production": 0,
+        "consumptionNominal": 134.3,
+        "consumptionCurrent": 134.3,
+        "fuseTriggered": true,
+        "generators": [],
+        "consumers": [
+          {
+            "type": "OilPump",
+            "nameEs": "Extractor de Petróleo",
+            "icon": "Crude_Oil.png",
+            "count": 1,
+            "powerNominal": 134.30990165797067,
+            "powerCurrent": 134.30990165797067,
+            "producingCount": 1
+          }
+        ]
+      }
+    ]
+  }
 }

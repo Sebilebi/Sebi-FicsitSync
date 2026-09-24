@@ -121,9 +121,7 @@ function initCommandCenter() {
         input.select();
       }
     } else if (e.key === 'Escape') {
-      closeModal();
-      closeMachineModal();
-      closeZoneModal();
+      closeAllModals();
     }
   });
 
@@ -163,6 +161,11 @@ function closeAllModals() {
   if (machineModal) machineModal.classList.remove('active');
   const zoneModal = document.getElementById('zone-modal');
   if (zoneModal) zoneModal.classList.remove('active');
+  const powerModal = document.getElementById('power-modal');
+  if (powerModal) {
+    powerModal.classList.remove('active');
+    if (typeof stopPowerOscilloscope === 'function') stopPowerOscilloscope();
+  }
   document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
   window.hasDraggedBlueprint = false;
   if (window.tacticalMap && typeof window.tacticalMap.setDrawMode === 'function') {
@@ -1487,6 +1490,8 @@ function updateKPITicker(saveData, metricsData) {
     const mined = saveData.nodes.filter(n => n.isExploited).length;
     nMiners.textContent = `${mined}/${saveData.nodes.length}`;
   }
+
+  updateHeaderPowerWidget();
 }
 
 async function fetchMetrics() {
@@ -1501,12 +1506,16 @@ async function fetchMetrics() {
       window.liveMetrics.last_sync = data.last_sync || window.liveMetrics.last_sync;
       window.liveMetrics.recentSaves = data.recentSaves || window.liveMetrics.recentSaves;
       window.liveMetrics.active_save_file = data.active_save_file || window.liveMetrics.active_save_file;
+      if (data.power) {
+        window.powerGridData = data.power;
+      }
     }
   } catch (err) {
     console.warn('[Sync] Could not fetch metrics:', err.message);
   } finally {
     recalculateLiveMetrics();
     updateSyncCountdownUI();
+    updateHeaderPowerWidget();
     if (currentMode === 'schematics') renderSchematics(currentBranchId);
     if (currentMode === 'mall_summary') renderMallSummary();
   }
@@ -1522,6 +1531,10 @@ async function loadMapData() {
 
     if (!bldRes || !bldRes.ok) bldRes = await fetch(`data/buildings.json?t=${ts}`);
     const bldData = await bldRes.json();
+
+    if (bldData && bldData.power) {
+      window.powerGridData = bldData.power;
+    }
 
     let zonesData = null;
     try {
@@ -1563,6 +1576,7 @@ async function loadMapData() {
     updateKPITicker(bldData, window.liveMetrics);
     applyMapData(bldData, zonesData, nodes);
     updateQuickZonesBar();
+    updateHeaderPowerWidget();
   } catch (err) {
     console.warn('[Map] Error loading map data:', err.message);
   }
@@ -2036,6 +2050,455 @@ function viewItemOnMap() {
   }
 }
 window.viewItemOnMap = viewItemOnMap;
+
+// ==========================================
+// 9.1 OSCILOSCOPIO Y MONITOR DE RED ELÉCTRICA FICSIT
+// ==========================================
+let currentPowerCircuitId = null;
+let powerOscilloscopeAnimId = null;
+let powerHistoryBuffer = [];
+let powerBreakerTripped = false;
+let powerLastTimestamp = 0;
+
+function updateHeaderPowerWidget() {
+  const pData = window.powerGridData || window.cachedBuildingsData?.power || window.liveMetrics?.power;
+  const consEl = document.getElementById('header-power-cons');
+  const prodEl = document.getElementById('header-power-prod');
+  const widget = document.getElementById('header-power-widget');
+  if (!consEl || !prodEl) return;
+
+  if (pData) {
+    const cons = Math.round(pData.consumptionCurrent || 0);
+    const prod = Math.round(pData.production || pData.capacity || 0);
+    const cap = Math.round(pData.capacity || 0);
+    consEl.textContent = `${cons.toLocaleString('es-ES')} MW`;
+    prodEl.textContent = `${prod.toLocaleString('es-ES')} MW`;
+    if (widget) {
+      widget.title = `Red Eléctrica FICSIT: Consumo: ${cons.toLocaleString('es-ES')} MW | Producción: ${prod.toLocaleString('es-ES')} MW | Capacidad: ${cap.toLocaleString('es-ES')} MW. Haz clic para abrir el osciloscopio de potencia.`;
+    }
+  }
+}
+window.updateHeaderPowerWidget = updateHeaderPowerWidget;
+
+function getActivePowerCircuit(circuitId) {
+  const pData = window.powerGridData || window.cachedBuildingsData?.power || window.liveMetrics?.power;
+  if (!pData || !pData.circuits || pData.circuits.length === 0) {
+    return {
+      circuitId: 1,
+      capacity: pData?.capacity || 0,
+      production: pData?.production || 0,
+      consumptionNominal: pData?.consumptionNominal || 0,
+      consumptionCurrent: pData?.consumptionCurrent || 0,
+      fuseTriggered: false,
+      generators: [],
+      consumers: []
+    };
+  }
+  if (circuitId) {
+    const found = pData.circuits.find(c => c.circuitId == circuitId);
+    if (found) return found;
+  }
+  if (currentPowerCircuitId) {
+    const found = pData.circuits.find(c => c.circuitId == currentPowerCircuitId);
+    if (found) return found;
+  }
+  return pData.circuits[0];
+}
+
+function openPowerGridModal(preferredCircuitId) {
+  closeAllModals();
+  const modal = document.getElementById('power-modal');
+  if (!modal) return;
+
+  const pData = window.powerGridData || window.cachedBuildingsData?.power || window.liveMetrics?.power;
+  if (pData && pData.circuits && pData.circuits.length > 0) {
+    const select = document.getElementById('power-circuit-select');
+    const selectWrap = document.getElementById('power-circuit-selector-wrap');
+    if (select && selectWrap) {
+      if (pData.circuits.length > 1) {
+        selectWrap.style.display = 'inline-block';
+        select.innerHTML = pData.circuits.map(c => 
+          `<option value="${c.circuitId}" ${c.circuitId == (preferredCircuitId || currentPowerCircuitId || pData.primaryCircuitId) ? 'selected' : ''}>
+            Circuito #${c.circuitId} (${c.capacity.toLocaleString('es-ES')} MW)
+          </option>`
+        ).join('');
+      } else {
+        selectWrap.style.display = 'none';
+      }
+    }
+  }
+
+  currentPowerCircuitId = preferredCircuitId || pData?.primaryCircuitId || (pData?.circuits?.[0]?.circuitId) || 1;
+  refreshPowerModalData();
+  modal.classList.add('active');
+
+  initPowerOscilloscope();
+}
+window.openPowerGridModal = openPowerGridModal;
+
+function closePowerModal() {
+  const modal = document.getElementById('power-modal');
+  if (modal) modal.classList.remove('active');
+  stopPowerOscilloscope();
+}
+window.closePowerModal = closePowerModal;
+
+function switchPowerCircuit(circuitId) {
+  currentPowerCircuitId = circuitId;
+  refreshPowerModalData();
+  initPowerOscilloscope();
+}
+window.switchPowerCircuit = switchPowerCircuit;
+
+function togglePowerBreaker() {
+  powerBreakerTripped = !powerBreakerTripped;
+  refreshPowerModalData();
+}
+window.togglePowerBreaker = togglePowerBreaker;
+
+function refreshPowerModalData() {
+  const circuit = getActivePowerCircuit(currentPowerCircuitId);
+  const titleEl = document.getElementById('power-modal-title');
+  if (titleEl) {
+    titleEl.textContent = `CIRCUITO DE ENERGÍA #${circuit.circuitId}`;
+  }
+
+  const isTripped = powerBreakerTripped || circuit.fuseTriggered;
+
+  const dispCap = isTripped ? 0 : circuit.capacity;
+  const dispProd = isTripped ? 0 : circuit.production;
+  const dispCons = isTripped ? 0 : circuit.consumptionCurrent;
+  const dispMax = isTripped ? 0 : circuit.consumptionNominal;
+
+  const kpiCons = document.getElementById('pwr-kpi-cons');
+  const kpiMax = document.getElementById('pwr-kpi-max');
+  const kpiProd = document.getElementById('pwr-kpi-prod');
+  const kpiCap = document.getElementById('pwr-kpi-cap');
+
+  if (kpiCons) kpiCons.textContent = `${dispCons.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MW`;
+  if (kpiMax) kpiMax.textContent = `${dispMax.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MW`;
+  if (kpiProd) kpiProd.textContent = `${dispProd.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MW`;
+  if (kpiCap) kpiCap.textContent = `${dispCap.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MW`;
+
+  // Fuse indicator
+  const fusePill = document.getElementById('power-fuse-pill');
+  const fuseText = document.getElementById('power-fuse-text');
+  const breakerBtn = document.getElementById('btn-power-breaker');
+  const breakerLabel = document.getElementById('power-breaker-label');
+
+  if (fusePill && fuseText) {
+    if (isTripped) {
+      fusePill.className = 'power-fuse-pill tripped';
+      fuseText.textContent = '✕ FUSIBLE DISPARADO';
+    } else {
+      fusePill.className = 'power-fuse-pill ok';
+      fuseText.textContent = '● FUSIBLE OPERATIVO';
+    }
+  }
+
+  if (breakerBtn && breakerLabel) {
+    if (isTripped) {
+      breakerBtn.className = 'power-breaker-btn tripped';
+      breakerLabel.textContent = 'RESTABLECER FUSIBLE';
+    } else {
+      breakerBtn.className = 'power-breaker-btn ok';
+      breakerLabel.textContent = 'FUSIBLE CONECTADO';
+    }
+  }
+
+  // Headroom
+  const headroomVal = document.getElementById('power-headroom-val');
+  const headroomPct = document.getElementById('power-headroom-pct');
+  if (headroomVal && headroomPct) {
+    const diff = dispCap - dispCons;
+    const pct = dispCap > 0 ? ((diff / dispCap) * 100).toFixed(1) : '0.0';
+    headroomVal.textContent = `${diff >= 0 ? '+' : ''}${diff.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MW`;
+    headroomVal.style.color = diff >= 0 ? '#4ade80' : '#ef4444';
+    headroomPct.textContent = `(${pct}% libre)`;
+  }
+
+  // Generators breakdown
+  const genCountBadge = document.getElementById('power-gen-total-count');
+  const genList = document.getElementById('power-generators-list');
+  if (genList) {
+    const gens = circuit.generators || [];
+    const totalGens = gens.reduce((sum, g) => sum + (g.count || 0), 0);
+    if (genCountBadge) genCountBadge.textContent = `${totalGens} máquinas`;
+    if (gens.length === 0) {
+      genList.innerHTML = `<div style="color:var(--text-muted); font-size:11px; padding:8px;">Sin generadores activos en esta subred.</div>`;
+    } else {
+      genList.innerHTML = gens.map(g => `
+        <div class="power-breakdown-row">
+          <div class="power-item-info">
+            <img src="icons/${g.icon || 'Fuel.png'}" class="power-item-icon" onerror="this.src='icons/Fuel.png'" />
+            <div>
+              <span class="power-item-name">${g.nameEs || g.type}</span>
+              <span class="power-item-count">(${g.count} uds)</span>
+            </div>
+          </div>
+          <span class="power-item-rate" style="color: #4ade80;">+${(g.capacityTotal || 0).toLocaleString('es-ES')} MW</span>
+        </div>
+      `).join('');
+    }
+  }
+
+  // Consumers breakdown
+  const consCountBadge = document.getElementById('power-cons-total-count');
+  const consList = document.getElementById('power-consumers-list');
+  if (consList) {
+    const cons = circuit.consumers || [];
+    const totalCons = cons.reduce((sum, c) => sum + (c.count || 0), 0);
+    if (consCountBadge) consCountBadge.textContent = `${totalCons} máquinas`;
+    if (cons.length === 0) {
+      consList.innerHTML = `<div style="color:var(--text-muted); font-size:11px; padding:8px;">Sin máquinas consumidoras registradas.</div>`;
+    } else {
+      consList.innerHTML = cons.map(c => `
+        <div class="power-breakdown-row">
+          <div class="power-item-info">
+            <img src="icons/${c.icon || 'Iron_Plate.png'}" class="power-item-icon" onerror="this.src='icons/Iron_Plate.png'" />
+            <div>
+              <span class="power-item-name">${c.nameEs || c.type}</span>
+              <span class="power-item-count">(${c.count} uds${c.producingCount ? ` · ${c.producingCount} activas` : ''})</span>
+            </div>
+          </div>
+          <span class="power-item-rate" style="color: #fa9549;">-${Math.round(c.powerCurrent || c.powerNominal).toLocaleString('es-ES')} MW</span>
+        </div>
+      `).join('');
+    }
+  }
+}
+
+function initPowerOscilloscope() {
+  stopPowerOscilloscope();
+  const circuit = getActivePowerCircuit(currentPowerCircuitId);
+  const isTripped = powerBreakerTripped || circuit.fuseTriggered;
+  const baseCons = isTripped ? 0 : circuit.consumptionCurrent;
+
+  // Initialize buffer with 120 historical samples
+  powerHistoryBuffer = [];
+  for (let i = 0; i < 120; i++) {
+    const noise = Math.sin(i * 0.28) * 8 + Math.cos(i * 0.15) * 5;
+    powerHistoryBuffer.push(Math.max(0, baseCons + noise));
+  }
+
+  powerLastTimestamp = performance.now();
+  renderPowerOscilloscopeLoop();
+}
+
+function stopPowerOscilloscope() {
+  if (powerOscilloscopeAnimId) {
+    cancelAnimationFrame(powerOscilloscopeAnimId);
+    powerOscilloscopeAnimId = null;
+  }
+}
+window.stopPowerOscilloscope = stopPowerOscilloscope;
+
+function renderPowerOscilloscopeLoop() {
+  const modal = document.getElementById('power-modal');
+  if (!modal || !modal.classList.contains('active')) {
+    stopPowerOscilloscope();
+    return;
+  }
+
+  const canvas = document.getElementById('power-oscilloscope-canvas');
+  if (!canvas) return;
+
+  const now = performance.now();
+  if (now - powerLastTimestamp >= 60) {
+    powerLastTimestamp = now;
+    const circuit = getActivePowerCircuit(currentPowerCircuitId);
+    const isTripped = powerBreakerTripped || circuit.fuseTriggered;
+    const targetCons = isTripped ? 0 : circuit.consumptionCurrent;
+    const noise = Math.sin(now * 0.0035) * 9 + Math.cos(now * 0.007) * 6;
+    const newPoint = Math.max(0, targetCons + noise);
+    powerHistoryBuffer.push(newPoint);
+    if (powerHistoryBuffer.length > 120) {
+      powerHistoryBuffer.shift();
+    }
+  }
+
+  drawPowerOscilloscopeFrame(canvas);
+  powerOscilloscopeAnimId = requestAnimationFrame(renderPowerOscilloscopeLoop);
+}
+
+function drawPowerOscilloscopeFrame(canvas) {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  const width = rect.width;
+  const height = rect.height;
+
+  if (width <= 0 || height <= 0) return;
+
+  if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+  }
+
+  const ctx = canvas.getContext('2d');
+  ctx.save();
+  ctx.scale(dpr, dpr);
+
+  const circuit = getActivePowerCircuit(currentPowerCircuitId);
+  const isTripped = powerBreakerTripped || circuit.fuseTriggered;
+  const capacity = isTripped ? 0 : circuit.capacity;
+  const production = isTripped ? 0 : circuit.production;
+  const maxCons = isTripped ? 0 : circuit.consumptionNominal;
+  const curCons = powerHistoryBuffer[powerHistoryBuffer.length - 1] || (isTripped ? 0 : circuit.consumptionCurrent);
+
+  // Layout boundaries
+  const padLeft = 68;
+  const padRight = 24;
+  const padTop = 16;
+  const padBottom = 26;
+  const plotWidth = width - padLeft - padRight;
+  const plotHeight = height - padTop - padBottom;
+
+  // Determine dynamic vertical scale (nearest 1000 MW or 500 MW)
+  const peakVal = Math.max(capacity, maxCons, curCons, 100);
+  let maxScale = Math.ceil((peakVal * 1.18) / 1000) * 1000;
+  if (maxScale < 500) maxScale = 500;
+
+  const valToY = (val) => padTop + plotHeight - (Math.max(0, val) / maxScale) * plotHeight;
+
+  // 1. Clear background
+  ctx.fillStyle = '#060910';
+  ctx.fillRect(0, 0, width, height);
+
+  // 2. Grid lines & Axis values
+  ctx.lineWidth = 1;
+  const gridSteps = 4;
+  for (let i = 0; i <= gridSteps; i++) {
+    const stepVal = Math.round((maxScale / gridSteps) * i);
+    const y = valToY(stepVal);
+
+    // Grid horizontal line
+    ctx.strokeStyle = i === 0 ? '#334155' : 'rgba(51, 65, 85, 0.45)';
+    ctx.setLineDash(i === 0 ? [] : [3, 4]);
+    ctx.beginPath();
+    ctx.moveTo(padLeft, y);
+    ctx.lineTo(width - padRight, y);
+    ctx.stroke();
+
+    // MW label
+    ctx.fillStyle = '#64748b';
+    ctx.font = '10px Oswald, "Roboto Condensed", sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`${stepVal.toLocaleString('es-ES')} MW`, padLeft - 8, y);
+  }
+  ctx.setLineDash([]);
+
+  // Time grid vertical lines (every 15s)
+  const timeLabels = ['-60s', '-45s', '-30s', '-15s', 'AHORA'];
+  for (let i = 0; i < timeLabels.length; i++) {
+    const x = padLeft + (plotWidth / (timeLabels.length - 1)) * i;
+    ctx.strokeStyle = 'rgba(51, 65, 85, 0.35)';
+    ctx.setLineDash([2, 4]);
+    ctx.beginPath();
+    ctx.moveTo(x, padTop);
+    ctx.lineTo(x, height - padBottom);
+    ctx.stroke();
+
+    ctx.fillStyle = i === timeLabels.length - 1 ? 'var(--ficsit-orange)' : '#64748b';
+    ctx.font = '10px Oswald, "Roboto Condensed", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(timeLabels[i], x, height - padBottom + 6);
+  }
+  ctx.setLineDash([]);
+
+  // 3. Draw CAPACITY line (#f8fafc)
+  if (capacity > 0) {
+    const yCap = valToY(capacity);
+    ctx.strokeStyle = '#f8fafc';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padLeft, yCap);
+    ctx.lineTo(width - padRight, yCap);
+    ctx.stroke();
+  }
+
+  // 4. Draw PRODUCTION line (#94a3b8)
+  if (production > 0) {
+    const yProd = valToY(production);
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 1.6;
+    ctx.setLineDash([4, 2]);
+    ctx.beginPath();
+    ctx.moveTo(padLeft, yProd);
+    ctx.lineTo(width - padRight, yProd);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // 5. Draw MAX CONSUMPTION line (#38bdf8)
+  if (maxCons > 0) {
+    const yMax = valToY(maxCons);
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 1.8;
+    ctx.shadowColor = '#38bdf8';
+    ctx.shadowBlur = 6;
+    ctx.beginPath();
+    ctx.moveTo(padLeft, yMax);
+    ctx.lineTo(width - padRight, yMax);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+
+  // 6. Draw CURRENT CONSUMPTION Curve (#fa9549) with area fill
+  if (powerHistoryBuffer.length > 1) {
+    const n = powerHistoryBuffer.length;
+    const stepX = plotWidth / (n - 1);
+
+    // Gradient fill under curve
+    ctx.beginPath();
+    ctx.moveTo(padLeft, height - padBottom);
+    for (let i = 0; i < n; i++) {
+      const x = padLeft + i * stepX;
+      const y = valToY(powerHistoryBuffer[i]);
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(padLeft + (n - 1) * stepX, height - padBottom);
+    ctx.closePath();
+
+    const grad = ctx.createLinearGradient(0, padTop, 0, height - padBottom);
+    grad.addColorStop(0, 'rgba(250, 149, 73, 0.28)');
+    grad.addColorStop(1, 'rgba(250, 149, 73, 0.01)');
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Vibrant line trace
+    ctx.beginPath();
+    ctx.strokeStyle = '#fa9549';
+    ctx.lineWidth = 2.4;
+    ctx.shadowColor = '#fa9549';
+    ctx.shadowBlur = 9;
+
+    for (let i = 0; i < n; i++) {
+      const x = padLeft + i * stepX;
+      const y = valToY(powerHistoryBuffer[i]);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Pulsing head circle at right edge
+    const lastX = padLeft + (n - 1) * stepX;
+    const lastY = valToY(powerHistoryBuffer[n - 1]);
+    const pulseRad = 3.5 + Math.sin(performance.now() * 0.008) * 1.5;
+
+    ctx.fillStyle = '#fa9549';
+    ctx.shadowColor = '#fa9549';
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(lastX, lastY, pulseRad, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  ctx.restore();
+}
 
 // ==========================================
 // 10. SCIM IN-GAME MACHINE DIALOG

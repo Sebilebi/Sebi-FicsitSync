@@ -23,20 +23,38 @@ const MACHINE_SPECS = {
   Manufacturer: { width: 1800, length: 1900, color: '#e58837', strokeColor: '#ff3700', power: 55, duration: 24, defaultIcon: 'Heavy_Modular_Frame.png', nameEs: 'Fabricante' },
   Refinery: { width: 1000, length: 2000, color: '#e58837', strokeColor: '#ff3700', power: 30, duration: 6, defaultIcon: 'Plastic.png', nameEs: 'Refinería' },
   Packager: { width: 800, length: 800, color: '#e58837', strokeColor: '#ff3700', power: 20, duration: 2, defaultIcon: 'Empty_Canister.png', nameEs: 'Empaquetador' },
-    Blender: { width: 1800, length: 1600, color: "#e58837", strokeColor: "#ff3700", power: 75, duration: 12, defaultIcon: "Motor.png", nameEs: "Mezcladora" },
-  GeneratorCoal: { width: 1000, length: 2600, color: "#4b5563", strokeColor: "#1f2937", power: -75, duration: 4, defaultIcon: "Coal.png", nameEs: "Generador de Carb�n" },
-  GeneratorFuel: { width: 2000, length: 2000, color: "#4b5563", strokeColor: "#1f2937", power: -150, duration: 4, defaultIcon: "Fuel.png", nameEs: "Generador de Combustible" },
-  GeneratorNuclear: { width: 3800, length: 3800, color: "#4b5563", strokeColor: "#1f2937", power: -2500, duration: 4, defaultIcon: "Uranium_Fuel_Rod.png", nameEs: "Planta Nuclear" },
-  GeneratorBiomass: { width: 800, length: 800, color: "#4b5563", strokeColor: "#1f2937", power: -30, duration: 4, defaultIcon: "Biomass.png", nameEs: "Quemador de Biomasa" },
+  Blender: { width: 1800, length: 1600, color: '#e58837', strokeColor: '#ff3700', power: 75, duration: 12, defaultIcon: 'Motor.png', nameEs: 'Mezcladora' },
+  GeneratorCoal: { width: 1000, length: 2600, color: '#4b5563', strokeColor: '#1f2937', power: -75, duration: 4, defaultIcon: 'Coal.png', nameEs: 'Generador de Carbón' },
+  GeneratorFuel: { width: 2000, length: 2000, color: '#4b5563', strokeColor: '#1f2937', power: -250, duration: 4, defaultIcon: 'Fuel.png', nameEs: 'Generador de Combustible' },
+  GeneratorNuclear: { width: 3800, length: 3800, color: '#4b5563', strokeColor: '#1f2937', power: -2500, duration: 4, defaultIcon: 'Uranium_Fuel_Rod.png', nameEs: 'Planta Nuclear' },
+  GeneratorBiomass: { width: 800, length: 800, color: '#4b5563', strokeColor: '#1f2937', power: -30, duration: 4, defaultIcon: 'Biomass.png', nameEs: 'Quemador de Biomasa' },
+  GeneratorIntegratedBiomass: { width: 800, length: 800, color: '#4b5563', strokeColor: '#1f2937', power: -20, duration: 4, defaultIcon: 'Biomass.png', nameEs: 'Quemador de Biomasa Integrado' },
   MinerMk1: { width: 600, length: 1400, color: '#e58837', strokeColor: '#ff3700', power: 5, defaultIcon: 'Iron_Ore.png', nameEs: 'Minero Mk.1' },
   MinerMk2: { width: 600, length: 1400, color: '#e58837', strokeColor: '#ff3700', power: 12, defaultIcon: 'Iron_Ore.png', nameEs: 'Minero Mk.2' },
   MinerMk3: { width: 600, length: 1400, color: '#e58837', strokeColor: '#ff3700', power: 30, defaultIcon: 'Iron_Ore.png', nameEs: 'Minero Mk.3' },
   OilPump: { width: 800, length: 1600, color: '#e58837', strokeColor: '#ff3700', power: 40, defaultIcon: 'Crude_Oil.png', nameEs: 'Extractor de Petróleo' },
   WaterPump: { width: 1800, length: 1800, color: '#0284c7', strokeColor: '#38bdf8', power: 20, defaultIcon: 'Water.png', nameEs: 'Extractor de Agua' },
+  PipelinePump: { width: 600, length: 600, color: '#0284c7', strokeColor: '#38bdf8', power: 4, defaultIcon: 'Water.png', nameEs: 'Bomba de Tubería' },
+  PipelinePumpMk2: { width: 800, length: 800, color: '#0284c7', strokeColor: '#38bdf8', power: 8, defaultIcon: 'Water.png', nameEs: 'Bomba de Tubería Mk.2' },
+  PipeHyperStart: { width: 400, length: 600, color: '#3b82f6', strokeColor: '#60a5fa', power: 0.3, defaultIcon: null, nameEs: 'Entrada de Hipertubo' },
+  ResourceSink: { width: 1200, length: 1200, color: '#e58837', strokeColor: '#ff3700', power: 30, defaultIcon: 'Ficsit_Coupon.png', nameEs: 'Trituradora FICSIT (Sink)' },
+  TruckStation: { width: 1000, length: 1600, color: '#e58837', strokeColor: '#ff3700', power: 20, defaultIcon: null, nameEs: 'Estación de Camiones' },
+  TrainStation: { width: 1600, length: 2600, color: '#e58837', strokeColor: '#ff3700', power: 50, defaultIcon: null, nameEs: 'Estación de Tren' },
+  PowerStorage: { width: 600, length: 600, color: '#0ea5e9', strokeColor: '#38bdf8', power: 0, defaultIcon: null, nameEs: 'Almacenamiento de Energía' },
   StorageContainer: { width: 500, length: 1000, color: '#e58837', strokeColor: '#ff3700', defaultIcon: null, nameEs: 'Contenedor de Almacenamiento' },
   StorageIntegrated: { width: 500, length: 1000, color: '#e58837', strokeColor: '#ff3700', defaultIcon: null, nameEs: 'Contenedor Integrado' },
   StoragePlayer: { width: 500, length: 1000, color: '#e58837', strokeColor: '#ff3700', defaultIcon: null, nameEs: 'Caja del Jugador' }
 };
+
+function getMachineSpec(raw) {
+  if (!raw) return null;
+  const clean = raw.replace('Build_', '').replace('_C', '');
+  if (MACHINE_SPECS[clean]) return MACHINE_SPECS[clean];
+  for (const [k, v] of Object.entries(MACHINE_SPECS)) {
+    if (clean.toLowerCase().includes(k.toLowerCase())) return v;
+  }
+  return null;
+}
 
 const BELT_RATES = {
   Build_ConveyorBeltMk1_C: 60,
@@ -198,6 +216,10 @@ function parseSaveFile(saveFilePath) {
   const powerPoles = [];
   const powerLines = [];
   const specialBuildings = [];
+  const rawCircuits = [];
+  const powerConnections = new Map();
+  const powerInfos = new Map();
+  const entityMap = new Map();
 
   for (const obj of allObjects) {
     const rawType = obj.typePath || obj.className || '';
@@ -205,6 +227,39 @@ function parseSaveFile(saveFilePath) {
     const className = rawType.split('.').pop() || '';
     const shortType = className.replace('Build_', '').replace('_C', '');
     const yaw = getYawFromQuaternion(obj.transform?.rotation);
+
+    if (rawType.includes('FGPowerCircuit')) {
+      rawCircuits.push(obj);
+      continue;
+    }
+    if (rawType.includes('FGPowerConnectionComponent')) {
+      if (obj.instanceName && obj.parentEntityName) {
+        powerConnections.set(obj.instanceName, obj.parentEntityName);
+      }
+      continue;
+    }
+    if (rawType.includes('FGPowerInfoComponent')) {
+      if (obj.instanceName) {
+        powerInfos.set(obj.instanceName, obj.properties || {});
+      }
+      continue;
+    }
+
+    const machSpec = getMachineSpec(rawType);
+    if (machSpec && obj.instanceName) {
+      const isGen = machSpec.power < 0;
+      const pot = obj.properties?.mCurrentPotential?.value ?? obj.properties?.mPendingPotential?.value ?? 1.0;
+      const isProd = obj.properties?.mIsProducing?.value !== false;
+      entityMap.set(obj.instanceName, {
+        id: obj.instanceName,
+        className,
+        type: shortType,
+        spec: machSpec,
+        isGenerator: isGen,
+        potential: Number(Number(pot).toFixed(2)),
+        isProducing: isProd
+      });
+    }
 
     // Power Lines
     if (rawType.includes('Build_PowerLine_C')) {
@@ -418,6 +473,88 @@ function parseSaveFile(saveFilePath) {
   const nodes = getDecoratedNodes(miners);
   const exploitedNodesCount = nodes.filter(n => n.isExploited).length;
 
+  // Resolve Power Circuits & Factory Grid
+  const resolvedCircuits = [];
+  for (const c of rawCircuits) {
+    const circuitId = c.properties?.mCircuitID?.value || 1;
+    const comps = c.properties?.mComponents?.values || [];
+    
+    let capacity = 0;
+    let production = 0;
+    let consumptionNominal = 0;
+    let consumptionCurrent = 0;
+    const gensMap = new Map();
+    const consMap = new Map();
+    const processed = new Set();
+
+    for (const comp of comps) {
+      const parentName = powerConnections.get(comp.pathName);
+      if (!parentName || processed.has(parentName)) continue;
+      processed.add(parentName);
+
+      const ent = entityMap.get(parentName);
+      if (!ent) continue;
+
+      if (ent.isGenerator) {
+        const pInfo = powerInfos.get(parentName + '.powerInfo') || powerInfos.get(parentName + '.PowerInfo');
+        const dynCap = pInfo?.mDynamicProductionCapacity?.value;
+        const cap = dynCap || Math.abs(ent.spec.power);
+        capacity += cap;
+        const prod = ent.type.includes('Biomass') ? 0 : cap;
+        production += prod;
+
+        if (!gensMap.has(ent.type)) {
+          gensMap.set(ent.type, { type: ent.type, nameEs: ent.spec.nameEs, icon: ent.spec.defaultIcon || 'Fuel.png', count: 0, capacityTotal: 0 });
+        }
+        const g = gensMap.get(ent.type);
+        g.count++;
+        g.capacityTotal += cap;
+      } else {
+        const basePower = ent.spec.power || 4;
+        const adjusted = basePower * Math.pow(ent.potential || 1.0, 1.321928);
+        consumptionNominal += adjusted;
+        if (ent.isProducing) {
+          consumptionCurrent += adjusted;
+        }
+
+        if (!consMap.has(ent.type)) {
+          consMap.set(ent.type, { type: ent.type, nameEs: ent.spec.nameEs, icon: ent.spec.defaultIcon || 'Iron_Plate.png', count: 0, powerNominal: 0, powerCurrent: 0, producingCount: 0 });
+        }
+        const cn = consMap.get(ent.type);
+        cn.count++;
+        cn.powerNominal += adjusted;
+        if (ent.isProducing) {
+          cn.powerCurrent += adjusted;
+          cn.producingCount++;
+        }
+      }
+    }
+
+    resolvedCircuits.push({
+      circuitId,
+      capacity: Math.round(capacity * 10) / 10,
+      production: Math.round(production * 10) / 10,
+      consumptionNominal: Math.round(consumptionNominal * 10) / 10,
+      consumptionCurrent: Math.round(consumptionCurrent * 10) / 10,
+      fuseTriggered: consumptionCurrent > capacity,
+      generators: Array.from(gensMap.values()).sort((a,b) => b.capacityTotal - a.capacityTotal),
+      consumers: Array.from(consMap.values()).sort((a,b) => b.powerNominal - a.powerNominal)
+    });
+  }
+
+  resolvedCircuits.sort((a, b) => b.capacity - a.capacity);
+  const primaryCircuit = resolvedCircuits[0] || null;
+
+  const powerGrid = {
+    capacity: primaryCircuit ? primaryCircuit.capacity : 0,
+    production: primaryCircuit ? primaryCircuit.production : 0,
+    consumptionNominal: primaryCircuit ? primaryCircuit.consumptionNominal : 0,
+    consumptionCurrent: primaryCircuit ? primaryCircuit.consumptionCurrent : 0,
+    fuseTriggered: primaryCircuit ? primaryCircuit.fuseTriggered : false,
+    primaryCircuitId: primaryCircuit ? primaryCircuit.circuitId : 1,
+    circuits: resolvedCircuits
+  };
+
   cachedSave = {
     header: {
       sessionName: parsed.header?.sessionName || 'Satisfactory',
@@ -452,7 +589,8 @@ function parseSaveFile(saveFilePath) {
     powerLines,
     specialBuildings,
     nodes,
-    collectables
+    collectables,
+    power: powerGrid
   };
 
   console.log(`[Parser] Parsed in ${Date.now() - startTime}ms! ${buildings.length} machines, ${attachments.length} splitters/mergers, ${powerLines.length} power lines, ${belts.length} belts, ${pipes.length} pipes, ${exploitedNodesCount}/${nodes.length} nodes mined.`);
@@ -616,7 +754,8 @@ function calculateMetrics(saveData, zones = []) {
     last_sync: new Date().toISOString(),
     session: saveData.header,
     global: globalRates,
-    zones: zoneMetrics
+    zones: zoneMetrics,
+    power: saveData.power || null
   };
 }
 

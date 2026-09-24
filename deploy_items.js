@@ -15,7 +15,9 @@ const filesToUpload = [
   { local: 'server/export_metrics.js', remote: '/web/server/export_metrics.js' },
   { local: 'server/sync_daemon.js', remote: '/web/server/sync_daemon.js' },
   { local: 'server/recipe_map.js', remote: '/web/server/recipe_map.js' },
-  { local: 'server/item_metadata.json', remote: '/web/server/item_metadata.json' }
+  { local: 'server/item_metadata.json', remote: '/web/server/item_metadata.json' },
+  { local: 'data/buildings.json', remote: '/web/data/buildings.json' },
+  { local: 'data/metrics.json', remote: '/web/data/metrics.json' }
 ];
 
 async function deploy() {

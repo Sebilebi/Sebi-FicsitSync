@@ -135,7 +135,8 @@ async function performSync(force = false, targetSaveName = null) {
       powerLines: parsedSave.powerLines || [],
       specialBuildings: parsedSave.specialBuildings || [],
       nodes: parsedSave.nodes || [],
-      collectables: parsedSave.collectables || []
+      collectables: parsedSave.collectables || [],
+      power: parsedSave.power || null
     };
 
     const nodesData = parsedSave.nodes || [];

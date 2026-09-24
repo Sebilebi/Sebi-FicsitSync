@@ -1,98 +1,23 @@
 {
-  "active_save_file": "test_autosave_3.sav",
-  "save_modified": "2026-09-24T00:02:26.44105384+02:00",
-  "last_sync": "2026-09-23T22:02:10.107Z",
-  "recentSaves": [
-    {
-      "name": "test_autosave_3.sav",
-      "modified": "2026-09-24T00:02:26.44105384+02:00",
-      "size": 1568768
-    },
-    {
-      "name": "test_autosave_2.sav",
-      "modified": "2026-09-23T23:57:26.410822788+02:00",
-      "size": 1568768
-    },
-    {
-      "name": "test_autosave_1.sav",
-      "modified": "2026-09-23T23:52:26.386650834+02:00",
-      "size": 1568768
-    },
-    {
-      "name": "test_autosave_0.sav",
-      "modified": "2026-09-23T23:47:26.351364989+02:00",
-      "size": 1568768
-    },
-    {
-      "name": "test_autosave_4.sav",
-      "modified": "2026-09-23T23:42:26.33292651+02:00",
-      "size": 1568768
-    },
-    {
-      "name": "test_autosave_2_continue.sav",
-      "modified": "2026-09-23T09:00:00.245798837+02:00",
-      "size": 1396736
-    },
-    {
-      "name": "test_220926-192552.sav",
-      "modified": "2026-09-22T19:26:11.476970778+02:00",
-      "size": 1347584
-    },
-    {
-      "name": "test_220926-185427.sav",
-      "modified": "2026-09-22T18:54:46.343883243+02:00",
-      "size": 1339392
-    },
-    {
-      "name": "test_210926-232031.sav",
-      "modified": "2026-09-21T23:20:47.033256894+02:00",
-      "size": 1097728
-    },
-    {
-      "name": "test_210926-232009.sav",
-      "modified": "2026-09-21T23:20:25.727319574+02:00",
-      "size": 1097728
-    },
-    {
-      "name": "test_autosave_1_continue.sav",
-      "modified": "2026-09-21T09:00:00.148725488+02:00",
-      "size": 954368
-    },
-    {
-      "name": "test_200926-154843.sav",
-      "modified": "2026-09-20T15:48:57.555436417+02:00",
-      "size": 925696
-    },
-    {
-      "name": "test_200926-012528_continue.sav",
-      "modified": "2026-09-20T02:00:00.120358874+02:00",
-      "size": 540672
-    },
-    {
-      "name": "test_200926-012528.sav",
-      "modified": "2026-09-20T01:25:39.513386852+02:00",
-      "size": 540672
-    }
-  ],
   "buildings": [
     {
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorIntegratedBiomass_C_2147475745",
       "className": "Build_GeneratorIntegratedBiomass_C",
       "type": "GeneratorIntegratedBiomass",
-      "nameEs": "GeneratorIntegratedBiomass",
+      "nameEs": "Quemador de Biomasa Integrado",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -51974,
       "y": 202513,
       "z": -2942,
       "yaw": 3.142,
-      "width": 1000,
-      "length": 1200,
-      "color": "#e58837",
-      "strokeColor": "#ff3700",
-      "power": 4,
-      "duration": 2,
-      "icon": null,
+      "width": 800,
+      "length": 800,
+      "color": "#4b5563",
+      "strokeColor": "#1f2937",
+      "power": -20,
+      "duration": 4,
+      "icon": "Biomass.png",
       "potential": 1,
       "isProducing": true,
       "status": "producing",
@@ -103,20 +28,20 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorIntegratedBiomass_C_2147475742",
       "className": "Build_GeneratorIntegratedBiomass_C",
       "type": "GeneratorIntegratedBiomass",
-      "nameEs": "GeneratorIntegratedBiomass",
+      "nameEs": "Quemador de Biomasa Integrado",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -51594,
       "y": 202513,
       "z": -2942,
       "yaw": 3.142,
-      "width": 1000,
-      "length": 1200,
-      "color": "#e58837",
-      "strokeColor": "#ff3700",
-      "power": 4,
-      "duration": 2,
-      "icon": null,
+      "width": 800,
+      "length": 800,
+      "color": "#4b5563",
+      "strokeColor": "#1f2937",
+      "power": -20,
+      "duration": 4,
+      "icon": "Biomass.png",
       "potential": 1,
       "isProducing": true,
       "status": "producing",
@@ -394,8 +319,8 @@
       "duration": 2,
       "icon": "Wire.png",
       "potential": 1,
-      "isProducing": true,
-      "status": "producing",
+      "isProducing": false,
+      "status": "idle",
       "inputs": [
         {
           "item": "Copper_Ingot",
@@ -538,8 +463,8 @@
       "duration": 2,
       "icon": "Iron_Ingot.png",
       "potential": 1,
-      "isProducing": true,
-      "status": "producing",
+      "isProducing": false,
+      "status": "idle",
       "inputs": [
         {
           "item": "Iron_Ore",
@@ -1191,8 +1116,8 @@
       "duration": 2,
       "icon": "Screw.png",
       "potential": 1,
-      "isProducing": false,
-      "status": "idle",
+      "isProducing": true,
+      "status": "producing",
       "inputs": [
         {
           "item": "Iron_Rod",
@@ -1263,8 +1188,8 @@
       "duration": 2,
       "icon": "Screw.png",
       "potential": 1,
-      "isProducing": false,
-      "status": "idle",
+      "isProducing": true,
+      "status": "producing",
       "inputs": [
         {
           "item": "Iron_Rod",
@@ -1361,7 +1286,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2147185644",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -75900,
@@ -1385,7 +1310,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2147185474",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -75900,
@@ -1409,7 +1334,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2147183430",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -80900,
@@ -1433,7 +1358,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2147183278",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -80900,
@@ -1601,7 +1526,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2147072009",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -72700,
@@ -1625,7 +1550,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2147070901",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -72700,
@@ -1649,7 +1574,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2147069916",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -84700,
@@ -1673,7 +1598,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2147069685",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -84700,
@@ -1820,8 +1745,8 @@
       "duration": 2,
       "icon": "Caterium_Ingot.png",
       "potential": 1,
-      "isProducing": false,
-      "status": "idle",
+      "isProducing": true,
+      "status": "producing",
       "inputs": [
         {
           "item": "Caterium_Ore",
@@ -1892,8 +1817,8 @@
       "duration": 2,
       "icon": "Caterium_Ingot.png",
       "potential": 1,
-      "isProducing": true,
-      "status": "producing",
+      "isProducing": false,
+      "status": "idle",
       "inputs": [
         {
           "item": "Caterium_Ore",
@@ -2216,7 +2141,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2146801943",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -69500,
@@ -2240,7 +2165,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2146801850",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -69500,
@@ -2264,7 +2189,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2146798810",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -88000,
@@ -2288,7 +2213,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2146798704",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -88000,
@@ -3655,7 +3580,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2147318972",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -74500,
@@ -3679,7 +3604,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2147318884",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -75500,
@@ -3703,7 +3628,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2147318787",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -76500,
@@ -3727,7 +3652,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2147318718",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -77500,
@@ -3751,7 +3676,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2147318610",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -78500,
@@ -3775,7 +3700,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2147318398",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -79500,
@@ -3799,7 +3724,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2147318310",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -80500,
@@ -3823,7 +3748,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2147318235",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -81500,
@@ -4706,7 +4631,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2146594115",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -82500,
@@ -4730,7 +4655,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2146594051",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -83500,
@@ -4754,7 +4679,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2146570492",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -84500,
@@ -4778,7 +4703,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2146570411",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -85500,
@@ -4802,7 +4727,7 @@
       "id": "Persistent_Level:PersistentLevel.Build_GeneratorCoal_C_2146570315",
       "className": "Build_GeneratorCoal_C",
       "type": "GeneratorCoal",
-      "nameEs": "Generador de Carb�n",
+      "nameEs": "Generador de Carbón",
       "recipeKey": "",
       "recipeName": "Sin receta",
       "x": -86500,
@@ -5574,7 +5499,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -5598,7 +5523,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -5622,7 +5547,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -5646,7 +5571,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -5670,7 +5595,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -5694,7 +5619,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -5718,7 +5643,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -5742,7 +5667,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -5766,7 +5691,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -5790,7 +5715,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -6146,8 +6071,8 @@
       "duration": 2,
       "icon": "Fuel.png",
       "potential": 1,
-      "isProducing": false,
-      "status": "idle",
+      "isProducing": true,
+      "status": "producing",
       "inputs": [
         {
           "item": "Crude_Oil",
@@ -6187,8 +6112,8 @@
       "duration": 2,
       "icon": "Fuel.png",
       "potential": 1,
-      "isProducing": true,
-      "status": "producing",
+      "isProducing": false,
+      "status": "idle",
       "inputs": [
         {
           "item": "Crude_Oil",
@@ -6224,7 +6149,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -6248,7 +6173,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -6272,7 +6197,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -6296,7 +6221,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -6320,7 +6245,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -6344,7 +6269,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -6368,7 +6293,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -6392,7 +6317,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -6416,7 +6341,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -6440,7 +6365,7 @@
       "length": 2000,
       "color": "#4b5563",
       "strokeColor": "#1f2937",
-      "power": -150,
+      "power": -250,
       "duration": 4,
       "icon": "Fuel.png",
       "potential": 1,
@@ -7981,7 +7906,7 @@
       "itemNameEs": "Wire",
       "itemIcon": "Wire.png",
       "itemColor": "#ffbca3",
-      "itemCount": 61,
+      "itemCount": 82,
       "rate": 60,
       "points": [
         {
@@ -8012,7 +7937,7 @@
       "itemNameEs": "Wire",
       "itemIcon": "Wire.png",
       "itemColor": "#ffbca3",
-      "itemCount": 61,
+      "itemCount": 82,
       "rate": 60,
       "points": [
         {
@@ -8167,7 +8092,7 @@
       "itemNameEs": "Copper Ingot",
       "itemIcon": "Copper_Ingot.png",
       "itemColor": "#ffbca3",
-      "itemCount": 5,
+      "itemCount": 4,
       "rate": 60,
       "points": [
         {
@@ -8330,7 +8255,7 @@
       "itemNameEs": "Wire",
       "itemIcon": "Wire.png",
       "itemColor": "#ffbca3",
-      "itemCount": 4,
+      "itemCount": 3,
       "rate": 60,
       "points": [
         {
@@ -8361,7 +8286,7 @@
       "itemNameEs": "Wire",
       "itemIcon": "Wire.png",
       "itemColor": "#ffbca3",
-      "itemCount": 61,
+      "itemCount": 82,
       "rate": 60,
       "points": [
         {
@@ -8392,7 +8317,7 @@
       "itemNameEs": "Wire",
       "itemIcon": "Wire.png",
       "itemColor": "#ffbca3",
-      "itemCount": 4,
+      "itemCount": 7,
       "rate": 60,
       "points": [
         {
@@ -8695,7 +8620,7 @@
       "itemNameEs": "Iron Ingot",
       "itemIcon": "Iron_Ingot.png",
       "itemColor": "#ffbca3",
-      "itemCount": 23,
+      "itemCount": 22,
       "rate": 60,
       "points": [
         {
@@ -9477,7 +9402,7 @@
       "itemNameEs": "Iron Ore",
       "itemIcon": "Iron_Ore.png",
       "itemColor": "#ffbca3",
-      "itemCount": 5,
+      "itemCount": 6,
       "rate": 60,
       "points": [
         {
@@ -10227,7 +10152,7 @@
       "itemNameEs": "Iron Rod",
       "itemIcon": "Iron_Rod.png",
       "itemColor": "#ffbca3",
-      "itemCount": 12,
+      "itemCount": 13,
       "rate": 60,
       "points": [
         {
@@ -10274,7 +10199,7 @@
       "itemNameEs": "Screw",
       "itemIcon": "Screw.png",
       "itemColor": "#ffbca3",
-      "itemCount": 4,
+      "itemCount": 5,
       "rate": 60,
       "points": [
         {
@@ -10344,7 +10269,7 @@
       "itemNameEs": "Screw",
       "itemIcon": "Screw.png",
       "itemColor": "#ffbca3",
-      "itemCount": 10,
+      "itemCount": 11,
       "rate": 60,
       "points": [
         {
@@ -10461,7 +10386,7 @@
       "itemNameEs": "Iron Rod",
       "itemIcon": "Iron_Rod.png",
       "itemColor": "#ffbca3",
-      "itemCount": 5,
+      "itemCount": 22,
       "rate": 60,
       "points": [
         {
@@ -10733,7 +10658,7 @@
       "itemNameEs": "Wire",
       "itemIcon": "Wire.png",
       "itemColor": "#ffbca3",
-      "itemCount": 61,
+      "itemCount": 82,
       "rate": 60,
       "points": [
         {
@@ -10791,7 +10716,7 @@
       "itemNameEs": "Wire",
       "itemIcon": "Wire.png",
       "itemColor": "#ffbca3",
-      "itemCount": 10,
+      "itemCount": 14,
       "rate": 60,
       "points": [
         {
@@ -10822,7 +10747,7 @@
       "itemNameEs": "Copper Sheet",
       "itemIcon": "Copper_Sheet.png",
       "itemColor": "#ffbca3",
-      "itemCount": 8,
+      "itemCount": 126,
       "rate": 60,
       "points": [
         {
@@ -10849,7 +10774,7 @@
       "itemNameEs": "Copper Sheet",
       "itemIcon": "Copper_Sheet.png",
       "itemColor": "#ffbca3",
-      "itemCount": 8,
+      "itemCount": 126,
       "rate": 60,
       "points": [
         {
@@ -10872,7 +10797,7 @@
       "itemNameEs": "Copper Sheet",
       "itemIcon": "Copper_Sheet.png",
       "itemColor": "#ffbca3",
-      "itemCount": 8,
+      "itemCount": 126,
       "rate": 60,
       "points": [
         {
@@ -10899,7 +10824,7 @@
       "itemNameEs": "Copper Sheet",
       "itemIcon": "Copper_Sheet.png",
       "itemColor": "#ffbca3",
-      "itemCount": 8,
+      "itemCount": 126,
       "rate": 60,
       "points": [
         {
@@ -10953,7 +10878,7 @@
       "itemNameEs": "Copper Ingot",
       "itemIcon": "Copper_Ingot.png",
       "itemColor": "#ffbca3",
-      "itemCount": 1,
+      "itemCount": 2,
       "rate": 60,
       "points": [
         {
@@ -10984,7 +10909,7 @@
       "itemNameEs": "Copper Ingot",
       "itemIcon": "Copper_Ingot.png",
       "itemColor": "#ffbca3",
-      "itemCount": 2,
+      "itemCount": 16,
       "rate": 60,
       "points": [
         {
@@ -11138,7 +11063,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 17,
+      "itemCount": 16,
       "rate": 60,
       "points": [
         {
@@ -11231,7 +11156,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 11,
+      "itemCount": 12,
       "rate": 60,
       "points": [
         {
@@ -11270,7 +11195,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 9,
+      "itemCount": 8,
       "rate": 60,
       "points": [
         {
@@ -12016,7 +11941,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 142,
+      "itemCount": 143,
       "rate": 60,
       "points": [
         {
@@ -12051,7 +11976,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 142,
+      "itemCount": 143,
       "rate": 60,
       "points": [
         {
@@ -12082,7 +12007,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 142,
+      "itemCount": 143,
       "rate": 60,
       "points": [
         {
@@ -12105,7 +12030,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 142,
+      "itemCount": 143,
       "rate": 60,
       "points": [
         {
@@ -12233,7 +12158,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 38,
+      "itemCount": 36,
       "rate": 60,
       "points": [
         {
@@ -12268,7 +12193,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 38,
+      "itemCount": 36,
       "rate": 60,
       "points": [
         {
@@ -12326,7 +12251,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 8,
+      "itemCount": 7,
       "rate": 60,
       "points": [
         {
@@ -12380,7 +12305,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 44,
+      "itemCount": 43,
       "rate": 60,
       "points": [
         {
@@ -12407,7 +12332,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 44,
+      "itemCount": 43,
       "rate": 60,
       "points": [
         {
@@ -12771,7 +12696,7 @@
       "itemNameEs": "Caterium Ore",
       "itemIcon": "Caterium_Ore.png",
       "itemColor": "#ffbca3",
-      "itemCount": 5,
+      "itemCount": 4,
       "rate": 120,
       "points": [
         {
@@ -12794,7 +12719,7 @@
       "itemNameEs": "Caterium Ore",
       "itemIcon": "Caterium_Ore.png",
       "itemColor": "#ffbca3",
-      "itemCount": 5,
+      "itemCount": 4,
       "rate": 60,
       "points": [
         {
@@ -12880,7 +12805,7 @@
       "itemNameEs": "Caterium Ore",
       "itemIcon": "Caterium_Ore.png",
       "itemColor": "#ffbca3",
-      "itemCount": 8,
+      "itemCount": 9,
       "rate": 60,
       "points": [
         {
@@ -13128,7 +13053,7 @@
       "itemNameEs": "Iron Rod",
       "itemIcon": "Iron_Rod.png",
       "itemColor": "#ffbca3",
-      "itemCount": 3,
+      "itemCount": 10,
       "rate": 60,
       "points": [
         {
@@ -13151,7 +13076,7 @@
       "itemNameEs": "Iron Rod",
       "itemIcon": "Iron_Rod.png",
       "itemColor": "#ffbca3",
-      "itemCount": 5,
+      "itemCount": 22,
       "rate": 60,
       "points": [
         {
@@ -13548,7 +13473,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 61,
+      "itemCount": 60,
       "rate": 60,
       "points": [
         {
@@ -13583,7 +13508,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 6,
+      "itemCount": 5,
       "rate": 60,
       "points": [
         {
@@ -13676,7 +13601,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 61,
+      "itemCount": 60,
       "rate": 60,
       "points": [
         {
@@ -13699,7 +13624,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 61,
+      "itemCount": 60,
       "rate": 60,
       "points": [
         {
@@ -13734,7 +13659,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 60,
+      "itemCount": 59,
       "rate": 60,
       "points": [
         {
@@ -13769,7 +13694,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 60,
+      "itemCount": 59,
       "rate": 60,
       "points": [
         {
@@ -13878,7 +13803,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 6,
+      "itemCount": 5,
       "rate": 60,
       "points": [
         {
@@ -13909,7 +13834,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 60,
+      "itemCount": 59,
       "rate": 60,
       "points": [
         {
@@ -16255,7 +16180,7 @@
       "itemNameEs": "Steel Beam",
       "itemIcon": "Steel_Beam.png",
       "itemColor": "#ffbca3",
-      "itemCount": 2,
+      "itemCount": 1,
       "rate": 60,
       "points": [
         {
@@ -16286,7 +16211,7 @@
       "itemNameEs": "Steel Beam",
       "itemIcon": "Steel_Beam.png",
       "itemColor": "#ffbca3",
-      "itemCount": 22,
+      "itemCount": 23,
       "rate": 60,
       "points": [
         {
@@ -18110,7 +18035,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 5,
+      "itemCount": 6,
       "rate": 60,
       "points": [
         {
@@ -18133,7 +18058,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 6,
+      "itemCount": 5,
       "rate": 60,
       "points": [
         {
@@ -19696,7 +19621,7 @@
       "itemNameEs": "Steel Beam",
       "itemIcon": "Steel_Beam.png",
       "itemColor": "#ffbca3",
-      "itemCount": 22,
+      "itemCount": 23,
       "rate": 60,
       "points": [
         {
@@ -19719,7 +19644,7 @@
       "itemNameEs": "Steel Beam",
       "itemIcon": "Steel_Beam.png",
       "itemColor": "#ffbca3",
-      "itemCount": 22,
+      "itemCount": 23,
       "rate": 60,
       "points": [
         {
@@ -21189,12 +21114,12 @@
       "className": "Build_ConveyorBeltMk3_C",
       "type": "ConveyorBeltMk3",
       "maxRate": 270,
-      "item": "Desc_Wire_C",
-      "itemName": "Wire",
-      "itemNameEs": "Wire",
-      "itemIcon": "Wire.png",
+      "item": "Desc_Cable_C",
+      "itemName": "Cable",
+      "itemNameEs": "Cable",
+      "itemIcon": "Cable.png",
       "itemColor": "#ffbca3",
-      "itemCount": 2,
+      "itemCount": 1,
       "rate": 270,
       "points": [
         {
@@ -25327,13 +25252,13 @@
       "className": "Build_ConveyorBeltMk1_C",
       "type": "ConveyorBeltMk1",
       "maxRate": 60,
-      "item": null,
-      "itemName": null,
-      "itemNameEs": null,
-      "itemIcon": null,
+      "item": "Desc_Rotor_C",
+      "itemName": "Rotor",
+      "itemNameEs": "Rotor",
+      "itemIcon": "Rotor.png",
       "itemColor": "#ffbca3",
-      "itemCount": 0,
-      "rate": 0,
+      "itemCount": 5,
+      "rate": 60,
       "points": [
         {
           "x": -52900,
@@ -25487,7 +25412,7 @@
       "itemNameEs": "Steel Beam",
       "itemIcon": "Steel_Beam.png",
       "itemColor": "#ffbca3",
-      "itemCount": 22,
+      "itemCount": 23,
       "rate": 60,
       "points": [
         {
@@ -26918,7 +26843,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 5,
+      "itemCount": 6,
       "rate": 120,
       "points": [
         {
@@ -26941,7 +26866,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 5,
+      "itemCount": 6,
       "rate": 120,
       "points": [
         {
@@ -27056,7 +26981,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 6,
+      "itemCount": 7,
       "rate": 270,
       "points": [
         {
@@ -27079,7 +27004,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 7,
+      "itemCount": 6,
       "rate": 270,
       "points": [
         {
@@ -27148,7 +27073,7 @@
       "itemNameEs": "Coal",
       "itemIcon": "Coal.png",
       "itemColor": "#ffbca3",
-      "itemCount": 5,
+      "itemCount": 6,
       "rate": 120,
       "points": [
         {
@@ -28225,7 +28150,7 @@
       "itemNameEs": "Rotor",
       "itemIcon": "Rotor.png",
       "itemColor": "#ffbca3",
-      "itemCount": 27,
+      "itemCount": 28,
       "rate": 60,
       "points": [
         {
@@ -28260,7 +28185,7 @@
       "itemNameEs": "Rotor",
       "itemIcon": "Rotor.png",
       "itemColor": "#ffbca3",
-      "itemCount": 27,
+      "itemCount": 28,
       "rate": 60,
       "points": [
         {
@@ -28295,7 +28220,7 @@
       "itemNameEs": "Smart Plating",
       "itemIcon": "Smart_Plating.png",
       "itemColor": "#ffbca3",
-      "itemCount": 1,
+      "itemCount": 8,
       "rate": 270,
       "points": [
         {
@@ -29026,7 +28951,7 @@
       "itemNameEs": "Polymer Resin",
       "itemIcon": "Polymer_Resin.png",
       "itemColor": "#ffbca3",
-      "itemCount": 1,
+      "itemCount": 2,
       "rate": 480,
       "points": [
         {
@@ -29067,13 +28992,13 @@
       "className": "Build_ConveyorBeltMk4_C",
       "type": "ConveyorBeltMk4",
       "maxRate": 480,
-      "item": "Desc_PolymerResin_C",
-      "itemName": "Polymer Resin",
-      "itemNameEs": "Polymer Resin",
-      "itemIcon": "Polymer_Resin.png",
+      "item": null,
+      "itemName": null,
+      "itemNameEs": null,
+      "itemIcon": null,
       "itemColor": "#ffbca3",
-      "itemCount": 1,
-      "rate": 480,
+      "itemCount": 0,
+      "rate": 0,
       "points": [
         {
           "x": 19500,
@@ -29095,7 +29020,7 @@
       "itemNameEs": "Polymer Resin",
       "itemIcon": "Polymer_Resin.png",
       "itemColor": "#ffbca3",
-      "itemCount": 3,
+      "itemCount": 2,
       "rate": 480,
       "points": [
         {
@@ -29118,7 +29043,7 @@
       "itemNameEs": "Polymer Resin",
       "itemIcon": "Polymer_Resin.png",
       "itemColor": "#ffbca3",
-      "itemCount": 3,
+      "itemCount": 2,
       "rate": 480,
       "points": [
         {
@@ -29141,7 +29066,7 @@
       "itemNameEs": "Polymer Resin",
       "itemIcon": "Polymer_Resin.png",
       "itemColor": "#ffbca3",
-      "itemCount": 5,
+      "itemCount": 4,
       "rate": 480,
       "points": [
         {
@@ -29187,7 +29112,7 @@
       "itemNameEs": "Polymer Resin",
       "itemIcon": "Polymer_Resin.png",
       "itemColor": "#ffbca3",
-      "itemCount": 5,
+      "itemCount": 7,
       "rate": 480,
       "points": [
         {
@@ -29233,7 +29158,7 @@
       "itemNameEs": "Polymer Resin",
       "itemIcon": "Polymer_Resin.png",
       "itemColor": "#ffbca3",
-      "itemCount": 2,
+      "itemCount": 1,
       "rate": 480,
       "points": [
         {
@@ -29302,7 +29227,7 @@
       "itemNameEs": "Polymer Resin",
       "itemIcon": "Polymer_Resin.png",
       "itemColor": "#ffbca3",
-      "itemCount": 2,
+      "itemCount": 3,
       "rate": 60,
       "points": [
         {
@@ -29458,13 +29383,13 @@
       "className": "Build_ConveyorBeltMk1_C",
       "type": "ConveyorBeltMk1",
       "maxRate": 60,
-      "item": "Desc_PolymerResin_C",
-      "itemName": "Polymer Resin",
-      "itemNameEs": "Polymer Resin",
-      "itemIcon": "Polymer_Resin.png",
+      "item": null,
+      "itemName": null,
+      "itemNameEs": null,
+      "itemIcon": null,
       "itemColor": "#ffbca3",
-      "itemCount": 3,
-      "rate": 60,
+      "itemCount": 0,
+      "rate": 0,
       "points": [
         {
           "x": 22500,
@@ -63096,5 +63021,187 @@
     "Persistent_Level:PersistentLevel.BP_Ship17_2852",
     "Persistent_Level:PersistentLevel.BP_DebrisActor_02449",
     "Persistent_Level:PersistentLevel.FGItemPickup_Spawnable_UAID_40B076DF2F7945CE01_1667081847"
-  ]
+  ],
+  "power": {
+    "capacity": 6875,
+    "production": 6875,
+    "consumptionNominal": 2428.6,
+    "consumptionCurrent": 1373.7,
+    "fuseTriggered": false,
+    "primaryCircuitId": 18,
+    "circuits": [
+      {
+        "circuitId": 18,
+        "capacity": 6875,
+        "production": 6875,
+        "consumptionNominal": 2428.6,
+        "consumptionCurrent": 1373.7,
+        "fuseTriggered": false,
+        "generators": [
+          {
+            "type": "GeneratorFuel",
+            "nameEs": "Generador de Combustible",
+            "icon": "Fuel.png",
+            "count": 20,
+            "capacityTotal": 5000
+          },
+          {
+            "type": "GeneratorCoal",
+            "nameEs": "Generador de Carbón",
+            "icon": "Coal.png",
+            "count": 25,
+            "capacityTotal": 1875
+          }
+        ],
+        "consumers": [
+          {
+            "type": "OilRefinery",
+            "nameEs": "Refinería",
+            "icon": "Plastic.png",
+            "count": 23,
+            "powerNominal": 672.0000007892509,
+            "powerCurrent": 402.0000007892509,
+            "producingCount": 14
+          },
+          {
+            "type": "OilPump",
+            "nameEs": "Extractor de Petróleo",
+            "icon": "Crude_Oil.png",
+            "count": 2,
+            "powerNominal": 268.61980331594134,
+            "powerCurrent": 134.30990165797067,
+            "producingCount": 1
+          },
+          {
+            "type": "ConstructorMk1",
+            "nameEs": "Constructor",
+            "icon": "Iron_Plate.png",
+            "count": 61,
+            "powerNominal": 265.0714701152,
+            "powerCurrent": 203.47147000996654,
+            "producingCount": 45
+          },
+          {
+            "type": "WaterPump",
+            "nameEs": "Extractor de Agua",
+            "icon": "Water.png",
+            "count": 10,
+            "powerNominal": 261.33793402884055,
+            "powerCurrent": 20,
+            "producingCount": 1
+          },
+          {
+            "type": "AssemblerMk1",
+            "nameEs": "Ensamblador",
+            "icon": "Reinforced_Iron_Plate.png",
+            "count": 11,
+            "powerNominal": 201.40972098843682,
+            "powerCurrent": 145.7724835885454,
+            "producingCount": 8
+          },
+          {
+            "type": "MinerMk2",
+            "nameEs": "Minero Mk.2",
+            "icon": "Iron_Ore.png",
+            "count": 7,
+            "powerNominal": 158.1041488811537,
+            "powerCurrent": 128.10415085428082,
+            "producingCount": 6
+          },
+          {
+            "type": "ResourceSink",
+            "nameEs": "Trituradora FICSIT (Sink)",
+            "icon": "Ficsit_Coupon.png",
+            "count": 5,
+            "powerNominal": 150,
+            "powerCurrent": 30,
+            "producingCount": 1
+          },
+          {
+            "type": "SmelterMk1",
+            "nameEs": "Fundición",
+            "icon": "Iron_Ingot.png",
+            "count": 23,
+            "powerNominal": 107.27319206975744,
+            "powerCurrent": 85.67319196452398,
+            "producingCount": 17
+          },
+          {
+            "type": "MinerMk1",
+            "nameEs": "Minero Mk.1",
+            "icon": "Iron_Ore.png",
+            "count": 19,
+            "powerNominal": 106.18298333139703,
+            "powerCurrent": 43.545745799963804,
+            "producingCount": 8
+          },
+          {
+            "type": "TruckStation",
+            "nameEs": "Estación de Camiones",
+            "icon": "Iron_Plate.png",
+            "count": 4,
+            "powerNominal": 80,
+            "powerCurrent": 80,
+            "producingCount": 4
+          },
+          {
+            "type": "FoundryMk1",
+            "nameEs": "Fundición Avanzada",
+            "icon": "Steel_Ingot.png",
+            "count": 3,
+            "powerNominal": 64.14927116974441,
+            "powerCurrent": 40.82312811747941,
+            "producingCount": 2
+          },
+          {
+            "type": "Packager",
+            "nameEs": "Empaquetador",
+            "icon": "Empty_Canister.png",
+            "count": 3,
+            "powerNominal": 60,
+            "powerCurrent": 60,
+            "producingCount": 3
+          },
+          {
+            "type": "PipelinePump",
+            "nameEs": "Bomba de Tubería",
+            "icon": "Water.png",
+            "count": 6,
+            "powerNominal": 24,
+            "powerCurrent": 0,
+            "producingCount": 0
+          },
+          {
+            "type": "PipeHyperStart",
+            "nameEs": "Entrada de Hipertubo",
+            "icon": "Iron_Plate.png",
+            "count": 35,
+            "powerNominal": 10.500000000000004,
+            "powerCurrent": 0,
+            "producingCount": 0
+          }
+        ]
+      },
+      {
+        "circuitId": 1,
+        "capacity": 0,
+        "production": 0,
+        "consumptionNominal": 134.3,
+        "consumptionCurrent": 134.3,
+        "fuseTriggered": true,
+        "generators": [],
+        "consumers": [
+          {
+            "type": "OilPump",
+            "nameEs": "Extractor de Petróleo",
+            "icon": "Crude_Oil.png",
+            "count": 1,
+            "powerNominal": 134.30990165797067,
+            "powerCurrent": 134.30990165797067,
+            "producingCount": 1
+          }
+        ]
+      }
+    ]
+  }
 }

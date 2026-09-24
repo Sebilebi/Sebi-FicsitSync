@@ -105,7 +105,8 @@ async function main() {
     powerLines: save.powerLines || [],
     specialBuildings: save.specialBuildings || [],
     nodes: save.nodes || [],
-    collectables: save.collectables || []
+    collectables: save.collectables || [],
+    power: save.power || null
   };
   fs.writeFileSync(outBuildingsPath, JSON.stringify(buildingsData, null, 2), 'utf8');
   console.log('[Export] Wrote static buildings to:', outBuildingsPath);
