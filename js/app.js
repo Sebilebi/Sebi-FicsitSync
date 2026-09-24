@@ -136,7 +136,7 @@ function initCommandCenter() {
   }
   window.addEventListener('resize', () => {
     if (currentMode === 'schematics') {
-      resetBlueprintZoom();
+      updateBlueprintTransform();
       if (currentSchematicsViewMode === 'flow') {
         requestAnimationFrame(updateFlowGraphConnections);
       }
@@ -301,8 +301,13 @@ function switchMainMode(modeId) {
     loadMapData();
   } else if (modeId === 'schematics') {
     renderSchematics(currentBranchId);
-    requestAnimationFrame(() => resetBlueprintZoom());
-    setTimeout(() => resetBlueprintZoom(), 60);
+    if (!bpHasInitialCentered) {
+      bpHasInitialCentered = true;
+      requestAnimationFrame(() => resetBlueprintZoom());
+      setTimeout(() => resetBlueprintZoom(), 60);
+    } else {
+      updateBlueprintTransform();
+    }
   } else if (modeId === 'mall_summary') {
     renderMallSummary();
   }
@@ -344,12 +349,17 @@ function renderBranchNavRail() {
 
 function selectBranch(branchId) {
   closeAllModals();
+  const changed = currentBranchId !== branchId;
   currentBranchId = branchId;
   saveAppState();
   renderBranchNavRail();
   renderSchematics(branchId);
-  requestAnimationFrame(() => resetBlueprintZoom());
-  setTimeout(() => resetBlueprintZoom(), 50);
+  if (changed) {
+    requestAnimationFrame(() => resetBlueprintZoom());
+    setTimeout(() => resetBlueprintZoom(), 50);
+  } else {
+    updateBlueprintTransform();
+  }
 }
 window.selectBranch = selectBranch;
 
@@ -451,6 +461,7 @@ let bpPanY = 0;
 const bpMinZoom = 0.25;
 const bpMaxZoom = 3.5;
 let bpPanZoomInitialized = false;
+let bpHasInitialCentered = false;
 
 function updateBlueprintTransform() {
   const stage = document.getElementById('blueprint-pan-zoom-stage');
@@ -632,6 +643,7 @@ function resetBlueprintZoom(bounds) {
 
   bpPanX = Math.round(vpCenterX - contentCenterX * bpZoom);
   bpPanY = Math.round(vpCenterY - contentCenterY * bpZoom);
+  bpHasInitialCentered = true;
 
   updateBlueprintTransform();
 }
@@ -1089,7 +1101,13 @@ function renderSchematics(branchId) {
   `;
 
   window.lastRenderedBranch = branchId;
-  requestAnimationFrame(() => resetBlueprintZoom());
+  if (!bpHasInitialCentered) {
+    bpHasInitialCentered = true;
+    requestAnimationFrame(() => resetBlueprintZoom());
+    setTimeout(() => resetBlueprintZoom(), 60);
+  } else {
+    updateBlueprintTransform();
+  }
 }
 window.renderSchematics = renderSchematics;
 
