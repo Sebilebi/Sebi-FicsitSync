@@ -448,6 +448,16 @@ class TacticalMap {
     c.addEventListener('mousedown', (e) => this.onMouseDown(e));
     c.addEventListener('mousemove', (e) => this.onMouseMove(e));
     window.addEventListener('mouseup', (e) => this.onMouseUp(e));
+    window.addEventListener('blur', () => {
+      this.isPointerDown = false;
+      this.isDragging = false;
+      this.transformAction = null;
+      this.transformPreZonesSnapshot = null;
+      this.transformZoneStartBounds = null;
+      this.drawStart = null;
+      this.drawCurrent = null;
+      this.render();
+    });
     c.addEventListener('wheel', (e) => this.onWheel(e), { passive: false });
     c.addEventListener('dblclick', (e) => this.onDoubleClick(e));
 
@@ -655,6 +665,9 @@ class TacticalMap {
   }
 
   onMouseDown(e) {
+    if (window.currentMode && window.currentMode !== 'live_map') return;
+    this.isPointerDown = true;
+
     const rect = this.canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
@@ -711,6 +724,7 @@ class TacticalMap {
           this.transformAction = handle;
           this.transformMouseStart = { x: mouseX, y: mouseY };
           this.transformZoneStartBounds = Object.assign({}, this.selectedZone.bounds);
+          this.hasDragged = false;
           return;
         }
       }
@@ -734,12 +748,14 @@ class TacticalMap {
         this.transformAction = 'move';
         this.transformMouseStart = { x: mouseX, y: mouseY };
         this.transformZoneStartBounds = Object.assign({}, clickedZone.bounds);
+        this.hasDragged = false;
         this.render();
         return;
       } else {
         this.selectedZone = null;
         this.transformAction = null;
         this.transformPreZonesSnapshot = null;
+        this.render();
       }
     } else {
       // In pan mode: check if clicking on any zone's title pill to edit
@@ -768,6 +784,11 @@ class TacticalMap {
   }
 
   onMouseMove(e) {
+    if (window.currentMode && window.currentMode !== 'live_map') {
+      this.clearHover();
+      return;
+    }
+
     const rect = this.canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
@@ -781,6 +802,9 @@ class TacticalMap {
     if (this.interactionMode === 'transform_zone' && this.transformAction && this.selectedZone && this.transformZoneStartBounds) {
       const dWorldX = (mouseX - this.transformMouseStart.x) / (0.001 * this.scale);
       const dWorldY = (mouseY - this.transformMouseStart.y) / (0.001 * this.scale);
+      if (Math.abs(mouseX - this.transformMouseStart.x) > 3 || Math.abs(mouseY - this.transformMouseStart.y) > 3) {
+        this.hasDragged = true;
+      }
       const b = this.transformZoneStartBounds;
 
       if (this.transformAction === 'move') {
@@ -825,11 +849,22 @@ class TacticalMap {
   }
 
   onMouseUp(e) {
-    if (!this.isDragging) return;
+    const wasPointerDown = this.isPointerDown;
+    this.isPointerDown = false;
+    const wasDragging = this.isDragging;
     this.isDragging = false;
+    const wasTransforming = !!this.transformAction;
+    const wasDrawing = !!(this.isDrawMode && this.drawStart);
+
+    if (!wasPointerDown && !wasDragging && !wasTransforming && !wasDrawing) return;
 
     if (window.currentMode && window.currentMode !== 'live_map') {
       this.hasDragged = false;
+      this.transformAction = null;
+      this.transformPreZonesSnapshot = null;
+      this.transformZoneStartBounds = null;
+      this.drawStart = null;
+      this.drawCurrent = null;
       this.clearHover();
       return;
     }
@@ -854,7 +889,7 @@ class TacticalMap {
       this.drawStart = null;
       this.drawCurrent = null;
       this.render();
-    } else if (this.interactionMode === 'transform_zone' && this.transformAction && this.selectedZone) {
+    } else if (this.interactionMode === 'transform_zone' && wasTransforming && this.selectedZone) {
       const b = this.transformZoneStartBounds;
       const cur = this.selectedZone.bounds;
       const hasChanged = b && cur && (b.minX !== cur.minX || b.maxX !== cur.maxX || b.minY !== cur.minY || b.maxY !== cur.maxY);
@@ -880,7 +915,7 @@ class TacticalMap {
       this.transformPreZonesSnapshot = null;
       this.transformZoneStartBounds = null;
       this.render();
-    } else if (!this.hasDragged) {
+    } else if (!this.hasDragged && wasDragging && this.interactionMode !== 'transform_zone' && !this.isDrawMode) {
       this.handleClick(mouseX, mouseY);
     }
 
@@ -889,6 +924,11 @@ class TacticalMap {
     }
 
     this.hasDragged = false;
+    this.transformAction = null;
+    this.transformPreZonesSnapshot = null;
+    this.transformZoneStartBounds = null;
+    this.drawStart = null;
+    this.drawCurrent = null;
   }
 
   onWheel(e) {
@@ -1225,6 +1265,10 @@ class TacticalMap {
   handleClick(mouseX, mouseY) {
     if (window.currentMode && window.currentMode !== 'live_map') {
       this.clearHover();
+      return;
+    }
+
+    if (this.interactionMode === 'transform_zone' || this.isDrawMode) {
       return;
     }
 

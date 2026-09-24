@@ -200,6 +200,16 @@ function switchMainMode(modeId) {
   currentMode = modeId;
   window.currentMode = modeId;
   window.hasDraggedBlueprint = false;
+  if (window.tacticalMap) {
+    window.tacticalMap.isDragging = false;
+    window.tacticalMap.isPointerDown = false;
+    window.tacticalMap.transformAction = null;
+    window.tacticalMap.transformPreZonesSnapshot = null;
+    window.tacticalMap.transformZoneStartBounds = null;
+    window.tacticalMap.drawStart = null;
+    window.tacticalMap.drawCurrent = null;
+    window.tacticalMap.clearHover();
+  }
   if (window.location.hash !== `#${modeId}`) {
     window.history.replaceState(null, null, `#${modeId}`);
   }
