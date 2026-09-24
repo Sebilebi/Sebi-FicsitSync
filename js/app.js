@@ -520,6 +520,109 @@ function resetBlueprintZoom(svgW = 1760, svgH = 650) {
 }
 window.resetBlueprintZoom = resetBlueprintZoom;
 
+function getItemRateInfo(item, zones, isGlobalMode = globalModeFilter) {
+  const cleanId = (item.id || '').toLowerCase().replace(/_/g, '');
+  const cleanName = (item.name || '').toLowerCase();
+  const metric = findMetricForItem(window.liveMetrics?.global, item.id);
+
+  const assignedZones = (zones || []).filter(z => {
+    if (!z || !z.item) return false;
+    const c = z.item.toLowerCase().replace(/_/g, '');
+    return c === cleanId || c.includes(cleanId) || cleanId.includes(c);
+  });
+
+  const producingZones = (zones || []).filter(z => {
+    const zm = window.liveMetrics?.zones?.[z.id];
+    if (!zm || !zm.production) return false;
+    return Object.keys(zm.production).some(k => {
+      const ck = k.toLowerCase().replace(/_/g, '');
+      return ck === cleanId || ck.includes(cleanId) || cleanId.includes(ck);
+    });
+  });
+
+  const nameMatchZones = (zones || []).filter(z => {
+    if (!z || !z.name) return false;
+    const zn = z.name.toLowerCase();
+    return zn.includes(cleanName) || cleanName.includes(zn);
+  });
+
+  let linkedZone = null;
+  let itemRate = 0;
+  let machinesCount = 0;
+
+  if (isGlobalMode) {
+    itemRate = metric ? (metric.production_nominal || 0) : 0;
+    machinesCount = metric ? (metric.machines_count || 0) : 0;
+    linkedZone = assignedZones[0] || producingZones[0] || nameMatchZones[0] || null;
+  } else {
+    if (assignedZones.length > 0) {
+      linkedZone = assignedZones[0];
+      for (const z of assignedZones) {
+        const zm = window.liveMetrics?.zones?.[z.id];
+        if (zm && zm.production) {
+          for (const [k, p] of Object.entries(zm.production)) {
+            const ck = k.toLowerCase().replace(/_/g, '');
+            if (ck === cleanId || ck.includes(cleanId) || cleanId.includes(ck)) {
+              itemRate += (p.rate || 0);
+              machinesCount += (p.count || 0);
+            }
+          }
+        }
+      }
+    } else if (producingZones.length > 0) {
+      linkedZone = producingZones[0];
+      for (const z of producingZones) {
+        const zm = window.liveMetrics?.zones?.[z.id];
+        if (zm && zm.production) {
+          for (const [k, p] of Object.entries(zm.production)) {
+            const ck = k.toLowerCase().replace(/_/g, '');
+            if (ck === cleanId || ck.includes(cleanId) || cleanId.includes(ck)) {
+              itemRate += (p.rate || 0);
+              machinesCount += (p.count || 0);
+            }
+          }
+        }
+      }
+    } else if (nameMatchZones.length > 0) {
+      linkedZone = nameMatchZones[0];
+      itemRate = 0;
+      machinesCount = 0;
+    } else {
+      linkedZone = null;
+      itemRate = 0;
+      machinesCount = 0;
+    }
+  }
+
+  const isProducing = itemRate > 0;
+  const rateText = isProducing ? `+${Math.round(itemRate * 10) / 10}/m` : '0/m (Buffer)';
+
+  let zoneBadgeText = '⚠️ Sin zona';
+  let zoneColor = '#eab308';
+
+  if (isGlobalMode) {
+    zoneBadgeText = isProducing ? '🌍 Global' : '⚠️ Inactivo';
+    zoneColor = isProducing ? '#10b981' : '#64748b';
+  } else if (linkedZone) {
+    const zName = linkedZone.name || 'Zona';
+    zoneBadgeText = `🏭 ${zName.substring(0, 14)}`;
+    zoneColor = linkedZone.color || '#38bdf8';
+  }
+
+  return {
+    itemRate,
+    machinesCount,
+    isProducing,
+    rateText,
+    linkedZone,
+    zoneBadgeText,
+    zoneColor,
+    assignedZones,
+    producingZones
+  };
+}
+window.getItemRateInfo = getItemRateInfo;
+
 function renderSchematics(branchId) {
   const cat = SATISFACTORY_CATEGORIES.find(c => c.id === branchId) || SATISFACTORY_CATEGORIES[0];
   if (!cat) return;
@@ -537,13 +640,13 @@ function renderSchematics(branchId) {
   const stage = document.getElementById('blueprint-pan-zoom-stage');
   if (!stage) return;
 
+  const zones = window.cachedZonesData || window.tacticalMap?.zones || [];
+
   let items = cat.items;
-  if (activeOnlyFilter && window.liveMetrics?.global) {
+  if (activeOnlyFilter) {
     items = items.filter(item => {
-      const metric = findMetricForItem(window.liveMetrics.global, item.id);
-      let r = 0;
-      if (metric) r = globalModeFilter ? metric.production_nominal : Object.values(metric.zones_breakdown || {}).reduce((s, v) => s + v, 0);
-      return r > 0;
+      const info = getItemRateInfo(item, zones, globalModeFilter);
+      return info.isProducing;
     });
     if (items.length === 0) items = cat.items;
   }
@@ -563,8 +666,6 @@ function renderSchematics(branchId) {
   const mallY = Math.max(45, Math.floor((svgHeight - mallH) / 2));
   const mallCenterY = mallY + mallH / 2;
 
-  const zones = window.cachedZonesData || window.tacticalMap?.zones || [];
-
   function getMachineType(item) {
     if (item.type === 'extractor') return 'Extractor Minero';
     if (item.input.includes('Petróleo')) return 'Refinería';
@@ -573,29 +674,16 @@ function renderSchematics(branchId) {
     return 'Constructor';
   }
 
-  function getLinkedZone(item) {
-    const cItem = item.id.toLowerCase().replace(/_/g, '');
-    const iName = item.name.toLowerCase();
-    return zones.find(z => {
-      if (!z) return false;
-      const zItem = (z.item || '').toLowerCase().replace(/_/g, '');
-      if (zItem && (zItem === cItem || zItem.includes(cItem) || cItem.includes(zItem))) return true;
-      const zName = (z.name || '').toLowerCase();
-      return zName.includes(iName) || iName.includes(zName);
-    });
-  }
-
   function renderRow(item, index, side) {
     const y = startY + index * rowSpacing;
-    const metric = findMetricForItem(window.liveMetrics?.global, item.id);
-    let itemRate = 0;
-    if (metric) itemRate = globalModeFilter ? metric.production_nominal : Object.values(metric.zones_breakdown || {}).reduce((s, v) => s + v, 0);
-    const isProducing = itemRate > 0;
-    const rateText = isProducing ? `+${Math.round(itemRate * 10) / 10}/m` : '0/m (Buffer)';
+    const info = getItemRateInfo(item, zones, globalModeFilter);
+    const itemRate = info.itemRate;
+    const isProducing = info.isProducing;
+    const rateText = info.rateText;
     const machineType = getMachineType(item);
-    const linkedZone = getLinkedZone(item);
-    const zoneBadgeText = linkedZone ? `🏭 ${linkedZone.name.substring(0, 14)}` : (globalModeFilter && metric && metric.production_nominal > 0 ? '🌍 Global' : '⚠️ Sin zona');
-    const zoneColor = linkedZone ? '#38bdf8' : (globalModeFilter && metric && metric.production_nominal > 0 ? '#10b981' : '#eab308');
+    const linkedZone = info.linkedZone;
+    const zoneBadgeText = info.zoneBadgeText;
+    const zoneColor = info.zoneColor;
     const itemColor = item.color || '#ea580c';
 
     if (side === 'left') {
@@ -779,12 +867,10 @@ function renderSchematics(branchId) {
           ${cat.items.map((item, idx) => {
             const col = idx % 9;
             const row = Math.floor(idx / 9);
-            const metric = findMetricForItem(window.liveMetrics?.global, item.id);
-            let itemRate = 0;
-            if (metric) itemRate = globalModeFilter ? metric.production_nominal : Object.values(metric.zones_breakdown || {}).reduce((s, v) => s + v, 0);
-            const isProd = itemRate > 0;
+            const info = getItemRateInfo(item, zones, globalModeFilter);
+            const isProd = info.isProducing;
             return `
-              <g transform="translate(${col * 33}, ${row * 34})" class="bp-node-clickable" onclick="window.openItemModal('${item.id}')" title="${item.name}: ${isProd ? '+' + Math.round(itemRate) + '/m' : 'Buffer'}">
+              <g transform="translate(${col * 33}, ${row * 34})" class="bp-node-clickable" onclick="window.openItemModal('${item.id}')" title="${item.name}: ${isProd ? '+' + Math.round(info.itemRate * 10) / 10 + '/m' : 'Buffer (0/m)'}">
                 <rect x="0" y="0" width="28" height="28" rx="4" fill="#0f172a" stroke="${isProd ? '#10b981' : (item.color || '#38bdf8')}" stroke-width="${isProd ? '2' : '1.5'}" />
                 <image href="icons/${item.id}.png" x="3" y="3" width="22" height="22" preserveAspectRatio="xMidYMid meet" />
               </g>
@@ -915,11 +1001,12 @@ function renderMallSummary() {
     items = items.filter(i => i.name.toLowerCase().includes(q) || i.id.toLowerCase().includes(q));
   }
 
+  const zones = window.cachedZonesData || window.tacticalMap?.zones || [];
   container.innerHTML = items.map(item => {
-    const metric = findMetricForItem(window.liveMetrics?.global, item.id);
-    const isProducing = metric && metric.production_nominal > 0;
+    const info = getItemRateInfo(item, zones, globalModeFilter);
+    const isProducing = info.isProducing;
     const rateColor = isProducing ? 'var(--neon-green)' : 'var(--text-dim)';
-    const rate = isProducing ? `+${Math.round(metric.production_nominal * 10) / 10}/m` : '0/m';
+    const rate = isProducing ? `+${Math.round(info.itemRate * 10) / 10}/m` : '0/m';
 
     return `
       <div class="mall-item-cell" onclick="openItemModal('${item.id}')" style="border-color: ${isProducing ? item.color : 'var(--border-glass)'};">
@@ -1139,6 +1226,130 @@ function togglePauseSync(event) {
 }
 window.togglePauseSync = togglePauseSync;
 
+function recalculateLiveMetrics() {
+  const buildings = window.cachedBuildingsData?.buildings || window.tacticalMap?.buildings || [];
+  const nodes = window.cachedNodesData || window.cachedBuildingsData?.nodes || window.tacticalMap?.nodes || [];
+  const zones = window.cachedZonesData || window.tacticalMap?.zones || [];
+
+  const globalRates = {};
+
+  // 1. Process all buildings in the save
+  for (const b of buildings) {
+    if (b.outputs && b.outputs.length > 0) {
+      for (const out of b.outputs) {
+        if (!out.item) continue;
+        if (!globalRates[out.item]) {
+          globalRates[out.item] = {
+            name: out.name || out.item,
+            production_nominal: 0,
+            machines_count: 0,
+            zones_breakdown: {},
+            zone_machines: {}
+          };
+        }
+        globalRates[out.item].production_nominal += (out.rate || 0);
+        globalRates[out.item].machines_count += 1;
+      }
+    }
+  }
+
+  // 2. Process all exploited resource nodes (miners/extractors)
+  const resMap = (typeof RESOURCE_CLASS_TO_ITEM !== 'undefined') ? RESOURCE_CLASS_TO_ITEM : {};
+  for (const n of nodes) {
+    if (n.isExploited && n.currentRate > 0) {
+      const itemId = resMap[n.resourceClass] || n.resourceClass?.replace('Desc_', '')?.replace('_C', '') || 'RawResource';
+      if (!globalRates[itemId]) {
+        globalRates[itemId] = {
+          name: n.resourceName || itemId,
+          production_nominal: 0,
+          machines_count: 0,
+          zones_breakdown: {},
+          zone_machines: {}
+        };
+      }
+      globalRates[itemId].production_nominal += n.currentRate;
+      globalRates[itemId].machines_count += 1;
+    }
+  }
+
+  // 3. Process zone-specific metrics
+  const zoneMetrics = {};
+
+  for (const zone of zones) {
+    if (!zone || !zone.bounds) continue;
+    const { minX, maxX, minY, maxY } = zone.bounds;
+
+    const machinesInZone = buildings.filter(b => 
+      b.x >= minX && b.x <= maxX && b.y >= minY && b.y <= maxY
+    );
+    const nodesInZone = nodes.filter(n =>
+      n.isExploited && n.x >= minX && n.x <= maxX && n.y >= minY && n.y <= maxY
+    );
+
+    const production = {};
+    const consumption = {};
+
+    for (const b of machinesInZone) {
+      if (b.outputs) {
+        for (const out of b.outputs) {
+          if (!out.item) continue;
+          if (!production[out.item]) {
+            production[out.item] = { name: out.name || out.item, rate: 0, count: 0 };
+          }
+          production[out.item].rate += (out.rate || 0);
+          production[out.item].count += 1;
+
+          if (globalRates[out.item]) {
+            globalRates[out.item].zones_breakdown[zone.name] = (globalRates[out.item].zones_breakdown[zone.name] || 0) + (out.rate || 0);
+            globalRates[out.item].zone_machines[zone.name] = (globalRates[out.item].zone_machines[zone.name] || 0) + 1;
+          }
+        }
+      }
+      if (b.inputs) {
+        for (const inp of b.inputs) {
+          if (!inp.item) continue;
+          if (!consumption[inp.item]) {
+            consumption[inp.item] = { name: inp.name || inp.item, rate: 0 };
+          }
+          consumption[inp.item].rate += (inp.rate || 0);
+        }
+      }
+    }
+
+    for (const n of nodesInZone) {
+      const itemId = resMap[n.resourceClass] || n.resourceClass?.replace('Desc_', '')?.replace('_C', '') || 'RawResource';
+      if (!production[itemId]) {
+        production[itemId] = { name: n.resourceName || itemId, rate: 0, count: 0 };
+      }
+      production[itemId].rate += n.currentRate;
+      production[itemId].count += 1;
+
+      if (globalRates[itemId]) {
+        globalRates[itemId].zones_breakdown[zone.name] = (globalRates[itemId].zones_breakdown[zone.name] || 0) + n.currentRate;
+        globalRates[itemId].zone_machines[zone.name] = (globalRates[itemId].zone_machines[zone.name] || 0) + 1;
+      }
+    }
+
+    zoneMetrics[zone.id] = {
+      zoneId: zone.id,
+      zoneName: zone.name,
+      assignedItem: zone.item,
+      color: zone.color,
+      totalMachines: machinesInZone.length + nodesInZone.length,
+      production,
+      consumption
+    };
+  }
+
+  if (!window.liveMetrics) window.liveMetrics = {};
+  window.liveMetrics.global = globalRates;
+  window.liveMetrics.zones = zoneMetrics;
+
+  return window.liveMetrics;
+}
+window.recalculateLiveMetrics = recalculateLiveMetrics;
+window.recalculateMetricsForZones = recalculateLiveMetrics;
+
 function updateKPITicker(saveData, metricsData) {
   const mCount = document.getElementById('kpi-machines-count');
   if (mCount && saveData?.buildings) mCount.textContent = saveData.buildings.length;
@@ -1158,14 +1369,21 @@ async function fetchMetrics() {
     const ts = Date.now();
     let res = await fetch(`/api/metrics?t=${ts}`).catch(() => null);
     if (!res || !res.ok) res = await fetch(`data/metrics.json?t=${ts}`);
-    if (!res.ok) return;
-    const data = await res.json();
-    window.liveMetrics = data;
+    if (res && res.ok) {
+      const data = await res.json();
+      if (!window.liveMetrics) window.liveMetrics = {};
+      window.liveMetrics.session = data.session || window.liveMetrics.session;
+      window.liveMetrics.last_sync = data.last_sync || window.liveMetrics.last_sync;
+      window.liveMetrics.recentSaves = data.recentSaves || window.liveMetrics.recentSaves;
+      window.liveMetrics.active_save_file = data.active_save_file || window.liveMetrics.active_save_file;
+    }
+  } catch (err) {
+    console.warn('[Sync] Could not fetch metrics:', err.message);
+  } finally {
+    recalculateLiveMetrics();
     updateSyncCountdownUI();
     if (currentMode === 'schematics') renderSchematics(currentBranchId);
     if (currentMode === 'mall_summary') renderMallSummary();
-  } catch (err) {
-    console.warn('[Sync] Could not fetch metrics:', err.message);
   }
 }
 
@@ -1216,6 +1434,7 @@ async function loadMapData() {
     window.cachedZonesData = zonesData;
     window.cachedNodesData = nodes;
 
+    recalculateLiveMetrics();
     updateKPITicker(bldData, window.liveMetrics);
     applyMapData(bldData, zonesData, nodes);
     updateQuickZonesBar();
@@ -1534,15 +1753,32 @@ function openItemModal(itemId) {
   const liveRateEl = document.getElementById('modal-live-rate');
   const liveZonesEl = document.getElementById('modal-live-zones');
 
+  const zones = window.cachedZonesData || window.tacticalMap?.zones || [];
+  const info = getItemRateInfo(item, zones, globalModeFilter);
   const metric = findMetricForItem(window.liveMetrics?.global, itemId);
-  if (metric && metric.production_nominal > 0) {
-    const rate = Math.round(metric.production_nominal * 10) / 10;
-    liveRateEl.textContent = `${rate}/min (${metric.machines_count} máq.)`;
 
-    const breakdowns = Object.entries(metric.zones_breakdown || {});
+  if (info.isProducing || (metric && metric.production_nominal > 0)) {
+    const displayRate = Math.round(info.itemRate * 10) / 10;
+    const modeLabel = globalModeFilter ? 'todo el mapa' : 'zonas activas';
+    liveRateEl.textContent = `${displayRate}/min (${info.machinesCount} máq. en ${modeLabel})`;
+
+    const breakdowns = [];
+    for (const z of zones) {
+      const zm = window.liveMetrics?.zones?.[z.id];
+      if (zm && zm.production) {
+        for (const [k, p] of Object.entries(zm.production)) {
+          const ck = k.toLowerCase().replace(/_/g, '');
+          const cleanId = itemId.toLowerCase().replace(/_/g, '');
+          if (ck === cleanId || ck.includes(cleanId) || cleanId.includes(ck)) {
+            breakdowns.push({ name: z.name, rate: p.rate, count: p.count });
+          }
+        }
+      }
+    }
+
     if (breakdowns.length > 0) {
       liveZonesEl.innerHTML = `<strong>Zonas productoras:</strong><br>` + 
-        breakdowns.map(([zName, zRate]) => `&bull; 🏭 <em>${zName}</em>: <strong>${Math.round(zRate * 10) / 10}/min</strong>`).join('<br>');
+        breakdowns.map(b => `&bull; 🏭 <em>${b.name}</em>: <strong>+${Math.round(b.rate * 10) / 10}/min</strong> (${b.count} máq.)`).join('<br>');
     } else {
       liveZonesEl.innerHTML = `<em>Instalaciones fuera de zonas delimitadas.</em>`;
     }
@@ -1920,6 +2156,7 @@ async function submitZoneForm(e) {
   } catch (err) {}
 
   if (typeof window.updateQuickZonesBar === 'function') window.updateQuickZonesBar();
+  if (typeof recalculateLiveMetrics === 'function') recalculateLiveMetrics();
   if (typeof closeZoneModal === 'function') closeZoneModal();
 }
 window.submitZoneForm = submitZoneForm;
@@ -1941,6 +2178,7 @@ async function deleteZone(zoneId) {
     window.cachedZonesData = zones;
     if (typeof window.updateQuickZonesBar === 'function') window.updateQuickZonesBar();
   }
+  if (typeof recalculateLiveMetrics === 'function') recalculateLiveMetrics();
 }
 window.deleteZone = deleteZone;
 

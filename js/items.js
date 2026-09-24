@@ -393,3 +393,26 @@ const SATISFACTORY_CATEGORIES = [
     ]
   }
 ];
+
+const RESOURCE_CLASS_TO_ITEM = {
+  'Desc_OreIron_C': 'Iron_Ore',
+  'Desc_OreCopper_C': 'Copper_Ore',
+  'Desc_Stone_C': 'Limestone',
+  'Desc_Coal_C': 'Coal',
+  'Desc_RawQuartz_C': 'Raw_Quartz',
+  'Desc_LiquidOil_C': 'Crude_Oil',
+  'Desc_OreGold_C': 'Caterium_Ore',
+  'Desc_Sulfur_C': 'Sulfur',
+  'Desc_Water_C': 'Water',
+  'Desc_OreBauxite_C': 'Bauxite',
+  'Desc_OreUranium_C': 'Uranium',
+  'Desc_NitrogenGas_C': 'Nitrogen_Gas',
+  'Desc_SAM_C': 'SAM'
+};
+
+if (typeof window !== 'undefined') {
+  window.RESOURCE_CLASS_TO_ITEM = RESOURCE_CLASS_TO_ITEM;
+}
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { SATISFACTORY_CATEGORIES, RESOURCE_CLASS_TO_ITEM };
+}

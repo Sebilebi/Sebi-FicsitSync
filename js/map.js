@@ -2590,23 +2590,64 @@ class TacticalMap {
     document.getElementById('zone-bounds-miny').value = Math.round(bounds.minY);
     document.getElementById('zone-bounds-maxy').value = Math.round(bounds.maxY);
 
+    // Auto-detect principal produced item from enclosed machines
+    const itemCounts = {};
+    for (const b of inside) {
+      if (b.outputs) {
+        for (const out of b.outputs) {
+          if (out.item) {
+            itemCounts[out.item] = (itemCounts[out.item] || 0) + 1;
+          }
+        }
+      }
+    }
+    const sortedDetected = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]);
+    const detectedItem = sortedDetected.length > 0 ? sortedDetected[0][0] : '';
+
     const itemSel = document.getElementById('zone-item-select');
-    if (itemSel) itemSel.value = '';
+    if (itemSel) {
+      if (detectedItem && itemSel.querySelector(`option[value="${detectedItem}"]`)) {
+        itemSel.value = detectedItem;
+      } else {
+        itemSel.value = '';
+      }
+    }
+
     const colorInp = document.getElementById('zone-color-input');
     if (colorInp) colorInp.value = '#38bdf8';
 
-    document.getElementById('zone-machines-preview').textContent = 
-      `${inside.length} máquina(s) detectada(s) dentro de este recuadro.`;
+    const nameInp = document.getElementById('zone-name-input');
+    if (nameInp) {
+      if (detectedItem) {
+        const allItems = typeof SATISFACTORY_CATEGORIES !== 'undefined' ? SATISFACTORY_CATEGORIES.flatMap(c => c.items) : [];
+        const itemObj = allItems.find(i => i.id === detectedItem);
+        nameInp.value = `Fábrica de ${itemObj ? itemObj.name : detectedItem}`;
+      } else {
+        nameInp.value = `Fábrica #${this.zones.length + 1}`;
+      }
+    }
 
-    document.getElementById('zone-name-input').value = `Fábrica #${this.zones.length + 1}`;
+    const previewEl = document.getElementById('zone-machines-preview');
+    if (previewEl) {
+      let previewMsg = `${inside.length} máquina(s) detectada(s) dentro de este recuadro.`;
+      if (sortedDetected.length > 0) {
+        const prodSummary = sortedDetected.slice(0, 3).map(([it, count]) => `${count} máq. de ${it}`).join(', ');
+        previewMsg += ` Producción: ${prodSummary}`;
+      }
+      previewEl.textContent = previewMsg;
+    }
+
     modal.classList.add('active');
   }
 
   getZoneMetrics(zone) {
-    if (!zone || !zone.bounds) return { machines: [], storages: [], production: {}, consumption: {} };
+    if (!zone || !zone.bounds) return { machines: [], storages: [], miners: [], production: {}, consumption: {} };
     const { minX, maxX, minY, maxY } = zone.bounds;
     const machines = this.buildings.filter(b => b.x >= minX && b.x <= maxX && b.y >= minY && b.y <= maxY);
     const storages = this.storages.filter(s => s.x >= minX && s.x <= maxX && s.y >= minY && s.y <= maxY);
+    const exploitedNodes = (this.nodes || []).filter(n => 
+      n.isExploited && n.x >= minX && n.x <= maxX && n.y >= minY && n.y <= maxY
+    );
 
     const production = {};
     const consumption = {};
@@ -2614,8 +2655,9 @@ class TacticalMap {
     for (const b of machines) {
       if (b.outputs) {
         for (const out of b.outputs) {
+          if (!out.item) continue;
           if (!production[out.item]) {
-            production[out.item] = { name: out.name, rate: 0, count: 0 };
+            production[out.item] = { name: out.name || out.item, rate: 0, count: 0 };
           }
           production[out.item].rate += out.rate || 0;
           production[out.item].count += 1;
@@ -2623,15 +2665,29 @@ class TacticalMap {
       }
       if (b.inputs) {
         for (const inp of b.inputs) {
+          if (!inp.item) continue;
           if (!consumption[inp.item]) {
-            consumption[inp.item] = { name: inp.name, rate: 0 };
+            consumption[inp.item] = { name: inp.name || inp.item, rate: 0 };
           }
           consumption[inp.item].rate += inp.rate || 0;
         }
       }
     }
 
-    return { machines, storages, production, consumption };
+    const resMap = (typeof RESOURCE_CLASS_TO_ITEM !== 'undefined') ? RESOURCE_CLASS_TO_ITEM : {};
+    for (const n of exploitedNodes) {
+      const resClass = n.resourceClass || '';
+      const itemId = resMap[resClass] || resClass.replace('Desc_', '').replace('_C', '');
+      const itemName = n.resourceName || itemId;
+      const rate = n.currentRate || 0;
+      if (!production[itemId]) {
+        production[itemId] = { name: itemName, rate: 0, count: 0 };
+      }
+      production[itemId].rate += rate;
+      production[itemId].count += 1;
+    }
+
+    return { machines, storages, miners: exploitedNodes, production, consumption };
   }
 
   updateZoneListUI() {
@@ -2950,6 +3006,7 @@ TacticalMap.prototype.commitZoneChanges = function() {
   this.render();
   this.updateZoneListUI();
   if (typeof window.updateQuickZonesBar === "function") window.updateQuickZonesBar();
+  if (typeof window.recalculateMetricsForZones === "function") window.recalculateMetricsForZones();
   this.initialZonesState = JSON.stringify(this.zones);
   this.history = [];
   this.redoStack = [];
