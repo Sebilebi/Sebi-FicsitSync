@@ -160,7 +160,12 @@ function closeAllModals() {
   const machineModal = document.getElementById('scim-machine-modal');
   if (machineModal) machineModal.classList.remove('active');
   const zoneModal = document.getElementById('zone-modal');
-  if (zoneModal) zoneModal.classList.remove('active');
+  if (zoneModal) {
+    zoneModal.classList.remove('active');
+    delete zoneModal.dataset.editingZoneId;
+    const titleEl = document.getElementById('zone-modal-title');
+    if (titleEl) titleEl.textContent = 'DELIMITAR NUEVA ZONA';
+  }
   const powerModal = document.getElementById('power-modal');
   if (powerModal) {
     powerModal.classList.remove('active');
@@ -168,8 +173,24 @@ function closeAllModals() {
   }
   document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
   window.hasDraggedBlueprint = false;
-  if (window.tacticalMap && typeof window.tacticalMap.setDrawMode === 'function') {
-    window.tacticalMap.setDrawMode(false);
+  if (window.tacticalMap) {
+    if (typeof window.tacticalMap.clearHover === 'function') {
+      window.tacticalMap.clearHover();
+    } else {
+      window.tacticalMap.hoveredMachine = null;
+      window.tacticalMap.hoveredMiner = null;
+      window.tacticalMap.hoveredNode = null;
+      window.tacticalMap.hoveredStorage = null;
+      window.tacticalMap.hoveredBelt = null;
+      window.tacticalMap.hoveredPipe = null;
+      window.tacticalMap.hoveredCollectible = null;
+      window.tacticalMap.hoveredAttachment = null;
+      window.tacticalMap.isDragging = false;
+      window.tacticalMap.hasDragged = false;
+    }
+    if (typeof window.tacticalMap.setDrawMode === 'function') {
+      window.tacticalMap.setDrawMode(false);
+    }
   }
 }
 window.closeAllModals = closeAllModals;
@@ -177,6 +198,8 @@ window.closeAllModals = closeAllModals;
 function switchMainMode(modeId) {
   closeAllModals();
   currentMode = modeId;
+  window.currentMode = modeId;
+  window.hasDraggedBlueprint = false;
   if (window.location.hash !== `#${modeId}`) {
     window.history.replaceState(null, null, `#${modeId}`);
   }
@@ -469,8 +492,21 @@ function initBlueprintPanZoom() {
     if (viewport) viewport.style.cursor = 'grab';
     setTimeout(() => {
       window.hasDraggedBlueprint = false;
-    }, 60);
+    }, 150);
   });
+
+  // Capture phase click interceptor: if blueprint was dragged, swallow the click so it never triggers nodes
+  viewport.addEventListener('click', (e) => {
+    if (window.hasDraggedBlueprint) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      setTimeout(() => {
+        window.hasDraggedBlueprint = false;
+      }, 50);
+      return;
+    }
+  }, true);
 
   window.addEventListener('blur', () => {
     isDragging = false;
@@ -480,6 +516,10 @@ function initBlueprintPanZoom() {
 
   viewport.addEventListener('wheel', (e) => {
     e.preventDefault();
+    window.hasDraggedBlueprint = true;
+    setTimeout(() => {
+      window.hasDraggedBlueprint = false;
+    }, 150);
     const rect = viewport.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
@@ -1879,6 +1919,9 @@ function openItemModal(itemId) {
     window.hasDraggedBlueprint = false;
     return;
   }
+  if (window.currentMode && window.currentMode !== 'schematics' && window.currentMode !== 'mall_summary') {
+    return;
+  }
   currentModalItemId = itemId;
   const allItems = SATISFACTORY_CATEGORIES.flatMap(c => c.items);
   const item = allItems.find(i => i.id === itemId);
@@ -2030,6 +2073,9 @@ function closeModal() {
   const modal = document.getElementById('item-modal');
   if (modal) modal.classList.remove('active');
   window.hasDraggedBlueprint = false;
+  if (window.tacticalMap && typeof window.tacticalMap.clearHover === 'function') {
+    window.tacticalMap.clearHover();
+  }
 }
 window.closeModal = closeModal;
 
@@ -2527,6 +2573,7 @@ function formatItemIcon(itemKey) {
 
 function openMachineInGameModal(b) {
   if (!b) return;
+  if (window.currentMode && window.currentMode !== 'live_map') return;
   const modal = document.getElementById('scim-machine-modal');
   if (!modal) return;
 
@@ -2625,6 +2672,9 @@ window.openMachineInGameModal = openMachineInGameModal;
 function closeMachineModal() {
   const modal = document.getElementById('scim-machine-modal');
   if (modal) modal.classList.remove('active');
+  if (window.tacticalMap && typeof window.tacticalMap.clearHover === 'function') {
+    window.tacticalMap.clearHover();
+  }
 }
 window.closeMachineModal = closeMachineModal;
 

@@ -129,7 +129,8 @@ html, body {
   
   -webkit-
   border-bottom: 1px solid var(--border-glass);
-  z-index: 50;
+  position: relative;
+  z-index: 150;
   gap: 12px;
 }
 
@@ -2246,6 +2247,8 @@ html, body {
 .global-header {
   border-bottom: 4px solid var(--ficsit-orange) !important;
   background: var(--bg-void) !important;
+  position: relative !important;
+  z-index: 150 !important;
 }
 .brand-icon {
   color: var(--ficsit-orange) !important;

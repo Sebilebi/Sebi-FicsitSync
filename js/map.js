@@ -825,6 +825,15 @@ class TacticalMap {
   }
 
   onMouseUp(e) {
+    if (!this.isDragging) return;
+    this.isDragging = false;
+
+    if (window.currentMode && window.currentMode !== 'live_map') {
+      this.hasDragged = false;
+      this.clearHover();
+      return;
+    }
+
     const rect = this.canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
@@ -875,11 +884,11 @@ class TacticalMap {
       this.handleClick(mouseX, mouseY);
     }
 
-    if (this.isDragging && this.hasDragged) {
+    if (this.hasDragged) {
       if (typeof saveAppState === 'function') saveAppState();
     }
 
-    this.isDragging = false;
+    this.hasDragged = false;
   }
 
   onWheel(e) {
@@ -916,6 +925,10 @@ class TacticalMap {
   }
 
   checkHover(mouseX, mouseY) {
+    if (window.currentMode && window.currentMode !== 'live_map') {
+      this.clearHover();
+      return;
+    }
     const worldMouse = this.screenToWorld(mouseX, mouseY);
 
     // 1. Check miners (highest priority over raw nodes so they get true SCIM machine outline)
@@ -1194,7 +1207,27 @@ class TacticalMap {
     return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
   }
 
+  clearHover() {
+    this.hoveredMiner = null;
+    this.hoveredNode = null;
+    this.hoveredMachine = null;
+    this.hoveredStorage = null;
+    this.hoveredBelt = null;
+    this.hoveredPipe = null;
+    this.hoveredCollectible = null;
+    this.hoveredAttachment = null;
+    if (this.connectedInBelts) this.connectedInBelts.clear();
+    if (this.connectedOutBelts) this.connectedOutBelts.clear();
+    this.isDragging = false;
+    this.hasDragged = false;
+  }
+
   handleClick(mouseX, mouseY) {
+    if (window.currentMode && window.currentMode !== 'live_map') {
+      this.clearHover();
+      return;
+    }
+
     // 1. Check if clicking on any zone's title pill
     for (let i = this.zones.length - 1; i >= 0; i--) {
       const z = this.zones[i];
@@ -1211,22 +1244,28 @@ class TacticalMap {
     }
 
     if (this.hoveredMiner) {
+      const miner = this.hoveredMiner;
+      this.clearHover();
       if (typeof window.openMachineInGameModal === 'function') {
-        window.openMachineInGameModal(this.hoveredMiner);
+        window.openMachineInGameModal(miner);
       } else {
-        this.selectMachine(this.hoveredMiner);
+        this.selectMachine(miner);
       }
       return;
     }
     if (this.hoveredNode) {
-      this.selectNode(this.hoveredNode);
+      const node = this.hoveredNode;
+      this.clearHover();
+      this.selectNode(node);
       return;
     }
     if (this.hoveredMachine) {
+      const machine = this.hoveredMachine;
+      this.clearHover();
       if (typeof window.openMachineInGameModal === 'function') {
-        window.openMachineInGameModal(this.hoveredMachine);
+        window.openMachineInGameModal(machine);
       } else {
-        this.selectMachine(this.hoveredMachine);
+        this.selectMachine(machine);
       }
       return;
     }
