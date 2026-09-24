@@ -2712,12 +2712,126 @@ window.closeMachineModal = closeMachineModal;
 // 11. GESTIÓN DE ZONAS (CREAR / EDITAR / BORRAR)
 // ==========================================
 function populateZoneItemSelect() {
+  const container = document.getElementById('zone-item-options-list');
   const select = document.getElementById('zone-item-select');
-  if (!select) return;
-  const allItems = SATISFACTORY_CATEGORIES.flatMap(c => c.items);
-  select.innerHTML = '<option value="">-- General / Múltiples Ítems --</option>' + 
-    allItems.map(i => `<option value="${i.id}">${i.name} (${i.id.replace(/_/g, ' ')})</option>`).join('');
+  const allItems = typeof SATISFACTORY_CATEGORIES !== 'undefined' ? SATISFACTORY_CATEGORIES.flatMap(c => c.items) : [];
+
+  if (select && select.tagName === 'SELECT') {
+    select.innerHTML = '<option value="">-- General / Múltiples Ítems --</option>' + 
+      allItems.map(i => `<option value="${i.id}">${i.name} (${i.id.replace(/_/g, ' ')})</option>`).join('');
+  }
+
+  if (!container) return;
+
+  let html = `
+    <div class="custom-zone-option selected" data-id="" data-name="general multiples items varios" onclick="selectZoneOption('', '-- General / Múltiples Ítems --')">
+      <div class="custom-zone-item-icon" style="font-size: 16px;">🏭</div>
+      <div class="opt-label-group">
+        <span class="opt-name">-- General / Múltiples Ítems --</span>
+        <span class="opt-sub">Sin material predeterminado</span>
+      </div>
+    </div>
+  `;
+
+  for (const item of allItems) {
+    const rawName = item.name;
+    const cleanId = item.id.replace(/_/g, ' ');
+    const iconPath = `icons/${item.id}.png`;
+    const safeName = rawName.replace(/'/g, "\\'");
+    const searchTerms = `${rawName.toLowerCase()} ${item.id.toLowerCase()} ${cleanId.toLowerCase()}`;
+    html += `
+      <div class="custom-zone-option" data-id="${item.id}" data-name="${searchTerms}" onclick="selectZoneOption('${item.id}', '${safeName}')">
+        <img class="opt-icon" src="${iconPath}" alt="${rawName}" onerror="this.src='icons/iron_plate.png'">
+        <div class="opt-label-group">
+          <span class="opt-name">${rawName}</span>
+          <span class="opt-sub">${cleanId}</span>
+        </div>
+      </div>
+    `;
+  }
+  container.innerHTML = html;
 }
+window.populateZoneItemSelect = populateZoneItemSelect;
+
+function toggleZoneItemDropdown(forceState) {
+  const dropdown = document.getElementById('zone-item-dropdown');
+  const arrow = document.getElementById('zone-select-arrow');
+  if (!dropdown) return;
+  const isCurrentlyOpen = dropdown.style.display === 'flex';
+  const shouldOpen = typeof forceState === 'boolean' ? forceState : !isCurrentlyOpen;
+
+  if (shouldOpen) {
+    dropdown.style.display = 'flex';
+    if (arrow) arrow.style.transform = 'rotate(180deg)';
+    const searchInput = document.getElementById('zone-item-search');
+    if (searchInput) {
+      searchInput.value = '';
+      filterZoneItems('');
+      setTimeout(() => searchInput.focus(), 50);
+    }
+  } else {
+    dropdown.style.display = 'none';
+    if (arrow) arrow.style.transform = 'rotate(0deg)';
+  }
+}
+window.toggleZoneItemDropdown = toggleZoneItemDropdown;
+
+function filterZoneItems(query) {
+  const q = (query || '').trim().toLowerCase();
+  const options = document.querySelectorAll('#zone-item-options-list .custom-zone-option');
+  options.forEach(opt => {
+    const text = opt.getAttribute('data-name') || '';
+    if (!q || text.includes(q)) {
+      opt.style.display = 'flex';
+    } else {
+      opt.style.display = 'none';
+    }
+  });
+}
+window.filterZoneItems = filterZoneItems;
+
+function updateCustomZoneItemSelectUI(itemId) {
+  const input = document.getElementById('zone-item-select');
+  const iconEl = document.getElementById('zone-select-icon');
+  const labelEl = document.getElementById('zone-select-label');
+  if (input) input.value = itemId || '';
+
+  const allItems = typeof SATISFACTORY_CATEGORIES !== 'undefined' ? SATISFACTORY_CATEGORIES.flatMap(c => c.items) : [];
+  const found = itemId ? allItems.find(i => i.id === itemId) : null;
+
+  if (found) {
+    if (iconEl) iconEl.innerHTML = `<img src="icons/${found.id}.png" alt="${found.name}" onerror="this.src='icons/iron_plate.png'">`;
+    if (labelEl) labelEl.textContent = found.name;
+  } else {
+    if (iconEl) iconEl.innerHTML = '🏭';
+    if (labelEl) labelEl.textContent = '-- General / Múltiples Ítems --';
+  }
+
+  // Marcar visualmente la opción activa en la lista
+  const options = document.querySelectorAll('#zone-item-options-list .custom-zone-option');
+  options.forEach(opt => {
+    if (opt.getAttribute('data-id') === (itemId || '')) {
+      opt.classList.add('selected');
+    } else {
+      opt.classList.remove('selected');
+    }
+  });
+}
+window.updateCustomZoneItemSelectUI = updateCustomZoneItemSelectUI;
+
+function selectZoneOption(itemId, itemName) {
+  updateCustomZoneItemSelectUI(itemId);
+  toggleZoneItemDropdown(false);
+}
+window.selectZoneOption = selectZoneOption;
+
+// Cerrar dropdown al hacer clic fuera
+document.addEventListener('click', (e) => {
+  const customSelect = document.getElementById('custom-zone-select');
+  if (customSelect && !customSelect.contains(e.target)) {
+    toggleZoneItemDropdown(false);
+  }
+});
 
 function toggleDrawZoneMode() {
   if (!window.tacticalMap) return;
@@ -2845,6 +2959,7 @@ function closeZoneModal() {
     const titleEl = document.getElementById('zone-modal-title');
     if (titleEl) titleEl.textContent = 'DELIMITAR NUEVA ZONA';
   }
+  if (typeof toggleZoneItemDropdown === 'function') toggleZoneItemDropdown(false);
   if (window.tacticalMap) window.tacticalMap.setDrawMode(false);
 }
 window.closeZoneModal = closeZoneModal;
@@ -2868,10 +2983,11 @@ function editZone(zoneId) {
 
   const itemSel = document.getElementById('zone-item-select');
   if (itemSel) {
-    if (itemSel.options.length <= 1 && typeof populateZoneItemSelect === 'function') {
-      populateZoneItemSelect();
+    if (typeof updateCustomZoneItemSelectUI === 'function') {
+      updateCustomZoneItemSelectUI(zone.item || '');
+    } else {
+      itemSel.value = zone.item || '';
     }
-    itemSel.value = zone.item || '';
   }
   if (document.getElementById('zone-color-input')) {
     document.getElementById('zone-color-input').value = zone.color || '#38bdf8';

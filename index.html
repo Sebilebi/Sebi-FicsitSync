@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@400;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=4.10.6">
+  <link rel="stylesheet" href="css/style.css?v=4.10.7">
 </head>
 <body>
   <div class="app-shell">
@@ -585,10 +585,23 @@
         </div>
 
         <div>
-          <label style="font-weight: 700; color: var(--text-main); display: block; margin-bottom: 4px;">Ítem Fábricado Principal (Opcional):</label>
-          <select id="zone-item-select" class="global-search-input" style="width: 100%; background: var(--bg-card);">
-            <option value="">-- General / Múltiples Ítems --</option>
-          </select>
+          <label style="font-weight: 700; color: var(--text-main); display: block; margin-bottom: 4px;">Ítem Fabricado Principal (Opcional):</label>
+          <input type="hidden" id="zone-item-select" value="">
+          <div class="custom-zone-select" id="custom-zone-select">
+            <button type="button" class="custom-zone-select-trigger" id="zone-select-trigger" onclick="toggleZoneItemDropdown()">
+              <div class="custom-zone-select-selected" id="zone-select-selected">
+                <span class="custom-zone-item-icon" id="zone-select-icon">🏭</span>
+                <span class="custom-zone-item-text" id="zone-select-label">-- General / Múltiples Ítems --</span>
+              </div>
+              <span class="custom-zone-select-arrow" id="zone-select-arrow">▼</span>
+            </button>
+            <div class="custom-zone-dropdown" id="zone-item-dropdown" style="display: none;">
+              <div class="custom-zone-search-box">
+                <input type="text" id="zone-item-search" placeholder="🔍 Buscar material o fábrica..." oninput="filterZoneItems(this.value)" autocomplete="off">
+              </div>
+              <div class="custom-zone-options-list" id="zone-item-options-list"></div>
+            </div>
+          </div>
         </div>
 
         <div>
@@ -747,10 +760,10 @@
     </div>
   </div>
 
-  <script src="js/items_es.js?v=4.10.6"></script>
-  <script src="js/items.js?v=4.10.6"></script>
-  <script src="js/collectibles.js?v=4.10.6"></script>
-  <script src="js/map.js?v=4.10.6"></script>
-  <script src="js/app.js?v=4.10.6"></script>
+  <script src="js/items_es.js?v=4.10.7"></script>
+  <script src="js/items.js?v=4.10.7"></script>
+  <script src="js/collectibles.js?v=4.10.7"></script>
+  <script src="js/map.js?v=4.10.7"></script>
+  <script src="js/app.js?v=4.10.7"></script>
 </body>
 </html>

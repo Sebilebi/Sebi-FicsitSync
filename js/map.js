@@ -3154,13 +3154,11 @@ class TacticalMap {
     const sortedDetected = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]);
     const detectedItem = sortedDetected.length > 0 ? sortedDetected[0][0] : '';
 
-    const itemSel = document.getElementById('zone-item-select');
-    if (itemSel) {
-      if (detectedItem && itemSel.querySelector(`option[value="${detectedItem}"]`)) {
-        itemSel.value = detectedItem;
-      } else {
-        itemSel.value = '';
-      }
+    if (typeof window.updateCustomZoneItemSelectUI === 'function') {
+      window.updateCustomZoneItemSelectUI(detectedItem || '');
+    } else {
+      const itemSel = document.getElementById('zone-item-select');
+      if (itemSel) itemSel.value = detectedItem || '';
     }
 
     const colorInp = document.getElementById('zone-color-input');
