@@ -520,6 +520,17 @@ function resetBlueprintZoom(svgW = 1760, svgH = 650) {
 }
 window.resetBlueprintZoom = resetBlueprintZoom;
 
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+if (typeof window !== 'undefined') window.escapeHtml = escapeHtml;
+
 function getItemRateInfo(item, zones, isGlobalMode = globalModeFilter) {
   const cleanId = (item.id || '').toLowerCase().replace(/_/g, '');
   const cleanName = (item.name || '').toLowerCase();
@@ -540,11 +551,32 @@ function getItemRateInfo(item, zones, isGlobalMode = globalModeFilter) {
     });
   });
 
+  const allBlds = window.cachedBuildingsData?.buildings || window.tacticalMap?.buildings || [];
+  const enclosingZones = (zones || []).filter(z => {
+    if (!z || !z.bounds) return false;
+    return allBlds.some(b => {
+      if (b.x < z.bounds.minX || b.x > z.bounds.maxX || b.y < z.bounds.minY || b.y > z.bounds.maxY) return false;
+      return (b.outputs || []).some(o => {
+        const co = ((o.item || o.name || '') + '').toLowerCase().replace(/_/g, '');
+        return co === cleanId || co.includes(cleanId) || cleanId.includes(co);
+      });
+    });
+  });
+
   const nameMatchZones = (zones || []).filter(z => {
     if (!z || !z.name) return false;
     const zn = z.name.toLowerCase();
     return zn.includes(cleanName) || cleanName.includes(zn);
   });
+
+  // Deduplicated map of all matching zones
+  const allMatchingMap = new Map();
+  for (const z of assignedZones) { if (z && z.id) allMatchingMap.set(z.id, z); }
+  for (const z of producingZones) { if (z && z.id) allMatchingMap.set(z.id, z); }
+  for (const z of enclosingZones) { if (z && z.id) allMatchingMap.set(z.id, z); }
+  for (const z of nameMatchZones) { if (z && z.id) allMatchingMap.set(z.id, z); }
+
+  const allMatchingZones = Array.from(allMatchingMap.values());
 
   let linkedZone = null;
   let itemRate = 0;
@@ -553,11 +585,11 @@ function getItemRateInfo(item, zones, isGlobalMode = globalModeFilter) {
   if (isGlobalMode) {
     itemRate = metric ? (metric.production_nominal || 0) : 0;
     machinesCount = metric ? (metric.machines_count || 0) : 0;
-    linkedZone = assignedZones[0] || producingZones[0] || nameMatchZones[0] || null;
+    linkedZone = allMatchingZones[0] || null;
   } else {
-    if (assignedZones.length > 0) {
-      linkedZone = assignedZones[0];
-      for (const z of assignedZones) {
+    if (allMatchingZones.length > 0) {
+      linkedZone = allMatchingZones[0];
+      for (const z of allMatchingZones) {
         const zm = window.liveMetrics?.zones?.[z.id];
         if (zm && zm.production) {
           for (const [k, p] of Object.entries(zm.production)) {
@@ -569,24 +601,6 @@ function getItemRateInfo(item, zones, isGlobalMode = globalModeFilter) {
           }
         }
       }
-    } else if (producingZones.length > 0) {
-      linkedZone = producingZones[0];
-      for (const z of producingZones) {
-        const zm = window.liveMetrics?.zones?.[z.id];
-        if (zm && zm.production) {
-          for (const [k, p] of Object.entries(zm.production)) {
-            const ck = k.toLowerCase().replace(/_/g, '');
-            if (ck === cleanId || ck.includes(cleanId) || cleanId.includes(ck)) {
-              itemRate += (p.rate || 0);
-              machinesCount += (p.count || 0);
-            }
-          }
-        }
-      }
-    } else if (nameMatchZones.length > 0) {
-      linkedZone = nameMatchZones[0];
-      itemRate = 0;
-      machinesCount = 0;
     } else {
       linkedZone = null;
       itemRate = 0;
@@ -608,6 +622,9 @@ function getItemRateInfo(item, zones, isGlobalMode = globalModeFilter) {
   if (isGlobalMode) {
     zoneBadgeText = isProducing ? '🌍 Global' : '⚠️ Inactivo';
     zoneColor = isProducing ? '#10b981' : '#64748b';
+  } else if (allMatchingZones.length > 1) {
+    zoneBadgeText = `🏭 ${allMatchingZones.length} zonas`;
+    zoneColor = allMatchingZones[0].color || '#38bdf8';
   } else if (linkedZone) {
     const zName = linkedZone.name || 'Zona';
     zoneBadgeText = `🏭 ${zName.substring(0, 14)}`;
@@ -620,6 +637,7 @@ function getItemRateInfo(item, zones, isGlobalMode = globalModeFilter) {
     isProducing,
     rateText,
     linkedZone,
+    allMatchingZones,
     zoneBadgeText,
     zoneColor,
     assignedZones,
@@ -687,9 +705,15 @@ function renderSchematics(branchId) {
     const rateText = info.rateText;
     const machineType = getMachineType(item);
     const linkedZone = info.linkedZone;
+    const allMatchingZones = info.allMatchingZones || [];
     const zoneBadgeText = info.zoneBadgeText;
     const zoneColor = info.zoneColor;
     const itemColor = item.color || '#ea580c';
+
+    const zoneNamesList = allMatchingZones.map(z => z.name || 'Zona').join(', ');
+    const zoneTitleAttr = allMatchingZones.length > 1
+      ? `Clic para ver ficha técnica de ${item.name} (${allMatchingZones.length} zonas: ${zoneNamesList})`
+      : (allMatchingZones.length === 1 ? `Clic para ver ficha técnica de ${item.name} (${allMatchingZones[0].name})` : `Clic para ver ficha técnica de ${item.name}`);
 
     if (side === 'left') {
       return `
@@ -713,7 +737,7 @@ function renderSchematics(branchId) {
           <line x1="95" y1="27" x2="118" y2="27" stroke="#0284c7" stroke-width="3" stroke-dasharray="3 2" />
 
           <!-- 2. Fábrica -->
-          <g transform="translate(118, 0)" class="bp-node-clickable" onclick="window.openItemModal('${item.id}')" title="Clic para ver ficha técnica de ${item.name}">
+          <g transform="translate(118, 0)" class="bp-node-clickable" onclick="window.openItemModal('${item.id}')" title="${zoneTitleAttr}">
             <rect x="6" y="-6" width="5" height="6" fill="#334155" />
             <rect x="14" y="-9" width="5" height="9" fill="#334155" />
             <rect x="0" y="0" width="88" height="54" rx="5" fill="#0f172a" stroke="${isProducing ? '#10b981' : '#475569'}" stroke-width="${isProducing ? '2' : '1.5'}" />
@@ -736,7 +760,7 @@ function renderSchematics(branchId) {
           </g>
 
           <!-- 3. Almacén Local -->
-          <g transform="translate(238, 0)" class="bp-node-clickable" onclick="window.openItemModal('${item.id}')">
+          <g transform="translate(238, 0)" class="bp-node-clickable" onclick="window.openItemModal('${item.id}')" title="${zoneTitleAttr}">
             <rect x="0" y="0" width="80" height="54" rx="5" fill="#0f172a" stroke="${itemColor}" stroke-width="2" />
             <rect x="2" y="2" width="76" height="11" rx="3" fill="${itemColor}" />
             <text x="40" y="10" text-anchor="middle" font-size="6.5" font-weight="900" fill="#ffffff">ALMACÉN LOCAL</text>
@@ -754,7 +778,7 @@ function renderSchematics(branchId) {
             <rect x="2" y="2" width="84" height="11" rx="3" fill="#dc2626" />
             <text x="44" y="10" text-anchor="middle" font-size="6.5" font-weight="900" fill="#ffffff">ESTACIÓN SALIDA</text>
             <text x="44" y="22" text-anchor="middle" font-size="5.5" font-weight="bold" fill="#fca5a5">CARGA AL MALL</text>
-            <text x="44" y="34" text-anchor="middle" font-size="8">🚉 📤</text>
+            <text x="44" y="34" text-anchor="middle" font-size="8">📥 🚉</text>
             <line x1="0" y1="48" x2="88" y2="48" stroke="#ef4444" stroke-width="2" stroke-dasharray="3 2" />
             <text x="44" y="46" text-anchor="middle" font-size="5" font-weight="bold" fill="#f87171">Vía de Carga</text>
           </g>
@@ -779,7 +803,7 @@ function renderSchematics(branchId) {
           <line x1="88" y1="27" x2="112" y2="27" stroke="#ea580c" stroke-width="3" stroke-dasharray="2 2" />
 
           <!-- 3. Almacén Local -->
-          <g transform="translate(112, 0)" class="bp-node-clickable" onclick="window.openItemModal('${item.id}')">
+          <g transform="translate(112, 0)" class="bp-node-clickable" onclick="window.openItemModal('${item.id}')" title="${zoneTitleAttr}">
             <rect x="0" y="0" width="80" height="54" rx="5" fill="#0f172a" stroke="${itemColor}" stroke-width="2" />
             <rect x="2" y="2" width="76" height="11" rx="3" fill="${itemColor}" />
             <text x="40" y="10" text-anchor="middle" font-size="6.5" font-weight="900" fill="#ffffff">ALMACÉN LOCAL</text>
@@ -796,7 +820,7 @@ function renderSchematics(branchId) {
           </g>
 
           <!-- 2. Fábrica -->
-          <g transform="translate(224, 0)" class="bp-node-clickable" onclick="window.openItemModal('${item.id}')" title="Clic para ver ficha técnica de ${item.name}">
+          <g transform="translate(224, 0)" class="bp-node-clickable" onclick="window.openItemModal('${item.id}')" title="${zoneTitleAttr}">
             <rect x="6" y="-6" width="5" height="6" fill="#334155" />
             <rect x="14" y="-9" width="5" height="9" fill="#334155" />
             <rect x="0" y="0" width="88" height="54" rx="5" fill="#0f172a" stroke="${isProducing ? '#10b981' : '#475569'}" stroke-width="${isProducing ? '2' : '1.5'}" />
@@ -820,7 +844,7 @@ function renderSchematics(branchId) {
             <rect x="2" y="2" width="81" height="11" rx="3" fill="#0284c7" />
             <text x="42.5" y="10" text-anchor="middle" font-size="6.5" font-weight="900" fill="#ffffff">ESTACIÓN ENTRADA</text>
             <text x="42.5" y="22" text-anchor="middle" font-size="5.5" font-weight="bold" fill="#38bdf8">DESCARGA INSUMO</text>
-            <text x="42.5" y="34" text-anchor="middle" font-size="8">🚉 📥</text>
+            <text x="42.5" y="34" text-anchor="middle" font-size="8">📤 🚉</text>
             <text x="42.5" y="47" text-anchor="middle" font-size="6" font-weight="bold" fill="#93c5fd">${item.input.substring(0, 16)}</text>
           </g>
 
@@ -932,6 +956,7 @@ window.renderSchematics = renderSchematics;
 
 
 function jumpToZone(zoneIdOrName) {
+  if (typeof closeModal === 'function') closeModal();
   switchMainMode('live_map');
   setTimeout(() => {
     if (!window.tacticalMap) return;
@@ -1761,36 +1786,112 @@ function openItemModal(itemId) {
   const liveSection = document.getElementById('modal-live-metrics');
   const liveRateEl = document.getElementById('modal-live-rate');
   const liveZonesEl = document.getElementById('modal-live-zones');
+  const btnViewMap = document.getElementById('modal-btn-view-map');
 
   const zones = window.cachedZonesData || window.tacticalMap?.zones || [];
   const info = getItemRateInfo(item, zones, globalModeFilter);
   const metric = findMetricForItem(window.liveMetrics?.global, itemId);
 
-  if (info.isProducing || (metric && metric.production_nominal > 0)) {
-    const displayRate = Math.round(info.itemRate * 10) / 10;
-    const modeLabel = globalModeFilter ? 'todo el mapa' : 'zonas activas';
-    liveRateEl.textContent = `${displayRate}/min (${info.machinesCount} máq. en ${modeLabel})`;
+  const cleanId = itemId.toLowerCase().replace(/_/g, '');
+  const allBlds = window.cachedBuildingsData?.buildings || window.tacticalMap?.buildings || [];
 
-    const breakdowns = [];
-    for (const z of zones) {
-      const zm = window.liveMetrics?.zones?.[z.id];
-      if (zm && zm.production) {
-        for (const [k, p] of Object.entries(zm.production)) {
-          const ck = k.toLowerCase().replace(/_/g, '');
-          const cleanId = itemId.toLowerCase().replace(/_/g, '');
-          if (ck === cleanId || ck.includes(cleanId) || cleanId.includes(ck)) {
-            breakdowns.push({ name: z.name, rate: p.rate, count: p.count });
+  const matchingZones = info.allMatchingZones || [];
+  const hasZones = matchingZones.length > 0;
+  const isGlobalActive = metric && metric.production_nominal > 0;
+
+  if (info.isProducing || isGlobalActive || hasZones) {
+    const displayRate = Math.round(info.itemRate * 10) / 10;
+    const modeLabel = globalModeFilter
+      ? 'todo el mapa'
+      : (matchingZones.length > 1 ? `${matchingZones.length} zonas` : 'zonas activas');
+
+    if (info.isProducing || isGlobalActive) {
+      liveRateEl.textContent = `${displayRate}/min (${info.machinesCount} máq. en ${modeLabel})`;
+    } else {
+      liveRateEl.textContent = `0/min (0 máq. activas en ${matchingZones.length} zonas)`;
+    }
+
+    if (hasZones) {
+      const zoneCards = matchingZones.map(z => {
+        const zm = window.liveMetrics?.zones?.[z.id];
+        let zRate = 0;
+        let zCount = 0;
+        if (zm && zm.production) {
+          for (const [k, p] of Object.entries(zm.production)) {
+            const ck = k.toLowerCase().replace(/_/g, '');
+            if (ck === cleanId || ck.includes(cleanId) || cleanId.includes(ck)) {
+              zRate += (p.rate || 0);
+              zCount += (p.count || 0);
+            }
           }
         }
+
+        // Count machines physically enclosed in this zone
+        const enclosedMachines = allBlds.filter(b => 
+          z.bounds && b.x >= z.bounds.minX && b.x <= z.bounds.maxX && b.y >= z.bounds.minY && b.y <= z.bounds.maxY &&
+          (b.outputs || []).some(o => {
+            const co = ((o.item || o.name || '') + '').toLowerCase().replace(/_/g, '');
+            return co === cleanId || co.includes(cleanId) || cleanId.includes(co);
+          })
+        );
+
+        let statusText = '';
+        if (zRate > 0) {
+          statusText = `+${Math.round(zRate * 10) / 10}/min (${zCount} máq.)`;
+          if (zm && zm.overlappingCount > 0) {
+            statusText += ` · <span style="color: #fbbf24;">(Compartida con otra zona)</span>`;
+          }
+        } else if (enclosedMachines.length > 0) {
+          statusText = `0/min (${enclosedMachines.length} máq. solapadas con otra zona)`;
+        } else {
+          statusText = `0/min (Sin máquinas activas)`;
+        }
+
+        const zColor = z.color || '#38bdf8';
+        const safeZoneId = (z.id || '').replace(/'/g, "\\'");
+        const safeZoneName = escapeHtml(z.name || 'Zona');
+
+        return `
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 10px; margin-bottom: 6px; background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-glass); border-left: 4px solid ${zColor}; border-radius: 4px;">
+            <div style="display: flex; flex-direction: column; gap: 2px; overflow: hidden;">
+              <div style="font-weight: 800; font-size: 12px; color: #f8fafc; display: flex; align-items: center; gap: 6px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+                <span>🏭</span> <span title="${safeZoneName}">${safeZoneName}</span>
+              </div>
+              <div style="font-size: 11px; color: ${zRate > 0 ? '#34d399' : '#94a3b8'}; font-weight: 600;">
+                ${statusText}
+              </div>
+            </div>
+            <button type="button" onclick="window.jumpToZone('${safeZoneId}')" class="map-hud-btn" style="padding: 3px 8px; font-size: 10.5px; height: 24px; white-space: nowrap; background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; cursor: pointer; flex-shrink: 0;">
+              🎯 Centrar
+            </button>
+          </div>
+        `;
+      });
+
+      liveZonesEl.innerHTML = `
+        <div style="font-weight: 800; color: #cbd5e1; margin-bottom: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">
+          Zonas asignadas / productoras (${matchingZones.length}):
+        </div>
+        ${zoneCards.join('')}
+      `;
+    } else {
+      liveZonesEl.innerHTML = `
+        <div style="padding: 6px 10px; font-size: 11px; color: #94a3b8; font-style: italic; background: rgba(15, 23, 42, 0.4); border-radius: 4px; border: 1px dashed var(--border-glass);">
+          ⚠️ No hay zonas delimitadas para este ítem. Puedes crear una zona sobre el mapa para monitorizar esta producción.
+        </div>
+      `;
+    }
+
+    if (btnViewMap) {
+      if (matchingZones.length === 1) {
+        btnViewMap.innerHTML = `🎯 Ver ${escapeHtml(matchingZones[0].name.substring(0, 20))} en el Mapa`;
+      } else if (matchingZones.length > 1) {
+        btnViewMap.innerHTML = `🎯 Ver Primera Zona en el Mapa (${escapeHtml(matchingZones[0].name.substring(0, 15))})`;
+      } else {
+        btnViewMap.innerHTML = `🎯 Buscar Instalación en el Mapa Táctico`;
       }
     }
 
-    if (breakdowns.length > 0) {
-      liveZonesEl.innerHTML = `<strong>Zonas productoras:</strong><br>` + 
-        breakdowns.map(b => `&bull; 🏭 <em>${b.name}</em>: <strong>+${Math.round(b.rate * 10) / 10}/min</strong> (${b.count} máq.)`).join('<br>');
-    } else {
-      liveZonesEl.innerHTML = `<em>Instalaciones fuera de zonas delimitadas.</em>`;
-    }
     if (liveSection) liveSection.style.display = 'block';
   } else {
     if (liveSection) liveSection.style.display = 'none';
@@ -1825,7 +1926,19 @@ window.closeModal = closeModal;
 
 function viewItemOnMap() {
   closeModal();
-  if (currentModalItemId) jumpToItemOnMap(currentModalItemId);
+  if (currentModalItemId) {
+    const zones = window.cachedZonesData || window.tacticalMap?.zones || [];
+    const allItems = SATISFACTORY_CATEGORIES.flatMap(c => c.items);
+    const item = allItems.find(i => i.id === currentModalItemId);
+    if (item) {
+      const info = getItemRateInfo(item, zones, globalModeFilter);
+      if (info.allMatchingZones && info.allMatchingZones.length > 0) {
+        jumpToZone(info.allMatchingZones[0].id);
+        return;
+      }
+    }
+    jumpToItemOnMap(currentModalItemId);
+  }
 }
 window.viewItemOnMap = viewItemOnMap;
 
