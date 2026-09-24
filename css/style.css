@@ -750,13 +750,17 @@ html, body {
   flex: 1;
   overflow-y: auto;
   padding: 14px;
-  display: none;
+  display: none !important;
 }
 
 .drawer-content-pane.active {
-  display: flex;
+  display: flex !important;
   flex-direction: column;
   gap: 12px;
+}
+
+.drawer-content-pane:not(.active) {
+  display: none !important;
 }
 
 /* ==========================================================================
@@ -2864,9 +2868,12 @@ html, body {
   flex: 1 !important;
   max-height: none !important;
 }
-#scim_tab_pane_resources {
-  display: flex;
+#scim_tab_pane_resources.active {
+  display: flex !important;
   flex-direction: column;
+}
+#scim_tab_pane_resources:not(.active) {
+  display: none !important;
 }
 
 .save-status-wrapper {

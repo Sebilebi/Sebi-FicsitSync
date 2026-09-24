@@ -1340,8 +1340,12 @@ function switchScimSidebarTab(tabName) {
   tabs.forEach(t => {
     const btn = document.getElementById(t.btnId);
     const pane = document.getElementById(t.paneId);
-    if (btn) btn.classList.toggle('active', t.id === tabName);
-    if (pane) pane.classList.toggle('active', t.id === tabName);
+    const isActive = t.id === tabName;
+    if (btn) btn.classList.toggle('active', isActive);
+    if (pane) {
+      pane.classList.toggle('active', isActive);
+      pane.style.display = isActive ? 'flex' : 'none';
+    }
   });
 }
 window.switchScimSidebarTab = switchScimSidebarTab;
