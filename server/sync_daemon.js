@@ -252,6 +252,54 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (url.pathname === '/api/zones') {
+    if (req.method === 'GET') {
+      let zones = [];
+      if (fs.existsSync(ZONES_PATH)) {
+        try { zones = JSON.parse(fs.readFileSync(ZONES_PATH, 'utf8')); } catch (e) {}
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(zones));
+      return;
+    }
+
+    if (req.method === 'POST') {
+      let body = '';
+      req.on('data', chunk => { body += chunk; });
+      req.on('end', async () => {
+        try {
+          const zonesData = JSON.parse(body || '[]');
+          console.log(`[HTTP API] Guardando ${zonesData.length} zonas en ${ZONES_PATH}...`);
+          fs.writeFileSync(ZONES_PATH, JSON.stringify(zonesData, null, 2), 'utf8');
+
+          // Subir a FileBrowser en /web/data/zones.json
+          try {
+            const headers = await getAuthHeaders();
+            await fetch(`${FB_BASE}/api/resources?source=${FB_SOURCE}&path=/web/data/zones.json&override=true`, {
+              method: 'POST',
+              headers: { ...headers, 'Content-Type': 'application/json' },
+              body: JSON.stringify(zonesData, null, 2)
+            });
+            console.log('[Sync Daemon] Subido /web/data/zones.json a FileBrowser correctamente.');
+          } catch (e) {
+            console.warn('[Sync Daemon] Aviso al subir zones.json a FileBrowser:', e.message);
+          }
+
+          // Recalcular métricas de inmediato para que reflejen las nuevas zonas
+          performSync(true).catch(e => console.warn('[Sync Daemon] Error recalculando tras guardar zonas:', e.message));
+
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ status: 'saved', count: zonesData.length }));
+        } catch (err) {
+          console.error('[HTTP API] Error guardando zonas:', err.message);
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ status: 'error', error: err.message }));
+        }
+      });
+      return;
+    }
+  }
+
   if (url.pathname === '/api/sync/status') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({

@@ -443,11 +443,28 @@ class TacticalMap {
     try {
       localStorage.setItem('ficsit_zones', JSON.stringify(this.zones));
     } catch (e) {}
-    fetch('/api/zones', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(this.zones)
-    }).catch(() => null);
+    window.cachedZonesData = this.zones;
+
+    const daemonUrls = [
+      `http://${window.location.hostname || 'localhost'}:8086/api/zones`,
+      'http://localhost:8086/api/zones',
+      'http://192.168.1.230:8086/api/zones',
+      'http://100.109.149.10:8086/api/zones'
+    ];
+    const payload = JSON.stringify(this.zones);
+    Promise.any(
+      daemonUrls.map(url =>
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          signal: AbortSignal.timeout(2000)
+        }).then(r => {
+          if (!r.ok) throw new Error();
+          return r;
+        })
+      )
+    ).catch(() => null);
   }
 
   onMouseDown(e) {
@@ -2567,10 +2584,16 @@ class TacticalMap {
     const modal = document.getElementById('zone-modal');
     if (!modal) return;
 
+    delete modal.dataset.editingZoneId;
     document.getElementById('zone-bounds-minx').value = Math.round(bounds.minX);
     document.getElementById('zone-bounds-maxx').value = Math.round(bounds.maxX);
     document.getElementById('zone-bounds-miny').value = Math.round(bounds.minY);
     document.getElementById('zone-bounds-maxy').value = Math.round(bounds.maxY);
+
+    const itemSel = document.getElementById('zone-item-select');
+    if (itemSel) itemSel.value = '';
+    const colorInp = document.getElementById('zone-color-input');
+    if (colorInp) colorInp.value = '#38bdf8';
 
     document.getElementById('zone-machines-preview').textContent = 
       `${inside.length} máquina(s) detectada(s) dentro de este recuadro.`;
@@ -2924,18 +2947,25 @@ window.TacticalMap = TacticalMap;
 // Added function to commit zone changes
 TacticalMap.prototype.commitZoneChanges = function() {
   this.persistZones();
+  this.render();
   this.updateZoneListUI();
   if (typeof window.updateQuickZonesBar === "function") window.updateQuickZonesBar();
-  if (typeof window.recalculateMetricsForZones === "function") window.recalculateMetricsForZones();
   this.initialZonesState = JSON.stringify(this.zones);
   this.history = [];
   this.redoStack = [];
   this.updateUndoRedoUI();
   const btnSave = document.getElementById("btn-save-zone-edits");
-  if (btnSave) { btnSave.disabled = true; btnSave.style.opacity = "0.5"; }
+  if (btnSave) {
+    btnSave.disabled = true;
+    btnSave.style.opacity = "0.5";
+    const originalText = btnSave.innerHTML;
+    btnSave.innerHTML = '<span>✓ GUARDADO</span>';
+    setTimeout(() => {
+      btnSave.innerHTML = originalText;
+    }, 1500);
+  }
   const btnRevert = document.getElementById("btn-revert-zone-edits");
   if (btnRevert) { btnRevert.disabled = true; btnRevert.style.opacity = "0.5"; }
-  alert("Zonas guardadas correctamente.");
 };
 
 TacticalMap.prototype.revertZoneChanges = function() {

@@ -1178,10 +1178,26 @@ async function loadMapData() {
     ]);
 
     if (!bldRes || !bldRes.ok) bldRes = await fetch(`data/buildings.json?t=${ts}`);
-    if (!zonesRes || !zonesRes.ok) zonesRes = await fetch(`data/zones.json?t=${ts}`);
-
     const bldData = await bldRes.json();
-    const zonesData = await zonesRes.json();
+
+    let zonesData = null;
+    try {
+      const stored = localStorage.getItem('ficsit_zones');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          zonesData = parsed;
+        }
+      }
+    } catch (e) {}
+
+    if (!zonesData) {
+      if (!zonesRes || !zonesRes.ok) zonesRes = await fetch(`data/zones.json?t=${ts}`);
+      if (zonesRes && zonesRes.ok) {
+        zonesData = await zonesRes.json();
+      }
+    }
+    if (!zonesData) zonesData = [];
 
     let nodes = bldData.nodes;
     if (!nodes || nodes.length === 0) {
@@ -1858,15 +1874,18 @@ function editZone(zoneId) {
 window.editZone = editZone;
 
 async function submitZoneForm(e) {
-  e.preventDefault();
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
   const modal = document.getElementById('zone-modal');
-  const name = document.getElementById('zone-name-input').value;
-  const item = document.getElementById('zone-item-select').value;
-  const color = document.getElementById('zone-color-input').value;
-  const minX = parseFloat(document.getElementById('zone-bounds-minx').value);
-  const maxX = parseFloat(document.getElementById('zone-bounds-maxx').value);
-  const minY = parseFloat(document.getElementById('zone-bounds-miny').value);
-  const maxY = parseFloat(document.getElementById('zone-bounds-maxy').value);
+  const name = document.getElementById('zone-name-input')?.value?.trim() || 'Zona';
+  const item = document.getElementById('zone-item-select')?.value || '';
+  const color = document.getElementById('zone-color-input')?.value || '#38bdf8';
+  const minX = parseFloat(document.getElementById('zone-bounds-minx')?.value || 0);
+  const maxX = parseFloat(document.getElementById('zone-bounds-maxx')?.value || 0);
+  const minY = parseFloat(document.getElementById('zone-bounds-miny')?.value || 0);
+  const maxY = parseFloat(document.getElementById('zone-bounds-maxy')?.value || 0);
 
   const zoneId = modal?.dataset?.editingZoneId || `zone-${Date.now()}`;
 
@@ -1878,40 +1897,49 @@ async function submitZoneForm(e) {
     bounds: { minX, maxX, minY, maxY }
   };
 
-  try {
-    // Llamar al endpoint del demonio local usando la IP de Tailscale del PC del usuario
-    const syncRes = await fetch('http://100.109.149.10:8086/api/sync/force', { method: 'POST' });
-    const result = await syncRes.json();
-
-    const res = await fetch('/api/zones', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newZone)
-    });
-
-    if (res.ok) {
-      closeZoneModal();
-      await loadMapData();
-      await fetchMetrics();
+  if (window.tacticalMap) {
+    if (!window.tacticalMap.zones) window.tacticalMap.zones = [];
+    const existingIdx = window.tacticalMap.zones.findIndex(z => z.id === zoneId);
+    if (existingIdx >= 0) {
+      window.tacticalMap.zones[existingIdx] = newZone;
     } else {
-      alert('Error guardando la zona en el servidor');
+      window.tacticalMap.zones.push(newZone);
     }
-  } catch (err) {
-    alert('No se pudo conectar con el servidor: ' + err.message);
+    window.tacticalMap.selectedZone = newZone;
+    window.tacticalMap.persistZones();
+    window.tacticalMap.render();
+    window.tacticalMap.updateZoneListUI();
+    if (window.tacticalMap.isDrawMode) {
+      window.tacticalMap.setDrawMode(false);
+    }
   }
+
+  window.cachedZonesData = window.tacticalMap ? window.tacticalMap.zones : [newZone];
+  try {
+    localStorage.setItem('ficsit_zones', JSON.stringify(window.cachedZonesData));
+  } catch (err) {}
+
+  if (typeof window.updateQuickZonesBar === 'function') window.updateQuickZonesBar();
+  if (typeof closeZoneModal === 'function') closeZoneModal();
 }
 window.submitZoneForm = submitZoneForm;
 
 async function deleteZone(zoneId) {
-  if (!confirm('¿Deseas eliminar esta zona delimitada?')) return;
-  try {
-    const res = await fetch(`/api/zones/${zoneId}`, { method: 'DELETE' });
-    if (res.ok) {
-      await loadMapData();
-      await fetchMetrics();
-    }
-  } catch (err) {
-    alert('Error al eliminar la zona: ' + err.message);
+  if (window.tacticalMap && typeof window.tacticalMap.deleteZone === 'function') {
+    window.tacticalMap.deleteZone(zoneId);
+  } else {
+    if (!confirm('¿Seguro que deseas eliminar esta zona delimitada?')) return;
+    let zones = [];
+    try {
+      const stored = localStorage.getItem('ficsit_zones');
+      if (stored) zones = JSON.parse(stored);
+    } catch (e) {}
+    zones = zones.filter(z => z.id !== zoneId);
+    try {
+      localStorage.setItem('ficsit_zones', JSON.stringify(zones));
+    } catch (e) {}
+    window.cachedZonesData = zones;
+    if (typeof window.updateQuickZonesBar === 'function') window.updateQuickZonesBar();
   }
 }
 window.deleteZone = deleteZone;
