@@ -85,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==========================================
 function initCommandCenter() {
   renderBranchNavRail();
-  renderSchematics(currentBranchId);
   renderMallSummary();
 
   // Initialize Map directly as the hero landing view or restore from hash/state
@@ -138,8 +137,11 @@ function initCommandCenter() {
     });
   }
   window.addEventListener('resize', () => {
-    if (currentMode === 'schematics' && currentSchematicsViewMode === 'flow') {
-      requestAnimationFrame(updateFlowGraphConnections);
+    if (currentMode === 'schematics') {
+      resetBlueprintZoom();
+      if (currentSchematicsViewMode === 'flow') {
+        requestAnimationFrame(updateFlowGraphConnections);
+      }
     }
   });
 
@@ -247,6 +249,8 @@ function switchMainMode(modeId) {
     loadMapData();
   } else if (modeId === 'schematics') {
     renderSchematics(currentBranchId);
+    requestAnimationFrame(() => resetBlueprintZoom());
+    setTimeout(() => resetBlueprintZoom(), 60);
   } else if (modeId === 'mall_summary') {
     renderMallSummary();
   }
@@ -290,6 +294,8 @@ function selectBranch(branchId) {
   saveAppState();
   renderBranchNavRail();
   renderSchematics(branchId);
+  requestAnimationFrame(() => resetBlueprintZoom());
+  setTimeout(() => resetBlueprintZoom(), 50);
 }
 window.selectBranch = selectBranch;
 
@@ -507,15 +513,42 @@ function zoomBlueprintOut() {
 }
 window.zoomBlueprintOut = zoomBlueprintOut;
 
-function resetBlueprintZoom(svgW = 1760, svgH = 650) {
+function resetBlueprintZoom(bounds) {
   const viewport = document.getElementById('svg-blueprint-viewport');
   if (!viewport) return;
-  const vpW = viewport.clientWidth || 1000;
-  const vpH = viewport.clientHeight || 700;
-  const fitScale = Math.min((vpW - 40) / svgW, (vpH - 40) / svgH, 1.0);
-  bpZoom = Math.max(0.35, Math.min(1.0, fitScale));
-  bpPanX = Math.round((vpW - svgW * bpZoom) / 2);
-  bpPanY = Math.max(20, Math.round((vpH - svgH * bpZoom) / 2));
+
+  const rect = viewport.getBoundingClientRect();
+  const vpW = (rect.width > 50) ? rect.width : (viewport.clientWidth || (window.innerWidth - 220));
+  const vpH = (rect.height > 50) ? rect.height : (viewport.clientHeight || (window.innerHeight - 100));
+
+  const b = bounds || window.currentBlueprintBounds || { minX: 0, maxX: 1760, minY: 35, maxY: 385 };
+
+  const contentW = Math.max(100, b.maxX - b.minX);
+  const contentH = Math.max(100, b.maxY - b.minY);
+  const contentCenterX = (b.minX + b.maxX) / 2;
+  const contentCenterY = (b.minY + b.maxY) / 2;
+
+  // 40px safety border so cards don't touch screen edges
+  const paddingX = 40;
+  const paddingY = 40;
+
+  const availableW = Math.max(100, vpW - paddingX);
+  const availableH = Math.max(100, vpH - paddingY);
+
+  const scaleX = availableW / contentW;
+  const scaleY = availableH / contentH;
+
+  // Maximum possible zoom to see everything with full clarity
+  const idealZoom = Math.min(scaleX, scaleY);
+  bpZoom = Math.max(bpMinZoom, Math.min(bpMaxZoom, idealZoom));
+
+  // Perfect center alignment
+  const vpCenterX = vpW / 2;
+  const vpCenterY = vpH / 2;
+
+  bpPanX = Math.round(vpCenterX - contentCenterX * bpZoom);
+  bpPanY = Math.round(vpCenterY - contentCenterY * bpZoom);
+
   updateBlueprintTransform();
 }
 window.resetBlueprintZoom = resetBlueprintZoom;
@@ -679,15 +712,40 @@ function renderSchematics(branchId) {
   const rightItems = items.slice(half);
   const maxRows = Math.max(leftItems.length, rightItems.length, 1);
   const rowSpacing = 88;
-  const startY = 50;
-  const svgHeight = Math.max(620, startY + maxRows * rowSpacing + 40);
   const svgWidth = 1760;
 
   const mallW = 340;
   const mallH = 260;
   const mallX = (svgWidth - mallW) / 2; // 710
-  const mallY = Math.max(45, Math.floor((svgHeight - mallH) / 2));
-  const mallCenterY = mallY + mallH / 2;
+
+  // Calculate balanced vertical alignment so rows and Mall center together
+  const rowsHeight = (maxRows - 1) * rowSpacing + 54;
+  let startY = 50;
+  let mallY = 50;
+  let mallCenterY = 50 + mallH / 2;
+
+  if (rowsHeight < mallH) {
+    mallY = 40;
+    mallCenterY = mallY + mallH / 2;
+    startY = Math.round(mallCenterY - rowsHeight / 2);
+  } else {
+    startY = 50;
+    const rowsCenterY = startY + rowsHeight / 2;
+    mallCenterY = rowsCenterY;
+    mallY = Math.round(mallCenterY - mallH / 2);
+  }
+
+  const contentMinX = 0;
+  const contentMaxX = svgWidth;
+  const contentMinY = Math.max(0, Math.min(startY - 15, mallY));
+  const contentMaxY = Math.max(startY + rowsHeight + 15, mallY + mallH);
+
+  window.currentBlueprintBounds = {
+    minX: contentMinX,
+    maxX: contentMaxX,
+    minY: contentMinY,
+    maxY: contentMaxY
+  };
 
   function getMachineType(item) {
     if (item.type === 'extractor') return 'Extractor Minero';
@@ -946,11 +1004,8 @@ function renderSchematics(branchId) {
     ${rightItems.map((item, idx) => renderRow(item, idx, 'right')).join('\n')}
   `;
 
-  // Auto fit initially if not zoomed by user
-  if (window.lastRenderedBranch !== branchId) {
-    resetBlueprintZoom(svgWidth, svgHeight);
-    window.lastRenderedBranch = branchId;
-  }
+  window.lastRenderedBranch = branchId;
+  requestAnimationFrame(() => resetBlueprintZoom());
 }
 window.renderSchematics = renderSchematics;
 
