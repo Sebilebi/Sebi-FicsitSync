@@ -188,7 +188,25 @@ const ITEM_NAMES_ES = {
   'Mercer_Sphere': 'Esfera de Mercer',
   'Somersloop': 'Somersloop',
   'Reanimated_SAM': 'SAM reanimado',
-  'SAM_Fluctuator': 'Fluctuador SAM'
+  'SAM_Fluctuator': 'Fluctuador SAM',
+
+  // Satisfactory 1.0+ Quantum & Phase 5 Tech
+  'Rocket_Fuel': 'Combustible de cohete',
+  'Ionized_Fuel': 'Combustible ionizado',
+  'Ficsite_Trigon': 'Trígono de ficsita',
+  'Dark_Matter_Residue': 'Residuo de materia oscura',
+  'Dark_Matter_Crystal': 'Cristal de materia oscura',
+  'Diamonds': 'Diamantes',
+  'Time_Crystal': 'Cristal temporal',
+  'Singularity_Cell': 'Célula de singularidad',
+  'Superposition_Oscillator': 'Oscilador de superposición',
+  'Quantum_Computer': 'Ordenador cuántico',
+  'Neural_Quantum_Processor': 'Procesador cuántico neural',
+  'AI_Expansion_Server': 'Servidor de expansión de IA',
+  'Ficsonium': 'Ficsonio',
+  'Ficsonium_Fuel_Rod': 'Barra de combustible de ficsonio',
+  'Biochemical_Sculptor': 'Escultor bioquímico',
+  'Ballistic_Warp_Drive': 'Motor de distorsión balística'
 };
 
 /**

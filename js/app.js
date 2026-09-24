@@ -811,7 +811,8 @@ function renderSchematics(branchId) {
   const svgWidth = 1760;
 
   const mallW = 340;
-  const mallH = 260;
+  const mallGridRows = Math.ceil((cat.items || []).length / 9);
+  const mallH = Math.max(260, 116 + mallGridRows * 34 + 65);
   const mallX = (svgWidth - mallW) / 2; // 710
 
   // Calculate balanced vertical alignment so rows and Mall center together
@@ -844,8 +845,9 @@ function renderSchematics(branchId) {
   };
 
   function getMachineType(item) {
-    if (item.type === 'extractor') return 'Extractor Minero';
-    if (item.input.includes('Petróleo')) return 'Refinería';
+    if (item.machine) return item.machine;
+    if (item.type === 'extractor') return item.input || 'Extractor Minero';
+    if (item.input.includes('Petróleo') || item.input.includes('Residuo')) return 'Refinería';
     if (item.input.includes('+')) return 'Ensambladora';
     if (item.input.includes('Mineral') || item.input.includes('Hierro +')) return 'Fundición';
     return 'Constructor';
